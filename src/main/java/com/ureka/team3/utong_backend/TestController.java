@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
     @GetMapping("/")
     public String home() {
-        return "😁 dev cicd 성공";
+        return "😁 dev cicd 성공 제발 ㄹㅇ 액튜에이터 넣었고 다했다 진짜 제발 cors도했다";
     }
 
 }
