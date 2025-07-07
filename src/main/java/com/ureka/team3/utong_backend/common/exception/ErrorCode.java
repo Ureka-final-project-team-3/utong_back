@@ -27,7 +27,7 @@ public enum ErrorCode {
   FILE_PROCESSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "F500", "파일 처리 중 오류가 발생했습니다."),
 
   AI_MESSAGE_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI500", "AI 서버 데이터 전송 실패"),
-
+  EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "EMAIL_ALREADY_EXISTS", "이미 존재하는 이메일입니다"),
   ALREADY_REVIEWED(HttpStatus.BAD_REQUEST, "ALREADY_REVIEWED", "이미 해당 요금제에 대한 리뷰를 작성하셨습니다.");
 
   private final HttpStatus status;

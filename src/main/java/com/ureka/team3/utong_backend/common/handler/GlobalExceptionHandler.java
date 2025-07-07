@@ -1,4 +1,4 @@
-package com.ureka.team3.utong_backend.common.exception.handler;
+package com.ureka.team3.utong_backend.common.handler;
 
 import java.util.HashMap;
 import java.util.Map;

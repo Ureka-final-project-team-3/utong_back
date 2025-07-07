@@ -1,7 +1,5 @@
 package com.ureka.team3.utong_backend.auth.service;
 
-
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.ureka.team3.utong_backend.auth.util.oauth.OAuth2HtmlGenerator;
@@ -17,9 +15,15 @@ public class OAuth2SuccessService {
         this.htmlGenerator = htmlGenerator;
     }
     
-    public ResponseEntity<String> processSuccess(String accessToken, String tokenType, String expiresIn, HttpServletRequest request) {
-        System.out.println("✅ OAuth2 성공 - Token: " + (accessToken != null ? accessToken.substring(0, 50) + "..." : "null"));
-        String html = htmlGenerator.generateSuccessHtml(accessToken, tokenType, expiresIn);
-        return ResponseEntity.ok().header("Content-Type", "text/html; charset=UTF-8").body(html);
+    public String processSuccess(String accessToken, String tokenType, String expiresIn, HttpServletRequest request) {
+        return htmlGenerator.generateSuccessHtml(accessToken, tokenType, expiresIn);
+    }
+    
+    public String getTestMessage() {
+        return "OAuth2 정상작동 /oauth2/authorization/google ";
+    }
+    
+    public String getDebugInfo(HttpServletRequest request) {
+        return "url: " + request.getRequestURL() + "?" + request.getQueryString();
     }
 }

@@ -46,7 +46,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
     
     private Account findOrCreateAccount(OAuth2UserInfoDto userInfo) {
-        // 이미 OAuth로 가입한 계정이 있는지 확인
         Account existingAccount = accountRepository.findByProviderAndProviderId(
                 userInfo.getProvider(), userInfo.getProviderId());
         
@@ -54,19 +53,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             return updateExistingAccount(existingAccount, userInfo);
         }
         
-        // 같은 이메일로 가입된 일반 계정이 있는지 확인
         Account emailAccount = accountRepository.findByEmail(userInfo.getEmail()).orElse(null);
         if (emailAccount != null && emailAccount.getProvider() == null) {
-            // 일반 계정을 OAuth 계정으로 연동
             return linkOAuthToExistingAccount(emailAccount, userInfo);
         }
         
-        // 새로운 OAuth 계정 생성
         return createNewOAuthAccount(userInfo);
     }
     
     private Account updateExistingAccount(Account account, OAuth2UserInfoDto userInfo) {
-        // 최신 정보로 업데이트
         Account updatedAccount = Account.builder()
                 .id(account.getId())
                 .email(userInfo.getEmail())
