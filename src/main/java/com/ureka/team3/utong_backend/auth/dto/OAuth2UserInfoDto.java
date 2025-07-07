@@ -1,6 +1,5 @@
 package com.ureka.team3.utong_backend.auth.dto;
 
-
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,6 +13,8 @@ public class OAuth2UserInfoDto {
     private String email;
     private String name;
     private String picture;
+    private String birthDate; // 네이버용 생일 (MM-dd)
+    private String birthYear; // 네이버용 출생연도
     
     public static OAuth2UserInfoDto of(String provider, Map<String, Object> attributes) {
         return switch (provider) {
@@ -56,6 +57,8 @@ public class OAuth2UserInfoDto {
                 .email(String.valueOf(response.get("email")))
                 .name(String.valueOf(response.get("name")))
                 .picture(String.valueOf(response.get("profile_image")))
+                .birthDate(String.valueOf(response.get("birthday"))) // MM-dd 형식
+                .birthYear(String.valueOf(response.get("birthyear"))) // 네이버는 "birthyear" (언더스코어 없음)
                 .build();
     }
 }
