@@ -1,4 +1,8 @@
-<!DOCTYPE html>
+<div class="container">
+        <h2>인증된 사용자 기능</h2>
+        <button id="getMeBtn">내 정보 조회</button>
+        <button id="refreshBtn" class="refresh-btn">토큰 갱신</button>
+        <button id="validateTokenBtn" style="background-color: #17a2b8;">토큰 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -164,9 +168,9 @@
             <a href="/oauth2/authorization/naver" class="social-login-btn naver-btn">
                 🟢 네이버로 로그인
             </a>
-            <button onclick="alert('카카오 로그인은 준비 중입니다!')" class="social-login-btn kakao-btn">
+            <a href="/oauth2/authorization/kakao" class="social-login-btn kakao-btn">
                 💬 카카오로 로그인
-            </button>
+            </a>
         </div>
         
         <div id="loginResult" class="result" style="display: none;"></div>
@@ -174,12 +178,20 @@
     </div>
 
     <div class="container">
-        <h2>인증된 사용자 기능</h2>
-        <button id="getMeBtn">내 정보 조회</button>
-        <button id="refreshBtn" class="refresh-btn">토큰 갱신</button>
-        <button id="validateTokenBtn" style="background-color: #17a2b8;">토큰 검증</button>
-        <button id="logoutBtn" class="logout-btn">로그아웃</button>
-        <div id="userInfoResult" class="result" style="display: none;"></div>
+        <h2>프로필 완성</h2>
+        <button id="getProfileBtn">프로필 정보 조회</button>
+        <form id="profileForm" style="display: none; margin-top: 20px;">
+            <div class="form-group">
+                <label for="profileName">이름:</label>
+                <input type="text" id="profileName">
+            </div>
+            <div class="form-group">
+                <label for="profileBirthDate">생년월일:</label>
+                <input type="date" id="profileBirthDate">
+            </div>
+            <button type="submit">프로필 업데이트</button>
+        </form>
+        <div id="profileResult" class="result" style="display: none;"></div>
     </div>
 
     <div class="container">
