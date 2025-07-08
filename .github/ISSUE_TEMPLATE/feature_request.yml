@@ -64,9 +64,9 @@ body:
       label: 📅 스프린트 마일스톤
       description: 이 작업이 포함될 스프린트를 선택하세요.
       options:
-        - sprint-1(25/07/08 ~ 25/07/11)
-        - sprint-2(25/07/14 ~ 25/07/18)
-        - sprint-3(25/07/21 ~ 25/07/25)
-        - sprint-4(25/07/28 ~ 25/08/01)
-        - sprint-5(25/08/04 ~ 25/08/08)
+        - sprint-1
+        - sprint-2
+        - sprint-3
+        - sprint-4
+        - sprint-5
       default: sprint-1
