@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.common.exception.BusinessException;
@@ -29,7 +30,10 @@ public class GlobalExceptionHandler {
     log.error("Business error at {}: {}", request.getRequestURI(), e.getMessage(), e);
     return ResponseEntity.ok(ApiResponse.fail(e.getErrorCode()));
   }
-
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<Void> handleNoResourceFound(NoResourceFoundException e) {
+      return ResponseEntity.notFound().build();
+  }
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ApiResponse<ValidationErrorResponse>> handleValidationExceptions(
           MethodArgumentNotValidException ex) {

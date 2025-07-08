@@ -1,8 +1,4 @@
-<div class="container">
-        <h2>인증된 사용자 기능</h2>
-        <button id="getMeBtn">내 정보 조회</button>
-        <button id="refreshBtn" class="refresh-btn">토큰 갱신</button>
-        <button id="validateTokenBtn" style="background-color: #17a2b8;">토큰 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -195,6 +191,15 @@
     </div>
 
     <div class="container">
+        <h2>인증된 사용자 기능</h2>
+        <button id="getMeBtn">내 정보 조회</button>
+        <button id="refreshBtn" class="refresh-btn">토큰 갱신</button>
+        <button id="validateTokenBtn" style="background-color: #17a2b8;">토큰 검증</button>
+        <button id="logoutBtn" class="logout-btn">로그아웃</button>
+        <div id="userInfoResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="container">
         <h2>테스트 요청</h2>
         <button id="testProtectedBtn">보호된 엔드포인트 테스트</button>
         <div id="testResult" class="result" style="display: none;"></div>
@@ -210,6 +215,7 @@
                 showMessage('저장된 Access Token을 발견했습니다.');
                 validateStoredTokenSilently();
             }
+            addDebugButtons();
         });
 
         async function validateStoredTokenSilently() {
@@ -356,6 +362,7 @@
             }
         }
 
+        // 회원가입
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -379,6 +386,7 @@
             }
         });
 
+        // 로그인
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -402,6 +410,53 @@
             showResult('loginResult', result.data, result.success);
         });
 
+        // 프로필 정보 조회
+        document.getElementById('getProfileBtn').addEventListener('click', async () => {
+            if (!accessToken) {
+                showMessage('먼저 로그인해주세요.', 'error');
+                return;
+            }
+
+            const result = await apiRequest('/auth/me');
+            
+            if (result.success) {
+                const userInfo = result.data;
+                document.getElementById('profileName').value = userInfo.name || '';
+                document.getElementById('profileBirthDate').value = userInfo.birthDate || '';
+                document.getElementById('profileForm').style.display = 'block';
+                showMessage('프로필 정보를 불러왔습니다.');
+            }
+            
+            showResult('profileResult', result.data, result.success);
+        });
+
+        // 프로필 업데이트
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!accessToken) {
+                showMessage('먼저 로그인해주세요.', 'error');
+                return;
+            }
+
+            const formData = {
+                name: document.getElementById('profileName').value,
+                birthDate: document.getElementById('profileBirthDate').value
+            };
+
+            const result = await apiRequest('/auth/profile', {
+                method: 'PUT',
+                body: JSON.stringify(formData)
+            });
+
+            showResult('profileResult', result.data, result.success);
+            
+            if (result.success) {
+                showMessage('프로필이 업데이트되었습니다!');
+            }
+        });
+
+        // 내 정보 조회
         document.getElementById('getMeBtn').addEventListener('click', async () => {
             if (!accessToken) {
                 showResult('userInfoResult', { error: '로그인이 필요합니다' }, false);
@@ -416,6 +471,7 @@
             }
         });
 
+        // 토큰 갱신
         document.getElementById('refreshBtn').addEventListener('click', async () => {
             const result = await apiRequest('/auth/refresh', { method: 'POST' });
             
@@ -429,8 +485,10 @@
             showResult('userInfoResult', result.data, result.success);
         });
 
+        // 토큰 검증
         document.getElementById('validateTokenBtn').addEventListener('click', validateTokenWithMessage);
 
+        // 로그아웃
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             const result = await apiRequest('/auth/logout', { method: 'POST' });
             
@@ -444,8 +502,10 @@
             showResult('userInfoResult', result.data, result.success);
         });
 
+        // 보호된 엔드포인트 테스트
         document.getElementById('testProtectedBtn').addEventListener('click', testProtectedAPI);
 
+        // 디버그 기능
         function addDebugButtons() {
             const debugContainer = document.createElement('div');
             debugContainer.className = 'container';
@@ -473,10 +533,6 @@
             };
             showResult('debugResult', data, true);
         }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            addDebugButtons();
-        });
     </script>
 </body>
 </html>
