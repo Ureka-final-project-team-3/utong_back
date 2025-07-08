@@ -29,7 +29,6 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Void>> signUp(@Valid @RequestBody AuthDto.SignUpRequest request) {
         return ResponseEntity.ok(authService.signUp(request));
     }
-    
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthDto.LoginResponse>> login(@Valid @RequestBody AuthDto.LoginRequest request, 
                                                                    HttpServletResponse response) {
