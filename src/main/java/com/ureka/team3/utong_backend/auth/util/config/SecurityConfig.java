@@ -47,28 +47,54 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
+//    @Bean
+//    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        return http
+//            .csrf(csrf -> csrf.disable())
+//            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//            .authorizeHttpRequests(auth -> auth
+//                .requestMatchers("/oauth2/**").permitAll()
+//                .requestMatchers("/login/oauth2/**").permitAll()
+//                
+//                .requestMatchers("/", "/index.html", "/*.html", "/*.css", "/*.js", "/*.ico").permitAll()
+//                .requestMatchers("/static/**", "/public/**", "/resources/**", "/webjars/**").permitAll()
+//                .requestMatchers("/h2-console/**").permitAll()
+//                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+//                
+//                .requestMatchers("/auth/signup", "/auth/login").permitAll()
+//                
+//                .requestMatchers("/debug/**").permitAll()
+//                
+//                .requestMatchers("/api/**", "/auth/me", "/auth/logout", "/auth/refresh").authenticated()
+//                .requestMatchers("/test").authenticated()
+//                
+//                .anyRequest().authenticated()
+//            )
+//            .headers(headers -> headers
+//                .frameOptions(frameOptions -> frameOptions.disable())
+//            )
+//            .oauth2Login(oauth2 -> oauth2
+//                .loginPage("/")
+//                .defaultSuccessUrl("/oauth2/success", true)
+//                .userInfoEndpoint(userInfo -> userInfo
+//                    .userService(customOAuth2UserService)
+//                )
+//                .successHandler(oAuth2SuccessHandler)
+//                .failureUrl("/?error=oauth2_failed")
+//            )
+//            .exceptionHandling(exceptions -> exceptions
+//                .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
+//            )
+//            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+//            .build();
+//    }
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/oauth2/**").permitAll()
-                .requestMatchers("/login/oauth2/**").permitAll()
-                
-                .requestMatchers("/", "/index.html", "/*.html", "/*.css", "/*.js", "/*.ico").permitAll()
-                .requestMatchers("/static/**", "/public/**", "/resources/**", "/webjars/**").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                
-                .requestMatchers("/auth/signup", "/auth/login").permitAll()
-                
-                .requestMatchers("/debug/**").permitAll()
-                
-                .requestMatchers("/api/**", "/auth/me", "/auth/logout", "/auth/refresh").authenticated()
-                .requestMatchers("/test").authenticated()
-                
-                .anyRequest().authenticated()
+                .anyRequest().permitAll() 
             )
             .headers(headers -> headers
                 .frameOptions(frameOptions -> frameOptions.disable())
