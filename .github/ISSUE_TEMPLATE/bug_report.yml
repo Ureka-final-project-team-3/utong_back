@@ -13,14 +13,3 @@ body:
     validations:
       required: true
 
-  - type: dropdown
-    id: milestone
-    attributes:
-      label: 📅 스프린트 마일스톤
-      description: 이 작업이 포함될 스프린트를 선택하세요.
-      options:
-        - sprint-1
-        - sprint-2
-        - sprint-3
-        - sprint-4
-        - sprint-5
