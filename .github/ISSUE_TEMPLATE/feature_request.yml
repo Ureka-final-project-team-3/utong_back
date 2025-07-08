@@ -1,0 +1,72 @@
+name: 기능 구현/리팩터링 작업
+description: 구현 또는 리팩터링 작업을 위한 이슈 템플릿
+title: "[feat] 🔧 "
+labels:
+  - feature
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 📌 작업 개요
+        이 이슈는 어떤 작업인지 간단히 작성해주세요.
+
+  - type: input
+    id: summary
+    attributes:
+      label: ✏️ 작업 요약
+      placeholder: 예) 사용자 조회 API 리팩터링
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 📄 상세 설명
+      placeholder: 어떤 작업인지, 어떤 이슈나 요구사항에 의해 진행되는지 구체적으로 작성해주세요.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ 작업 체크리스트
+      options:
+        - label: 컨트롤러 수정 또는 추가
+        - label: 서비스 로직 구현 또는 변경
+        - label: DTO/도메인 정의 또는 변경
+        - label: 레포지토리 수정 또는 쿼리 추가
+        - label: 테스트 코드 작성
+        - label: Swagger 문서 작성/수정
+        - label: API 명세서 업데이트
+        - label: 기타 리팩터링 또는 부가 작업
+
+  - type: dropdown
+    id: labels
+    attributes:
+      label: 🏷️ 관련 라벨
+      description: 관련 태그를 선택해주세요.
+      multiple: true
+      options:
+        - feature
+        - refactor
+        - test
+        - chore
+        - infra
+        - api
+        - ci/cd
+        - security
+
+  - type: dropdown
+    id: milestone
+    attributes:
+      label: 📅 스프린트 마일스톤
+      description: 이 작업이 포함될 스프린트를 선택하세요.
+      options:
+        - sprint-1(25/07/08 ~ 25/07/11)
+        - sprint-2(25/07/14 ~ 25/07/18)
+        - sprint-3(25/07/21 ~ 25/07/25)
+        - sprint-4(25/07/28 ~ 25/08/01)
+        - sprint-5(25/08/04 ~ 25/08/08)
+      default: sprint-1

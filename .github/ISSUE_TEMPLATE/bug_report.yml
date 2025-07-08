@@ -1,0 +1,25 @@
+name: 버그 리포트
+description: 수정할 버그 작업용 템플릿
+title: "[bug] "
+labels: ["bug"]
+assignees: []
+
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: 🔧 수정 내용
+      placeholder: 어떤 버그를 어떻게 수정할 예정인지 간단히 적어주세요.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: milestone
+    attributes:
+      label: 📅 스프린트 마일스톤
+      description: 이 작업이 포함될 스프린트를 선택하세요.
+      options:
+        - sprint-1
+        - sprint-2
+        - sprint-3
+        - sprint-4
