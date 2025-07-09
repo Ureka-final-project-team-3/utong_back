@@ -27,7 +27,7 @@
             margin-bottom: 5px;
             font-weight: bold;
         }
-        input[type="email"], input[type="password"], input[type="text"], input[type="date"] {
+        input[type="email"], input[type="password"], input[type="text"], input[type="date"], input[type="tel"] {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
@@ -58,6 +58,12 @@
         }
         .refresh-btn:hover {
             background-color: #218838;
+        }
+        .find-btn {
+            background-color: #17a2b8;
+        }
+        .find-btn:hover {
+            background-color: #138496;
         }
         .result {
             background-color: #f8f9fa;
@@ -159,18 +165,31 @@
         <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
             <h3>소셜 로그인</h3>
             <a href="/oauth2/authorization/google" class="social-login-btn google-btn">
-                📧 구글로 로그인
+                구글로 로그인
             </a>
             <a href="/oauth2/authorization/naver" class="social-login-btn naver-btn">
-                🟢 네이버로 로그인
+                네이버로 로그인
             </a>
             <a href="/oauth2/authorization/kakao" class="social-login-btn kakao-btn">
-                💬 카카오로 로그인
+                카카오로 로그인
             </a>
         </div>
         
         <div id="loginResult" class="result" style="display: none;"></div>
         <div id="tokenDisplay" class="token-display" style="display: none;"></div>
+    </div>
+
+    <div class="container">
+        <h2>아이디 찾기</h2>
+        <form id="findAccountForm">
+            <div class="form-group">
+                <label for="findPhoneNumber">전화번호:</label>
+                <input type="tel" id="findPhoneNumber" placeholder="010-1234-5678" required 
+                       pattern="010-\d{4}-\d{4}" title="010-0000-0000 형식으로 입력해주세요">
+            </div>
+            <button type="submit" class="find-btn">아이디 찾기</button>
+        </form>
+        <div id="findAccountResult" class="result" style="display: none;"></div>
     </div>
 
     <div class="container">
@@ -408,6 +427,30 @@
             }
 
             showResult('loginResult', result.data, result.success);
+        });
+
+        // 아이디 찾기
+        document.getElementById('findAccountForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const phoneNumber = document.getElementById('findPhoneNumber').value;
+            
+            const formData = {
+                phoneNumber: phoneNumber
+            };
+
+            const result = await apiRequest('/auth/find-account', {
+                method: 'POST',
+                body: JSON.stringify(formData)
+            });
+
+            showResult('findAccountResult', result.data, result.success);
+            
+            if (result.success) {
+                showMessage('계정을 찾았습니다!');
+            } else {
+                showMessage('해당 전화번호로 등록된 계정을 찾을 수 없습니다.', 'error');
+            }
         });
 
         // 프로필 정보 조회
