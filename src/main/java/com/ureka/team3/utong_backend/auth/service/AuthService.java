@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ureka.team3.utong_backend.auth.dto.AuthDto;
 import com.ureka.team3.utong_backend.auth.entity.Account;
-import com.ureka.team3.utong_backend.auth.entity.Line;
 import com.ureka.team3.utong_backend.auth.entity.User;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
 import com.ureka.team3.utong_backend.auth.repository.LineRepository;
@@ -24,6 +23,7 @@ import com.ureka.team3.utong_backend.auth.repository.UserRepository;
 import com.ureka.team3.utong_backend.auth.util.JwtProperties;
 import com.ureka.team3.utong_backend.auth.util.JwtUtil;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
+import com.ureka.team3.utong_backend.common.exception.business.EmailAlreadyExistsException;
 import com.ureka.team3.utong_backend.common.exception.business.InvalidPasswordException;
 import com.ureka.team3.utong_backend.common.exception.business.InvalidTokenException;
 import com.ureka.team3.utong_backend.common.exception.business.UserNotFoundException;
@@ -65,12 +65,11 @@ public class AuthService {
     @Transactional
     public ApiResponse<Void> signUp(AuthDto.SignUpRequest request) {
         if (accountRepository.existsByEmail(request.getEmail())) {
-            throw new InvalidPasswordException("이미 존재하는 이메일입니다");
+            throw new EmailAlreadyExistsException("이미 존재하는 이메일입니다");
         }
         
         String accountId = UUID.randomUUID().toString();
         
-        // Account 생성
         Account account = Account.builder()
                 .id(accountId)
                 .email(request.getEmail())
@@ -81,31 +80,25 @@ public class AuthService {
         
         accountRepository.save(account);
         
-        // 전화번호가 제공된 경우 기존 User 확인 및 연결
         if (request.getPhoneNumber() != null && !request.getPhoneNumber().trim().isEmpty()) {
             Optional<User> existingUser = findUserByPhoneNumber(request.getPhoneNumber());
             
             if (existingUser.isPresent()) {
                 User user = existingUser.get();
                 
-                // 이미 다른 account와 연결되어 있는지 확인
                 if (user.getAccount() != null) {
-                    // 이미 연결된 계정이 있다면 현재 생성한 account 삭제
                     accountRepository.deleteById(accountId);
                     throw new InvalidPasswordException("해당 전화번호로 이미 가입된 계정이 있습니다");
                 }
                 
-                // 기존 User와 새 Account 연결
                 userRepository.updateAccountId(user.getId(), accountId);
                 userRepository.flush();
                 
                 return ApiResponse.success("기존 통신사 고객 정보와 연결하여 회원가입이 완료되었습니다", null);
             } else {
-                // 전화번호로 User를 찾을 수 없는 경우
                 return ApiResponse.success("해당 전화번호로 등록된 통신사 고객 정보를 찾을 수 없어 웹사이트 전용 계정으로 가입되었습니다", null);
             }
         } else {
-            // 전화번호가 없는 경우 - 웹사이트 전용 계정
             return ApiResponse.success("웹사이트 전용 계정으로 회원가입이 완료되었습니다", null);
         }
     }
