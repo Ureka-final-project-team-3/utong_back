@@ -5,28 +5,33 @@ import java.time.LocalDate;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 public class AuthDto {
     
-    @Data
-    public static class SignUpRequest {
-        @NotBlank(message = "이메일은 필수입니다")
-        @Email(message = "올바른 이메일 형식이 아닙니다")
-        private String email;
-        
-        @NotBlank(message = "비밀번호는 필수입니다")
-        @Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다")
-        private String password;
-        
-        @NotBlank(message = "닉네임은 필수입니다")
-        @Size(max = 50, message = "닉네임은 50자 이하여야 합니다")
-        private String nickname;
-        
-        private String name;
-        private LocalDate birthDate;
-    }
+	@Data
+	public static class SignUpRequest {
+	    @NotBlank(message = "이메일은 필수입니다")
+	    @Email(message = "올바른 이메일 형식이 아닙니다")
+	    private String email;
+	    
+	    @NotBlank(message = "비밀번호는 필수입니다")
+	    @Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다")
+	    private String password;
+	    
+	    @NotBlank(message = "닉네임은 필수입니다")
+	    @Size(max = 50, message = "닉네임은 50자 이하여야 합니다")
+	    private String nickname;
+	    
+	    // 본인인증용 전화번호 (선택사항)
+	    private String phoneNumber;
+	    
+	    // 웹사이트 전용 계정용 개인정보 (전화번호 없을 시 사용)
+	    private String name;
+	    private LocalDate birthDate;
+	}
     
     @Data
     public static class LoginRequest {
