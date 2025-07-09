@@ -188,7 +188,8 @@
         </form>
         <div id="findAccountResult" class="result" style="display: none;"></div>
     </div>
-	<div class="container">
+
+    <div class="container">
         <h2>비밀번호 찾기</h2>
         <form id="forgotPasswordForm">
             <div class="form-group">
@@ -205,20 +206,6 @@
         <div id="forgotPasswordResult" class="result" style="display: none;"></div>
     </div>
 
-    <div class="container">
-        <h2>비밀번호 찾기</h2>
-        <form id="forgotPasswordForm">
-            <div class="form-group">
-                <label for="forgotEmail">이메일:</label>
-                <input type="email" id="forgotEmail" required>
-            </div>
-            <div class="form-group">
-                <label for="forgotPhoneNumber">전화번호:</label>
-                <input type="tel" id="forgotPhoneNumber" placeholder="010-1234-5678" required 
-                       pattern="010-\d{4}-\d{4}" title="010-0000-0000">
-           </div>
-       </form>
-    </div>
     <div class="container">
         <h2>프로필 완성</h2>
         <button id="getProfileBtn">프로필 정보 조회</button>
@@ -428,6 +415,15 @@
             
             if (result.success) {
                 showMessage('회원가입이 완료되었습니다!');
+                document.getElementById('signupForm').reset();
+                
+                // 회원가입 후 자동 로그인 처리
+                if (result.data && result.data.accessToken) {
+                    accessToken = result.data.accessToken;
+                    localStorage.setItem('accessToken', accessToken);
+                    showToken(accessToken);
+                    showMessage('자동 로그인되었습니다!');
+                }
             }
         });
 
@@ -445,14 +441,20 @@
                 body: JSON.stringify(formData)
             });
 
-            if (result.success && result.data.accessToken) {
-                accessToken = result.data.accessToken;
+            console.log('로그인 응답:', result); // 디버깅용
+
+            showResult('loginResult', result.data, result.success);
+
+            if (result.success && result.data && result.data.data && result.data.data.accessToken) {
+                accessToken = result.data.data.accessToken;
                 localStorage.setItem('accessToken', accessToken);
                 showToken(accessToken);
                 showMessage('로그인 성공! Access Token이 저장되었습니다.');
+                console.log('Access Token 저장됨:', accessToken); // 디버깅용
+            } else if (result.success) {
+                console.log('로그인 성공했지만 accessToken이 없음:', result.data);
+                showMessage('로그인 성공했지만 토큰을 받지 못했습니다.', 'error');
             }
-
-            showResult('loginResult', result.data, result.success);
         });
 
         // 비밀번호 찾기
