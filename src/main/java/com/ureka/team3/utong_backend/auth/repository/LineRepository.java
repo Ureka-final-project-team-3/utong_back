@@ -18,5 +18,5 @@ public interface LineRepository extends JpaRepository<Line, String> {
     @Query("SELECT l.user.account.email FROM Line l WHERE l.phoneNumber = :phoneNumber")
     Optional<String> findEmailByPhoneNumber(@Param("phoneNumber") String phoneNumber);
     
-    
+    Optional<Line> findByUserId(String userId);
 }
