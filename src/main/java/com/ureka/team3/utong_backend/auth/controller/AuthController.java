@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ureka.team3.utong_backend.auth.dto.AuthDto;
+import com.ureka.team3.utong_backend.auth.dto.FindAccountDto;
 import com.ureka.team3.utong_backend.auth.service.AuthService;
+import com.ureka.team3.utong_backend.auth.service.FindAccountService;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,9 +22,11 @@ import jakarta.validation.Valid;
 public class AuthController {
     
     private final AuthService authService;
+    private final FindAccountService findAccountService;
     
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, FindAccountService findAccountService) {
         this.authService = authService;
+        this.findAccountService = findAccountService;
     }
     
     @PostMapping("/signup")
@@ -50,5 +54,11 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<AuthDto.UserInfo>> getCurrentUser() {
         return ResponseEntity.ok(authService.getCurrentUser());
+    }
+    
+    @PostMapping("/find-account")
+    public ResponseEntity<ApiResponse<FindAccountDto.FindAccountResponse>> findAccount(
+            @Valid @RequestBody FindAccountDto.FindAccountRequest request) {
+        return ResponseEntity.ok(findAccountService.findAccountByPhoneNumber(request));
     }
 }

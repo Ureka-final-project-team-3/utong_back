@@ -20,43 +20,50 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  private final Logger log = LoggerFactory.getLogger(getClass());
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
-  @ExceptionHandler(BusinessException.class)
-  public ResponseEntity<ApiResponse<Void>> handleBusinessException(
-      BusinessException e, HttpServletRequest request) {
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBusinessException(
+            BusinessException e, HttpServletRequest request) {
 
-    log.error("Business error at {}: {}", request.getRequestURI(), e.getMessage(), e);
-    return ResponseEntity.ok(ApiResponse.fail(e.getErrorCode()));
-  }
+        log.error("Business error at {}: {}", request.getRequestURI(), e.getMessage(), e);
+        
+        return ResponseEntity
+                .status(e.getErrorCode().getStatus())
+                .body(ApiResponse.fail(e.getErrorCode()));
+    }
 
-  @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ApiResponse<ValidationErrorResponse>> handleValidationExceptions(
-          MethodArgumentNotValidException ex) {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<ValidationErrorResponse>> handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
 
-    log.warn("Validation error: {}", ex.getMessage());
+        log.warn("Validation error: {}", ex.getMessage());
 
-    Map<String, String> errors = new HashMap<>();
-    ex.getBindingResult().getFieldErrors().forEach(error ->
-            errors.put(error.getField(), error.getDefaultMessage())
-    );
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage())
+        );
 
-    ValidationErrorResponse errorResponse = ValidationErrorResponse.of(errors);
+        ValidationErrorResponse errorResponse = ValidationErrorResponse.of(errors);
 
-    return ResponseEntity.badRequest()
-            .body(new ApiResponse<>(
-                    ErrorCode.INVALID_INPUT_VALUE.getStatus().value(),
-                    ErrorCode.INVALID_INPUT_VALUE.getCode(),
-                    ErrorCode.INVALID_INPUT_VALUE.getMessage(),
-                    errorResponse
-            ));
-  }
+        return ResponseEntity
+                .status(ErrorCode.INVALID_INPUT_VALUE.getStatus())
+                .body(new ApiResponse<>(
+                        ErrorCode.INVALID_INPUT_VALUE.getStatus().value(),
+                        ErrorCode.INVALID_INPUT_VALUE.getCode(),
+                        ErrorCode.INVALID_INPUT_VALUE.getMessage(),
+                        errorResponse
+                ));
+    }
 
-  @ExceptionHandler(Exception.class)
-  public ResponseEntity<ApiResponse<Void>> handleGeneralException(
-      Exception e, HttpServletRequest request) {
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleGeneralException(
+            Exception e, HttpServletRequest request) {
 
-    log.error("Unexpected error at {}: {}", request.getRequestURI(), e.getMessage(), e);
-    return ResponseEntity.ok(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
-  }
+        log.error("Unexpected error at {}: {}", request.getRequestURI(), e.getMessage(), e);
+        
+        return ResponseEntity
+                .status(ErrorCode.INTERNAL_SERVER_ERROR.getStatus())
+                .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+    }
 }
