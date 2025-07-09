@@ -17,20 +17,16 @@ public class AuthDto {
 	    @Email(message = "올바른 이메일 형식이 아닙니다")
 	    private String email;
 	    
-	    @NotBlank(message = "비밀번호는 필수입니다")
-	    @Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다")
-	    private String password;
-	    
 	    @NotBlank(message = "닉네임은 필수입니다")
 	    @Size(max = 50, message = "닉네임은 50자 이하여야 합니다")
 	    private String nickname;
 	    
-	    // 본인인증용 전화번호 (선택사항)
-	    private String phoneNumber;
+	    @NotBlank(message = "비밀번호는 필수입니다")
+	    @Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다")
+	    private String password;
 	    
-	    // 웹사이트 전용 계정용 개인정보 (전화번호 없을 시 사용)
-	    private String name;
-	    private LocalDate birthDate;
+	    @NotBlank(message = "전화번호는 필수입니다")
+	    private String phoneNumber;
 	}
     
     @Data
