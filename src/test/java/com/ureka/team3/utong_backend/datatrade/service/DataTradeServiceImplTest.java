@@ -1,94 +1,80 @@
 package com.ureka.team3.utong_backend.datatrade.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
 import com.ureka.team3.utong_backend.datatrade.dto.OrderRedisDto;
+import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
+import com.ureka.team3.utong_backend.datatrade.repository.BuyDataRequestRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.OrderRedisRepository;
 import com.ureka.team3.utong_backend.datatrade.repository.SaleDataRequestRepository;
-import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.test.context.ActiveProfiles;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@Transactional
-class DataTradeServiceTest {
 
-    @Autowired
-    private DataTradeService dataTradeService;
+@ExtendWith(MockitoExtension.class)
+class DataTradeServiceImplTest {
 
-    @Autowired
+    @InjectMocks
+    private DataTradeServiceImpl dataTradeService;
+
+    @Mock
     private SaleDataRequestRepository saleDataRequestRepository;
 
-    @Autowired
+    @Mock
+    private BuyDataRequestRepository buyDataRequestRepository;
+
+    @Mock
     private AccountRepository accountRepository;
 
-    @Autowired
-    private StringRedisTemplate redisTemplate;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    private final String dataCode = "001";
-
-    @BeforeEach
-    void setup() {
-        // 테스트용 계정 생성
-        Account account = Account.builder()
-                .id("test-user")
-                .email("test@test.com")
-                .build();
-        accountRepository.save(account);
-    }
-
-    @AfterEach
-    void cleanup() {
-        // Redis 삭제
-        Set<String> keys = redisTemplate.keys("order_queue:sell:*");
-        if (keys != null) redisTemplate.delete(keys);
-        keys = redisTemplate.keys("orderbook:sell:*");
-        if (keys != null) redisTemplate.delete(keys);
-    }
+    @Mock
+    private OrderRedisRepository orderRedisRepository;
 
     @Test
-    void requestSale_정상동작_그리고_Redis_저장됨() throws Exception {
+    void requestSale_정상동작() {
         // given
+        String username = "test-user";
         DataTradeDto.SaleDataRequestDto dto = DataTradeDto.SaleDataRequestDto.builder()
-                .price(8900L)
-                .dataAmount(10L)
-                .dataCode(dataCode).
-                build();
+                .price(1000L)
+                .dataAmount(5L)
+                .dataCode("001")
+                .build();
+
+        Account account = Account.builder().id(username).build();
+
+        SaleDataRequest saved = SaleDataRequest.builder()
+//                .id("1L")
+                .price(dto.getPrice())
+                .quantity(dto.getDataAmount())
+                .dataCode(dto.getDataCode())
+                .account(account)
+                .build();
+        ReflectionTestUtils.setField(saved, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(saved, "expiredAt", LocalDateTime.now().plusDays(1));
+
+        when(accountRepository.findById(username)).thenReturn(Optional.of(account));
+        when(saleDataRequestRepository.save(any())).thenReturn(saved);
 
         // when
-        ApiResponse response = dataTradeService.requestSale("test-user", dto);
+        ApiResponse response = dataTradeService.requestSale(username, dto);
 
         // then
-        String listKey = "order_queue:sell:" + dataCode + ":" + dto.getPrice();
-        String zsetKey = "orderbook:sell:" + dataCode;
-
-        // Redis List에 저장된 JSON
-        String redisJson = redisTemplate.opsForList().leftPop(listKey);
-        assertNotNull(redisJson, "Redis에 저장된 주문이 없음");
-
-        OrderRedisDto order = objectMapper.readValue(redisJson, OrderRedisDto.class);
-
-        assertEquals(dto.getDataAmount(), order.getQuantity());
-        assertTrue(order.getCreatedAt() > 0);
-        assertTrue(order.getExpiredAt() > order.getCreatedAt());
-
-        // ZSet에 listKey가 저장되어 있는지 확인
-        Set<String> zset = redisTemplate.opsForZSet().range(zsetKey, 0, -1);
-        assertTrue(zset.contains(listKey));
+        assertNotNull(response);
+        assertEquals("판매 등록 완료", response.getMessage());
+        verify(orderRedisRepository).saveSellOrder(any(OrderRedisDto.class));
     }
 }

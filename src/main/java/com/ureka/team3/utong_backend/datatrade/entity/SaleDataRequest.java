@@ -41,5 +41,6 @@ public class SaleDataRequest {
         if (this.id == null) this.id = UUID.randomUUID().toString();
         if (this.createdAt == null) this.createdAt = LocalDateTime.now();
         if (this.expiredAt == null) this.expiredAt = createdAt.plusDays(3);
+//        if (this.expiredAt == null) this.expiredAt = createdAt.plusMinutes(10);
     }
 }

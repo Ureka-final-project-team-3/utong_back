@@ -14,4 +14,6 @@ public class OrderRedisDto {
     private long quantity;      // 데이터 용량 (GB 등)
     private long createdAt;
     private long expiredAt;
+    private long price;
+    private String dataCode;
 }
