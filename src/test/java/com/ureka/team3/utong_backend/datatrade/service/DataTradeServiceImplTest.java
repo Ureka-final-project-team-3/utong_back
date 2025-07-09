@@ -5,6 +5,7 @@ import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
 import com.ureka.team3.utong_backend.datatrade.dto.OrderRedisDto;
+import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
 import com.ureka.team3.utong_backend.datatrade.repository.BuyDataRequestRepository;
 import com.ureka.team3.utong_backend.datatrade.repository.OrderRedisRepository;
@@ -45,6 +46,42 @@ class DataTradeServiceImplTest {
     private OrderRedisRepository orderRedisRepository;
 
     @Test
+    void requestBuy_정상동작() {
+        // given
+        String username = "test-user";
+        DataTradeDto.BuyDataRequestDto dto = DataTradeDto.BuyDataRequestDto.builder()
+                .price(2000L)
+                .dataAmount(3L)
+                .dataCode("XYZ")
+                .build();
+
+        Account account = Account.builder().id(username).build();
+
+        BuyDataRequest saved = BuyDataRequest.builder()
+                .price(dto.getPrice())
+                .quantity(dto.getDataAmount())
+                .dataCode(dto.getDataCode())
+                .account(account)
+                .build();
+
+        // createdAt, expiredAt 수동 세팅
+        ReflectionTestUtils.setField(saved, "createdAt", LocalDateTime.now());
+        ReflectionTestUtils.setField(saved, "expiredAt", LocalDateTime.now().plusHours(2));
+        ReflectionTestUtils.setField(saved, "id", "123"); // ID도 세팅
+
+        when(buyDataRequestRepository.save(any())).thenReturn(saved);
+
+        // when
+        ApiResponse response = dataTradeService.requestBuy(account, dto);
+
+        // then
+        assertNotNull(response);
+        assertEquals("구매 등록 완료", response.getMessage());
+        assertEquals("123", response.getData());
+        verify(orderRedisRepository).savePurchaseOrder(any(OrderRedisDto.class));
+    }
+
+    @Test
     void requestSale_정상동작() {
         // given
         String username = "test-user";
@@ -66,11 +103,10 @@ class DataTradeServiceImplTest {
         ReflectionTestUtils.setField(saved, "createdAt", LocalDateTime.now());
         ReflectionTestUtils.setField(saved, "expiredAt", LocalDateTime.now().plusDays(1));
 
-        when(accountRepository.findById(username)).thenReturn(Optional.of(account));
         when(saleDataRequestRepository.save(any())).thenReturn(saved);
 
         // when
-        ApiResponse response = dataTradeService.requestSale(username, dto);
+        ApiResponse response = dataTradeService.requestSale(account, dto);
 
         // then
         assertNotNull(response);
