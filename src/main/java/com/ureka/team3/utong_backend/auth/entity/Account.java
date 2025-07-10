@@ -87,4 +87,10 @@ public class Account implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+    // 포인트 충전 후 account 의 마일리지 컬럼 업데이트 메서드
+    public void addMileage(Long amount) {
+        if (this.mileage == null) this.mileage = 0L;
+        this.mileage += amount;
+    }
 }

@@ -1,6 +1,7 @@
 package com.ureka.team3.utong_backend.auth.service;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,10 +18,12 @@ import com.ureka.team3.utong_backend.auth.dto.AuthDto;
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.auth.entity.User;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
+import com.ureka.team3.utong_backend.auth.repository.LineRepository;
 import com.ureka.team3.utong_backend.auth.repository.UserRepository;
 import com.ureka.team3.utong_backend.auth.util.JwtProperties;
 import com.ureka.team3.utong_backend.auth.util.JwtUtil;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
+import com.ureka.team3.utong_backend.common.exception.business.EmailAlreadyExistsException;
 import com.ureka.team3.utong_backend.common.exception.business.InvalidPasswordException;
 import com.ureka.team3.utong_backend.common.exception.business.InvalidTokenException;
 import com.ureka.team3.utong_backend.common.exception.business.UserNotFoundException;
@@ -34,6 +37,7 @@ public class AuthService {
     
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
+    private final LineRepository lineRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
@@ -42,6 +46,7 @@ public class AuthService {
     
     public AuthService(AccountRepository accountRepository,
                       UserRepository userRepository,
+                      LineRepository lineRepository,
                       PasswordEncoder passwordEncoder,
                       AuthenticationManager authenticationManager,
                       JwtUtil jwtUtil,
@@ -49,6 +54,7 @@ public class AuthService {
                       JwtProperties jwtProperties) {
         this.accountRepository = accountRepository;
         this.userRepository = userRepository;
+        this.lineRepository = lineRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
@@ -59,11 +65,10 @@ public class AuthService {
     @Transactional
     public ApiResponse<Void> signUp(AuthDto.SignUpRequest request) {
         if (accountRepository.existsByEmail(request.getEmail())) {
-            throw new InvalidPasswordException("이미 존재하는 이메일입니다");
+            throw new EmailAlreadyExistsException("이미 존재하는 이메일입니다");
         }
         
         String accountId = UUID.randomUUID().toString();
-        String userId = UUID.randomUUID().toString();
         
         Account account = Account.builder()
                 .id(accountId)
@@ -75,16 +80,32 @@ public class AuthService {
         
         accountRepository.save(account);
         
-        User user = User.builder()
-                .id(userId)
-                .name(request.getName())
-                .birthDate(request.getBirthDate())
-                .account(account)
-                .build();
-        
-        userRepository.save(user);
-        
-        return ApiResponse.success("회원가입이 완료되었습니다", null);
+        if (request.getPhoneNumber() != null && !request.getPhoneNumber().trim().isEmpty()) {
+            Optional<User> existingUser = findUserByPhoneNumber(request.getPhoneNumber());
+            
+            if (existingUser.isPresent()) {
+                User user = existingUser.get();
+                
+                if (user.getAccount() != null) {
+                    accountRepository.deleteById(accountId);
+                    throw new InvalidPasswordException("해당 전화번호로 이미 가입된 계정이 있습니다");
+                }
+                
+                userRepository.updateAccountId(user.getId(), accountId);
+                userRepository.flush();
+                
+                return ApiResponse.success("기존 통신사 고객 정보와 연결하여 회원가입이 완료되었습니다", null);
+            } else {
+                return ApiResponse.success("해당 전화번호로 등록된 통신사 고객 정보를 찾을 수 없어 웹사이트 전용 계정으로 가입되었습니다", null);
+            }
+        } else {
+            return ApiResponse.success("웹사이트 전용 계정으로 회원가입이 완료되었습니다", null);
+        }
+    }
+    
+    private Optional<User> findUserByPhoneNumber(String phoneNumber) {
+        return lineRepository.findByPhoneNumber(phoneNumber)
+                .flatMap(line -> userRepository.findById(line.getUser().getId()));
     }
     
     public ApiResponse<AuthDto.LoginResponse> login(AuthDto.LoginRequest request, HttpServletResponse response) {
@@ -184,12 +205,14 @@ public class AuthService {
             throw new InvalidTokenException("인증되지 않은 사용자입니다");
         }
         
+        User user = userRepository.findByAccountId(account.getId()).orElse(null);
+        
         AuthDto.UserInfo userInfo = new AuthDto.UserInfo(
                 account.getId(),
                 account.getEmail(),
                 account.getNickname(),
-                account.getUser() != null ? account.getUser().getName() : null,
-                account.getUser() != null ? account.getUser().getBirthDate() : null,
+                user != null ? user.getName() : null,
+                user != null ? user.getBirthDate() : null,
                 account.getMileage()
         );
         
