@@ -18,7 +18,7 @@ public class OAuth2Controller {
         this.oAuth2SuccessService = oAuth2SuccessService;
     }
     
-    @GetMapping("/oauth2/success")
+    @GetMapping("/api/oauth2/success")
     public ResponseEntity<String> oauth2Success(@RequestParam(value = "accessToken", required = false) String accessToken, 
                                                @RequestParam(value = "tokenType", required = false) String tokenType, 
                                                @RequestParam(value = "expiresIn", required = false) String expiresIn, 
@@ -26,12 +26,12 @@ public class OAuth2Controller {
         return ResponseEntity.ok(oAuth2SuccessService.processSuccess(accessToken, tokenType, expiresIn, request));
     }
     
-    @GetMapping("/oauth2/test")
+    @GetMapping("/api/oauth2/test")
     public ResponseEntity<String> testOAuth() {
         return ResponseEntity.ok(oAuth2SuccessService.getTestMessage());
     }
     
-    @GetMapping("/oauth2/debug")
+    @GetMapping("/api/oauth2/debug")
     public ResponseEntity<String> debugOAuth(HttpServletRequest request) {
         return ResponseEntity.ok(oAuth2SuccessService.getDebugInfo(request));
     }
