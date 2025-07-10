@@ -15,7 +15,7 @@ import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class PasswordResetController {
     
     private final PasswordResetService passwordResetService;
