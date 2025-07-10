@@ -1,7 +1,7 @@
 package com.ureka.team3.utong_backend.datatrade.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ureka.team3.utong_backend.datatrade.dto.OrderRedisDto;
+import com.ureka.team3.utong_backend.datatrade.dto.OrderMQDto;
 import com.ureka.team3.utong_backend.datatrade.utils.RedisKeyUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ class OrderRedisRepositoryTest {
     @Test
     void savePurchaseOrder_정상동작_및_Redis저장확인() throws Exception {
         // given
-        OrderRedisDto dto = OrderRedisDto.builder()
+        OrderMQDto dto = OrderMQDto.builder()
                 .orderId("100L")
                 .price(8900L)
                 .quantity(5L)
@@ -61,7 +61,7 @@ class OrderRedisRepositoryTest {
         String redisJson = redisTemplate.opsForList().leftPop(listKey);
         assertNotNull(redisJson);
 
-        OrderRedisDto redisDto = objectMapper.readValue(redisJson, OrderRedisDto.class);
+        OrderMQDto redisDto = objectMapper.readValue(redisJson, OrderMQDto.class);
         assertEquals(dto.getOrderId(), redisDto.getOrderId());
         assertEquals(dto.getQuantity(), redisDto.getQuantity());
 
@@ -75,7 +75,7 @@ class OrderRedisRepositoryTest {
         long now = Instant.now().toEpochMilli();
         long expiredAt = Instant.now().plus(3, ChronoUnit.DAYS).toEpochMilli();
 
-        OrderRedisDto dto = OrderRedisDto.builder()
+        OrderMQDto dto = OrderMQDto.builder()
                 .orderId("1")
                 .dataCode(dataCode)
                 .price(price)
@@ -98,9 +98,9 @@ class OrderRedisRepositoryTest {
         assertThat(listValues).hasSize(1);
         assertThat(score).isEqualTo((double) price);
 
-        OrderRedisDto storedDto = null;
+        OrderMQDto storedDto = null;
         try {
-            storedDto = objectMapper.readValue(listValues.get(0), OrderRedisDto.class);
+            storedDto = objectMapper.readValue(listValues.get(0), OrderMQDto.class);
         } catch (Exception e) {
             throw new RuntimeException("역직렬화 실패", e);
         }

@@ -4,7 +4,7 @@ import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
-import com.ureka.team3.utong_backend.datatrade.dto.OrderRedisDto;
+import com.ureka.team3.utong_backend.datatrade.dto.OrderMQDto;
 import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
 import com.ureka.team3.utong_backend.datatrade.repository.BuyDataRequestRepository;
@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -78,7 +77,7 @@ class DataTradeServiceImplTest {
         assertNotNull(response);
         assertEquals("구매 등록 완료", response.getMessage());
         assertEquals("123", response.getData());
-        verify(orderRedisRepository).savePurchaseOrder(any(OrderRedisDto.class));
+        verify(orderRedisRepository).savePurchaseOrder(any(OrderMQDto.class));
     }
 
     @Test
@@ -111,6 +110,6 @@ class DataTradeServiceImplTest {
         // then
         assertNotNull(response);
         assertEquals("판매 등록 완료", response.getMessage());
-        verify(orderRedisRepository).saveSellOrder(any(OrderRedisDto.class));
+        verify(orderRedisRepository).saveSellOrder(any(OrderMQDto.class));
     }
 }

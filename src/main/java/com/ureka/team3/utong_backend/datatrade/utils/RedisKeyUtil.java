@@ -2,8 +2,8 @@ package com.ureka.team3.utong_backend.datatrade.utils;
 
 public class RedisKeyUtil {
 
-    private static final String ORDER_QUEUE_PREFIX = "order_queue";
-    private static final String ORDER_BOOK_PREFIX = "order_book";
+    public static final String ORDER_QUEUE_PREFIX = "order_queue";
+    public static final String ORDER_BOOK_PREFIX = "order_book";
 
     public static String buildSellListKey(String dataCode, long price) {
         return ORDER_QUEUE_PREFIX + ":sell:" + dataCode + ":" + price;
