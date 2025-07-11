@@ -48,51 +48,51 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     }
     
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, 
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                       Authentication authentication) throws IOException {
-        
-        if (response.isCommitted()) {
-            return;
-        }
-        
-        Object principal = authentication.getPrincipal();
-        Account account;
-        
-        if (principal instanceof CustomOAuth2UserDto customUser) {
-            account = customUser.getAccount();
-        } else {
-            String email = null;
-            if (principal instanceof org.springframework.security.oauth2.core.oidc.user.OidcUser oidcUser) {
-                email = oidcUser.getEmail();
+        try {
+            Account account;
+            
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof CustomOAuth2UserDto) {
+                CustomOAuth2UserDto customUser = (CustomOAuth2UserDto) principal;
+                account = customUser.getAccount();
+                
+            } else if (principal instanceof org.springframework.security.oauth2.core.oidc.user.OidcUser) {
+                org.springframework.security.oauth2.core.oidc.user.OidcUser oidcUser = 
+                    (org.springframework.security.oauth2.core.oidc.user.OidcUser) principal;
                 account = createOrUpdateAccountFromOidcUser(oidcUser);
                 
-            } else if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User oAuth2User) {
-                email = oAuth2User.getAttribute("email");
+            } else if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User) {
+                org.springframework.security.oauth2.core.user.OAuth2User oAuth2User = 
+                    (org.springframework.security.oauth2.core.user.OAuth2User) principal;
                 account = createOrUpdateAccountFromOAuth2User(oAuth2User);
                 
             } else {
                 throw new RuntimeException("지원하지 않는 사용자 타입: " + principal.getClass().getName());
             }
+            
+            String accessToken = jwtUtil.generateAccessToken(account.getId(), account.getEmail());
+            String refreshToken = jwtUtil.generateRefreshToken(account.getId());
+            
+            redisTokenService.saveRefreshToken(account.getId(), refreshToken);
+            
+            Cookie refreshTokenCookie = createRefreshTokenCookie(refreshToken);
+            response.addCookie(refreshTokenCookie);
+            
+            // 프론트엔드 URL로 리다이렉트
+            String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl)
+                    .queryParam("accessToken", accessToken)
+                    .queryParam("tokenType", "Bearer")
+                    .queryParam("expiresIn", jwtProperties.getAccessTokenExpiration())
+                    .queryParam("oauth", "success")
+                    .build().toUriString();
+            
+            getRedirectStrategy().sendRedirect(request, response, targetUrl);
+            
+        } catch (Exception e) {
+            response.sendRedirect(frontendUrl + "?error=oauth_failed");
         }
-        
-        String accessToken = jwtUtil.generateAccessToken(account.getId(), account.getEmail());
-        String refreshToken = jwtUtil.generateRefreshToken(account.getId());
-        
-        System.out.println("JWT 토큰 생성 완료 - Account ID: " + account.getId() + ", Email: " + account.getEmail());
-        System.out.println("Access Token: " + accessToken.substring(0, 50) + "...");
-        
-        redisTokenService.saveRefreshToken(account.getId(), refreshToken);
-        
-        Cookie refreshTokenCookie = createRefreshTokenCookie(refreshToken);
-        response.addCookie(refreshTokenCookie);
-        
-        // 프론트엔드 URL로 리다이렉트
-        String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl)
-                .queryParam("accessToken", accessToken)
-                .queryParam("tokenType", "Bearer")
-                .queryParam("expiresIn", jwtProperties.getAccessTokenExpiration())
-                .queryParam("oauth", "success")  // OAuth 성공 표시
-                .build().toUriString();
     }
     
     private Cookie createRefreshTokenCookie(String refreshToken) {
