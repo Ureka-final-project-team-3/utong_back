@@ -16,11 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class PriceController {
 
     private final PriceService priceService;
-    
+
     @GetMapping("/prices")
     public ResponseEntity<ApiResponse<PriceDto>> getPrice(
             @RequestParam(defaultValue = "903ee67c-71b3-432e-bbd1-aaf5d5043376") String id
     ) {
+
         return ResponseEntity.ok(priceService.getPrice(id));
     }
 }
