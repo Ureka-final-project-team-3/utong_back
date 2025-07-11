@@ -15,6 +15,7 @@ public enum ErrorCode {
 
   LINE_NOT_FOUND(HttpStatus.NOT_FOUND, "LINE_NOT_FOUND", "회선 정보를 찾을 수 없습니다."),
 
+  GIFTICON_NOT_FOUND(HttpStatus.NOT_FOUND, "G404", "기프티콘 정보를 찾을 수 없습니다."),
 
   INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "INVALID_TOKEN", "유효하지 않은 토큰입니다"),
   EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "EXPIRED_TOKEN", "만료된 토큰입니다"),
