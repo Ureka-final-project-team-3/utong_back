@@ -94,3 +94,9 @@ server:
 logging:
   level:
     com.eureka.ip.team1: DEBUG
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
