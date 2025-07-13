@@ -19,4 +19,10 @@ public interface OrderMQRepository {
     OrderMQDto popValidSellOrder(String dataCode, long price);
 
     void requeuePartialSellOrder(OrderMQDto order);
+
+    Long getHighestBuyPrice(String dataCode);
+
+    OrderMQDto popValidBuyOrder(String dataCode, Long highestBuyPrice);
+
+    void requeuePartialBuyOrder(OrderMQDto buyOrder);
 }

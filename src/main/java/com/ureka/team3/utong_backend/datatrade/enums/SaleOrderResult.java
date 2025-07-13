@@ -1,10 +1,11 @@
 package com.ureka.team3.utong_backend.datatrade.enums;
 
-public enum BuyOrderResult {
+public enum SaleOrderResult {
     ALL_COMPLETE,
     PART_COMPLETE,
     WAITING,
-    INSUFFICIENT_POINT,
+    BORDERLESS,
     NEED_DEFAULT_LINE,
+    EXCEED_SALE_LIMIT,
     FAIL
 }

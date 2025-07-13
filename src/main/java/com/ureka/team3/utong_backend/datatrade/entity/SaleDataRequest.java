@@ -36,6 +36,9 @@ public class SaleDataRequest {
     @Column(name = "expired_at")
     private LocalDateTime expiredAt;
 
+    @Column(name = "line_id")
+    private String lineId;
+
     @PrePersist
     public void initId() {
         if (this.id == null) this.id = UUID.randomUUID().toString();

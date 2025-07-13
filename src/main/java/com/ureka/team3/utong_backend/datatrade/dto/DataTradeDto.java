@@ -1,6 +1,7 @@
 package com.ureka.team3.utong_backend.datatrade.dto;
 
 import com.ureka.team3.utong_backend.datatrade.enums.BuyOrderResult;
+import com.ureka.team3.utong_backend.datatrade.enums.SaleOrderResult;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -42,7 +43,7 @@ public class DataTradeDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SaleDataResponseDto<T> {
-        private BuyOrderResult result;
+        private SaleOrderResult result;
         private long remainData;
         private T data;
     }

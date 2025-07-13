@@ -90,4 +90,14 @@ public class Account implements UserDetails {
         if (this.mileage == null) this.mileage = 0L;
         this.mileage += amount;
     }
+
+    public void increasePoint(Long salePrice) {
+        this.mileage += salePrice;
+    }
+
+    public void decreasePoint(Long purchasePrice) {
+        if (mileage < purchasePrice)
+            throw new InsufficientPointException();
+        this.mileage -= purchasePrice;
+    }
 }

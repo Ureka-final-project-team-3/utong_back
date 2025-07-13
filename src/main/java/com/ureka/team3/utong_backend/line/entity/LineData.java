@@ -25,6 +25,10 @@ public class LineData {
 
     private Long remining;
 
+    private Long purchased;
+
+    private Long sell;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
