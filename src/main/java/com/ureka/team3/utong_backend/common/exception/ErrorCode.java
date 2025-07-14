@@ -34,8 +34,8 @@ public enum ErrorCode {
 
   AI_MESSAGE_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI500", "AI 서버 데이터 전송 실패"),
   EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "EMAIL_ALREADY_EXISTS", "이미 존재하는 이메일입니다"),
-  ALREADY_REVIEWED(HttpStatus.BAD_REQUEST, "ALREADY_REVIEWED", "이미 해당 요금제에 대한 리뷰를 작성하셨습니다.");
-
+  ALREADY_REVIEWED(HttpStatus.BAD_REQUEST, "ALREADY_REVIEWED", "이미 해당 요금제에 대한 리뷰를 작성하셨습니다."),
+  INSUFFICIENT_POINT(HttpStatus.BAD_REQUEST,"INSUFFICIENT_POINT","포인트가 부족합니다");
   private final HttpStatus status;
   private final String code;
   private final String message;

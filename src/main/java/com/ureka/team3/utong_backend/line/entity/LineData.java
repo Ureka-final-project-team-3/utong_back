@@ -1,9 +1,13 @@
 package com.ureka.team3.utong_backend.line.entity;
 
+import com.ureka.team3.utong_backend.auth.entity.Line;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "line_data")
@@ -17,19 +21,21 @@ public class LineData {
     @Column(length = 36)
     private String id;
 
-    @Column(name = "phone_number", length = 20, nullable = false)
-    private String phoneNumber;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "line_id", nullable = false)
+    private Line line;
 
     @Column(name = "data_code", length = 3)
     private String dataCode;
 
     private Long remining;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private Long purchased;
 
-    @Column(name = "expired_at")
-    private LocalDateTime expiredAt;
+    private Long sell;
+
+    @Column(name = "month")
+    private LocalDate month;
 }
 
 
