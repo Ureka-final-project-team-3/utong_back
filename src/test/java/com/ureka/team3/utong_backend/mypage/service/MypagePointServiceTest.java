@@ -1,4 +1,4 @@
-package com.ureka.team3.utong_backend.myapge.service;
+package com.ureka.team3.utong_backend.mypage.service;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
