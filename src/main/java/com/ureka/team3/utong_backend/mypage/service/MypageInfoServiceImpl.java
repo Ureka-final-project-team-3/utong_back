@@ -35,18 +35,7 @@ public class MypageInfoServiceImpl implements MypageInfoService {
 
         User user = userRepository.findByAccountId(accountId)
                 .orElseThrow(UserNotFoundException::new);
-        
-        //손민혁이 조금 추가한 조건문 (삭제 시 notice 해주세용)
-        if (user == null) {
-            return MyInfoResponseDto.builder()
-                    .name("비회원")
-                    .email(account.getEmail())
-                    .mileage(account.getMileage() != null ? account.getMileage() : 0L)
-                    .phoneNumber(null)
-                    .remainingData(0L)
-                    .build();
-        }
-        
+
         // line & line_data 정보 가져오기(보유 데이터 조회용)
         Line line = lineRepository.findByUserId(user.getId())
                 .orElseThrow(LineNotFoundException::new);
