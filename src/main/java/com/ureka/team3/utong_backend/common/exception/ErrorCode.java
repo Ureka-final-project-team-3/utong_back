@@ -12,7 +12,10 @@ public enum ErrorCode {
   ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "A404", "존재하지 않는 계정입니다"),
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U404", "사용자를 찾을 수 없습니다."),
   INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "INVALID_PASSWORD", "비밀번호가 올바르지 않습니다"),
-
+  ROULETTE_EVENT_NOT_FOUND(HttpStatus.NOT_FOUND, "R404", "룰렛 이벤트를 찾을 수 없습니다"),
+  ROULETTE_EVENT_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "R400", "활성화된 룰렛 이벤트가 없습니다"),
+  ROULETTE_ALREADY_PARTICIPATED(HttpStatus.BAD_REQUEST, "R409", "이미 참여한 룰렛 이벤트입니다"),
+  ROULETTE_WINNERS_FULL(HttpStatus.BAD_REQUEST, "R410", "당첨자가 모두 마감되었습니다"),
   LINE_NOT_FOUND(HttpStatus.NOT_FOUND, "LINE_NOT_FOUND", "회선 정보를 찾을 수 없습니다."),
 
   GIFTICON_NOT_FOUND(HttpStatus.NOT_FOUND, "G404", "기프티콘 정보를 찾을 수 없습니다."),
