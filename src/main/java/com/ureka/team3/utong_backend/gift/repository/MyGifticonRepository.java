@@ -1,5 +1,6 @@
 package com.ureka.team3.utong_backend.gift.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +17,8 @@ public interface MyGifticonRepository extends JpaRepository<UserGifticon, String
     // 기프티콘 상세
     Optional<UserGifticon> findByIdAndUser_Id(String id, String userId);
 
+    // 활성화된 기프티콘 & 유효 기간이 지난 기프티콘 조회
+    List<UserGifticon> findByIsActiveTrueAndExpiredAtBefore(LocalDateTime now);
 }
 
 
