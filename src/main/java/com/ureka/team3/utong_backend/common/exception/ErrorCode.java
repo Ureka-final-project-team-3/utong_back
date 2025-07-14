@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 public enum ErrorCode {
 
+  CONCURRENT_ACCESS_ERROR(HttpStatus.CONFLICT, "C409", "동시 접근 오류가 발생했습니다"),
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C500", "서버 내부 오류가 발생했습니다"),
 
   ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "A404", "존재하지 않는 계정입니다"),

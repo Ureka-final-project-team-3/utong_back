@@ -13,4 +13,6 @@ public interface GifticonService {
 
     ApiResponse<Long> getGifticonCount();
 
+    ApiResponse<Void> exchangeGifticon(String gifticonId, String accountId);
+
 }
