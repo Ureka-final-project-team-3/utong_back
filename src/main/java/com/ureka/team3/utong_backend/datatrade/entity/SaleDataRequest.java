@@ -39,6 +39,9 @@ public class SaleDataRequest {
     @Column(name = "line_id")
     private String lineId;
 
+    @Column
+    private String status;
+
     @PrePersist
     public void initId() {
         if (this.id == null) this.id = UUID.randomUUID().toString();
