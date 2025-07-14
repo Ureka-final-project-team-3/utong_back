@@ -28,7 +28,7 @@ public class LineData {
     @Column(name = "data_code", length = 3)
     private String dataCode;
 
-    private Long remining;
+    private Long remaining;
 
     private Long purchased;
 

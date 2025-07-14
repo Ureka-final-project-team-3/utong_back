@@ -50,7 +50,7 @@ public class MypageInfoServiceImpl implements MypageInfoService {
                 .email(account.getEmail())
                 .mileage(account.getMileage())
                 .phoneNumber(line.getPhoneNumber())
-                .remainingData(lineData != null ? lineData.getRemining() : 0L)
+                .remainingData(lineData != null ? lineData.getRemaining() : 0L)
                 .build();
     }
 
