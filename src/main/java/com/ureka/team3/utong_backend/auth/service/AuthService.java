@@ -95,12 +95,10 @@ public class AuthService {
                 userRepository.flush();
                 
                 return ApiResponse.success("기존 통신사 고객 정보와 연결하여 회원가입이 완료되었습니다", null);
-            } else {
-                return ApiResponse.success("해당 전화번호로 등록된 통신사 고객 정보를 찾을 수 없어 웹사이트 전용 계정으로 가입되었습니다", null);
             }
-        } else {
-            return ApiResponse.success("웹사이트 전용 계정으로 회원가입이 완료되었습니다", null);
         }
+        
+        return ApiResponse.success("비회원으로 회원가입이 완료되었습니다", null);
     }
     
     private Optional<User> findUserByPhoneNumber(String phoneNumber) {
@@ -211,7 +209,7 @@ public class AuthService {
                 account.getId(),
                 account.getEmail(),
                 account.getNickname(),
-                user != null ? user.getName() : null,
+                user != null ? user.getName() : "비회원",
                 user != null ? user.getBirthDate() : null,
                 account.getMileage()
         );
