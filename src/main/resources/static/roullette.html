@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>룰렛 테스트</title>
+</head>
+<body>
+    <h1>룰렛 이벤트 테스트</h1>
+    
+    <div>
+        <h2>로그인</h2>
+        <input type="email" id="loginEmail" placeholder="이메일" value="cliff615@naver.com">
+        <input type="password" id="loginPassword" placeholder="비밀번호" value="12345678">
+        <button onclick="login()">로그인</button>
+        <div id="loginResult"></div>
+    </div>
+    
+    <hr>
+    
+    <div>
+        <h2>활성 이벤트 정보</h2>
+        <button onclick="getEventInfo()">이벤트 정보 조회</button>
+        <div id="eventInfo"></div>
+    </div>
+    
+    <hr>
+    
+    <div>
+        <h2>룰렛 참여</h2>
+        <input type="text" id="eventId" placeholder="이벤트 ID">
+        <button onclick="participate()">룰렛 돌리기!</button>
+        <div id="participateResult"></div>
+    </div>
+    
+    <hr>
+    
+    <div>
+        <h2>테스트 로그</h2>
+        <button onclick="clearLog()">로그 지우기</button>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        let accessToken = localStorage.getItem('accessToken') || '';
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const result = await response.json();
+                
+                if (result.resultCode === 200 && result.data.accessToken) {
+                    accessToken = result.data.accessToken;
+                    localStorage.setItem('accessToken', accessToken);
+                    document.getElementById('loginResult').innerHTML = 'LOGIN SUCCESS';
+                    log('로그인 성공');
+                } else {
+                    document.getElementById('loginResult').innerHTML = 'LOGIN FAILED: ' + result.message;
+                    log('로그인 실패: ' + result.message);
+                }
+            } catch (error) {
+                document.getElementById('loginResult').innerHTML = 'LOGIN ERROR: ' + error.message;
+                log('로그인 오류: ' + error.message);
+            }
+        }
+
+        async function getEventInfo() {
+            if (!accessToken) {
+                alert('먼저 로그인하세요');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/roulette/event`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.resultCode === 200) {
+                    const data = result.data;
+                    document.getElementById('eventInfo').innerHTML = `
+                        <p>이벤트 ID: ${data.eventId}</p>
+                        <p>제목: ${data.title}</p>
+                        <p>시작: ${data.startDate}</p>
+                        <p>종료: ${data.endDate}</p>
+                        <p>최대 당첨자: ${data.maxWinners}명</p>
+                        <p>현재 당첨자: ${data.currentWinners}명</p>
+                        <p>당첨 확률: ${(data.winProbability * 100).toFixed(1)}%</p>
+                        <p>활성 상태: ${data.isActive}</p>
+                        <p>참여 가능: ${data.canParticipate}</p>
+                        <p>이미 참여: ${data.alreadyParticipated}</p>
+                    `;
+                    
+                    document.getElementById('eventId').value = data.eventId;
+                    log('이벤트 정보 조회 성공');
+                } else {
+                    document.getElementById('eventInfo').innerHTML = 'ERROR: ' + result.message;
+                    log('이벤트 정보 조회 실패: ' + result.message);
+                }
+            } catch (error) {
+                document.getElementById('eventInfo').innerHTML = 'ERROR: ' + error.message;
+                log('이벤트 정보 조회 오류: ' + error.message);
+            }
+        }
+
+        async function participate() {
+            if (!accessToken) {
+                alert('먼저 로그인하세요');
+                return;
+            }
+            
+            const eventId = document.getElementById('eventId').value;
+            if (!eventId) {
+                alert('이벤트 ID를 입력하세요');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/roulette/participate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({ eventId })
+                });
+                
+                const result = await response.json();
+                
+                if (result.resultCode === 200) {
+                    const data = result.data;
+                    const resultColor = data.isWinner ? 'red' : 'blue';
+                    document.getElementById('participateResult').innerHTML = `
+                        <h3 style="color: ${resultColor}">
+                            ${data.isWinner ? '🎉 당첨!' : '😢 꽝!'}
+                        </h3>
+                        <p>${data.message}</p>
+                        <p>남은 당첨자 수: ${data.remainingWinners}명</p>
+                        <p>이벤트: ${data.eventTitle}</p>
+                    `;
+                    log(`룰렛 결과: ${data.isWinner ? '당첨' : '꽝'} - ${data.message}`);
+                } else {
+                    document.getElementById('participateResult').innerHTML = 'ERROR: ' + result.message;
+                    log('룰렛 참여 실패: ' + result.message);
+                }
+            } catch (error) {
+                document.getElementById('participateResult').innerHTML = 'ERROR: ' + error.message;
+                log('룰렛 참여 오류: ' + error.message);
+            }
+        }
+
+        // 페이지 로드시 토큰 확인
+        window.onload = function() {
+            if (accessToken) {
+                document.getElementById('loginResult').innerHTML = 'ALREADY LOGGED IN';
+                log('저장된 토큰으로 로그인 상태');
+            }
+        };
+    </script>
+</body>
+</html>
