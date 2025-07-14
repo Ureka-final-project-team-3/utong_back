@@ -26,7 +26,7 @@ public interface AccountRepository extends JpaRepository<Account, String> {
     // 비관적 락을 사용하여 계정 정보를 조회
     // 타임아웃을 3초로 설정, 초과 시 예외 발생
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @QueryHints({@QueryHint(name = "javax.persistence.lock.timeout", value = "3000")})
+    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000")})
     @Query("SELECT a FROM Account a WHERE a.id = :accountId")
     Optional<Account> findByIdWithLock(@Param("accountId") String accountId);
 }
