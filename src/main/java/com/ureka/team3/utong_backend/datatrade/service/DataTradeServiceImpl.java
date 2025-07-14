@@ -2,6 +2,7 @@ package com.ureka.team3.utong_backend.datatrade.service;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.auth.entity.Line;
+import com.ureka.team3.utong_backend.auth.entity.Plan;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
 import com.ureka.team3.utong_backend.auth.repository.LineRepository;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
@@ -18,11 +19,17 @@ import com.ureka.team3.utong_backend.datatrade.repository.BuyDataRequestReposito
 import com.ureka.team3.utong_backend.datatrade.repository.ContractRepository;
 import com.ureka.team3.utong_backend.datatrade.repository.OrderMQRepository;
 import com.ureka.team3.utong_backend.datatrade.repository.SaleDataRequestRepository;
+import com.ureka.team3.utong_backend.line.entity.LineData;
 import com.ureka.team3.utong_backend.line.repository.LineDataRepository;
+import com.ureka.team3.utong_backend.price.entity.Price;
+import com.ureka.team3.utong_backend.price.repository.PriceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 import static com.ureka.team3.utong_backend.datatrade.utils.TimeUtil.toEpochMillis;
 
@@ -38,6 +45,7 @@ public class DataTradeServiceImpl implements DataTradeService {
     private final AccountRepository accountRepository;
     private final LineRepository lineRepository;
     private final LineDataRepository lineDataRepository;
+    private final PriceRepository priceRepository;
 
     @Override
     @Transactional
@@ -50,9 +58,12 @@ public class DataTradeServiceImpl implements DataTradeService {
         Line line = lineRepository.findById(defaultLineId).orElseThrow(LineNotFoundException::new);
         Long planTotalData = line.getPlan().getData();
         if (planTotalData == -1) {
-            // todo : 해당 회선이 무제한 요금제를 쓰는 경우 거래불가 처리
+            handlePurchaseUnlimitedPlan();
         }
-        // todo : 해당 회선의 판매 요청이 있을 경우 거래불가 처리( 자기가 판 데이터를 자기가 살 수 있기 때문에)
+
+        if(saleDataRequestRepository.existsWaitingRequestByLineId(line.getId())){
+            return handleExistSaleRequest();
+        }
         try {
             account.decreasePoint(dto.getPrice() * dto.getDataAmount());
             accountRepository.save(account);
@@ -61,6 +72,12 @@ public class DataTradeServiceImpl implements DataTradeService {
         }
         BuyDataRequest savedOrder = saveBuyOrder(account, dto);
         return handleBuyMatching(savedOrder);
+    }
+
+    private static ApiResponse<DataTradeDto.BuyDataResponseDto<Object>> handleExistSaleRequest() {
+        return ApiResponse.success("이미 판매 대기중인 데이터가 있습니다. 취소 후 다시 이용해주세요", DataTradeDto.BuyDataResponseDto.builder()
+                .result(BuyOrderResult.EXIST_SALE_REQUEST)
+                .build());
     }
 
     private static ApiResponse<DataTradeDto.BuyDataResponseDto<Object>> handleNotExistDefaultLine() {
@@ -74,6 +91,13 @@ public class DataTradeServiceImpl implements DataTradeService {
         return ApiResponse.success("포인트 부족", DataTradeDto.BuyDataResponseDto.builder()
                 .result(BuyOrderResult.INSUFFICIENT_POINT)
                 .build());
+    }
+
+    private ApiResponse handlePurchaseUnlimitedPlan() {
+        return ApiResponse.success("무제한 요금제는 데이터를 구매할 수 없습니다.",
+                DataTradeDto.SaleDataResponseDto.builder()
+                        .result(SaleOrderResult.BORDERLESS)
+                        .build());
     }
 
     private BuyDataRequest saveBuyOrder(Account account, DataTradeDto.BuyDataRequestDto dto) {
@@ -116,7 +140,7 @@ public class DataTradeServiceImpl implements DataTradeService {
         while (remaining > 0) {
             OrderMQDto sellOrder = orderMQRepository.popValidSellOrder(buyDataRequest.getDataCode(), lowestSellPrice);
             if (sellOrder == null) break;
-            SaleDataRequest saleDataRequest = saleDataRequestRepository.findById(sellOrder.getOrderId()).orElseThrow(IllegalArgumentException::new);// todo : 커스텀 예외 추가
+            SaleDataRequest saleDataRequest = saleDataRequestRepository.findById(sellOrder.getOrderId()).orElseThrow(IllegalArgumentException::new);
 
             long available = sellOrder.getQuantity();
             long used = Math.min(available, remaining);
@@ -165,9 +189,12 @@ public class DataTradeServiceImpl implements DataTradeService {
 
         // 포인트 지급
         Account account = saleDataRequest.getAccount();
-        account.increasePoint((long) (buyDataRequest.getPrice() * used * 0.975));  // todo : 관리자가 설정한 비율만큼 받도록
+        Price price = priceRepository.findAll().get(0);
+        account.increasePoint((long) (buyDataRequest.getPrice() - ((float) buyDataRequest.getPrice() /100 * price.getTax())));
 
-        // todo : 구매자에게 데이터 넘겨주기
+        Line line = lineRepository.findById(buyDataRequest.getLineId()).orElseThrow(IllegalArgumentException::new);
+        LineData lineData = lineDataRepository.findLineDataByLine(line).stream().findFirst().orElseThrow(IllegalArgumentException::new);
+        lineData.purchaseData(used);
     }
 
     @Override
@@ -180,24 +207,36 @@ public class DataTradeServiceImpl implements DataTradeService {
         }
 
         Line line = lineRepository.findById(defaultLineId).orElseThrow(LineNotFoundException::new);
-        Long planTotalData = line.getPlan().getData();
-
+        Plan plan = line.getPlan();
+        Long planTotalData = plan.getData();
+        float availableTradeRate = plan.getAvailableTradeRate();
+        LineData lineData = lineDataRepository.findLineDataByLine(line).stream().findFirst().orElseThrow(IllegalArgumentException::new);
         if (planTotalData == -1) {
             // 무제한 요금제는 판매 불가
-            return handleUnlimitedPlan();
+            return handleSaleUnlimitedPlan();
         }
-        // todo : canSaleData  = planTotalData*0.05 - 이번달 판매 데이터
-        Long canSaleData = (long) (planTotalData * 0.05);
+
+        Long canSaleData = (long) (((float) planTotalData / 100) * availableTradeRate - lineData.getSell() );
         if (dto.getDataAmount() > canSaleData) {
             return handleExceedSaleLimit();
         }
-        // todo : 해당 회선의 구매 요청이 있을 경우 거래불가 처리( 자기가 판 데이터를 자기가 살 수 있기 때문에)
+
+        if(buyDataRequestRepository.existsWaitingRequestByLineId(line.getId())){
+            return handleExistBuyRequest();
+        }
         SaleDataRequest savedOrder = saveSaleOrder(account, dto);
+        lineData.saleData(dto.getDataAmount());
         return handleSaleMatching(savedOrder);
     }
 
+    private ApiResponse handleExistBuyRequest() {
+        return ApiResponse.success("이미 판매 대기중인 데이터가 있습니다. 취소 후 다시 이용해주세요", DataTradeDto.SaleDataResponseDto.builder()
+                .result(SaleOrderResult.EXIST_BUY_REQUEST)
+                .build());
+    }
 
-    private ApiResponse handleUnlimitedPlan() {
+
+    private ApiResponse handleSaleUnlimitedPlan() {
         return ApiResponse.success("무제한 요금제는 데이터를 판매할 수 없습니다.",
                 DataTradeDto.SaleDataResponseDto.builder()
                         .result(SaleOrderResult.BORDERLESS)
@@ -234,7 +273,7 @@ public class DataTradeServiceImpl implements DataTradeService {
             if (buyOrder == null) break;
 
             BuyDataRequest buyDataRequest = buyDataRequestRepository.findById(buyOrder.getOrderId())
-                    .orElseThrow(IllegalArgumentException::new); // todo: 커스텀 예외로 교체
+                    .orElseThrow(IllegalArgumentException::new);
 
             long available = buyOrder.getQuantity();
             long used = Math.min(available, remaining);

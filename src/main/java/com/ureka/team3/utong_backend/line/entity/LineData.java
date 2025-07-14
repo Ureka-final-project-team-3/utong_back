@@ -36,6 +36,15 @@ public class LineData {
 
     @Column(name = "month")
     private LocalDate month;
+
+    public void purchaseData(Long amount){
+        this.purchased += amount;
+    }
+
+    public void saleData(Long amount){
+        this.remaining -= amount;
+        this.sell += amount;
+    }
 }
 
 

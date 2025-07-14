@@ -7,5 +7,6 @@ public enum SaleOrderResult {
     BORDERLESS,
     NEED_DEFAULT_LINE,
     EXCEED_SALE_LIMIT,
+    EXIST_BUY_REQUEST,
     FAIL
 }

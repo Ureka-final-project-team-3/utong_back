@@ -6,5 +6,6 @@ public enum BuyOrderResult {
     WAITING,
     INSUFFICIENT_POINT,
     NEED_DEFAULT_LINE,
+    EXIST_SALE_REQUEST,
     FAIL
 }

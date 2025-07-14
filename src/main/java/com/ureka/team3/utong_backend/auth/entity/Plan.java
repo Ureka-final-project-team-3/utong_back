@@ -26,4 +26,7 @@ public class Plan {
     
     @Column(name = "data")
     private Long data;
+
+    @Column(name = "available_trade_rate")
+    private float availableTradeRate;
 }
