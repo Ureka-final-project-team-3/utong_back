@@ -40,12 +40,12 @@ class MypageInfoServiceTest {
         Account account = Account.builder().id(accountId).email("user@test.com").mileage(3000L).build();
         User user = User.builder().id("user-id").name("테스트유저").build();
         Line line = Line.builder().phoneNumber("010-0000-0000").build();
-        LineData lineData = LineData.builder().remining(8000L).build();
+        LineData lineData = LineData.builder().remaining(8000L).build();
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(account));
         when(userRepository.findByAccountId(accountId)).thenReturn(Optional.of(user));
         when(lineRepository.findByUserId(user.getId())).thenReturn(Optional.of(line));
-        when(lineDataRepository.findTopByPhoneNumberOrderByCreatedAtDesc(line.getPhoneNumber())).thenReturn(Optional.ofNullable(lineData));
+        when(lineDataRepository.findTopByLineOrderByMonthDesc(line)).thenReturn(Optional.ofNullable(lineData));
 
         MyInfoResponseDto result = mypageInfoService.getMyInfo(accountId);
 
