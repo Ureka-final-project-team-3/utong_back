@@ -33,11 +33,10 @@ public class MypageInfoServiceImpl implements MypageInfoService {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(AccountNotFoundException::new);
 
-        User user = userRepository.findByAccountId(accountId)
-                .orElseThrow(UserNotFoundException::new);
-        
-        //손민혁이 조금 추가한 조건문 (삭제 시 notice 해주세용)
-        if (user == null) {
+        //손민혁이 수정좀 한 코드
+        User user = userRepository.findByAccountId(accountId).orElse(null);
+
+        if (user == null || "비회원".equals(user.getName())) {
             return MyInfoResponseDto.builder()
                     .name("비회원")
                     .email(account.getEmail())
