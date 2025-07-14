@@ -100,7 +100,7 @@ public class GifticonServiceImpl implements GifticonService {
                     .gifticon(gifticon)
                     .isActive(true)
                     .createdAt(LocalDateTime.now())
-                    .expiredAt(LocalDateTime.now().plusDays(30))
+                    .expiredAt(LocalDateTime.now().plusDays(30).toLocalDate().atTime(23, 59, 59))
                     .build();
 
             myGifticonRepository.save(userGifticon);
