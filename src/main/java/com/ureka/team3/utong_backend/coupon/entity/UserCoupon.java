@@ -26,9 +26,6 @@ public class UserCoupon {
     @JoinColumn(name = "coupon_id", nullable = false)
     private Coupon coupon;
 
-    @Column(name = "amount")
-    private Integer amount;
-
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

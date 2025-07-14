@@ -29,9 +29,6 @@ public class UserGifticon {
     @JoinColumn(name = "gifticon_id", nullable = false)
     private Gifticon gifticon;
 
-    @Column(name = "amount")
-    private Integer amount;
-
     @Column(name = "is_active")
     private Boolean isActive;
 
