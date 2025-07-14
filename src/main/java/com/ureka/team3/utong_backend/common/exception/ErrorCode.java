@@ -20,6 +20,9 @@ public enum ErrorCode {
 
   GIFTICON_NOT_FOUND(HttpStatus.NOT_FOUND, "G404", "기프티콘 정보를 찾을 수 없습니다."),
 
+  COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "C001", "사용자의 쿠폰이 존재하지 않습니다."),
+
+
   INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "INVALID_TOKEN", "유효하지 않은 토큰입니다"),
   EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "EXPIRED_TOKEN", "만료된 토큰입니다"),
   LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "LOGIN_REQUIRED", "로그인이 필요합니다"),
