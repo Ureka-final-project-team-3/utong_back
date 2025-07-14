@@ -107,7 +107,6 @@ public class AuthService {
         return lineRepository.findByPhoneNumber(phoneNumber)
                 .flatMap(line -> userRepository.findById(line.getUser().getId()));
     }
-    
     public ApiResponse<AuthDto.LoginResponse> login(AuthDto.LoginRequest request, HttpServletResponse response) {
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -134,11 +133,12 @@ public class AuthService {
                     account.getMileage()
             );
             
-            AuthDto.LoginResponse loginResponse = new AuthDto.LoginResponse(
-                    accessToken, 
-                    jwtProperties.getAccessTokenExpiration(), 
-                    userInfo
-            );
+            AuthDto.LoginResponse loginResponse = AuthDto.LoginResponse.builder()
+                    .accessToken(accessToken)
+                    .tokenType("Bearer")
+                    .expiresIn(jwtProperties.getAccessTokenExpiration())
+                    .userInfo(userInfo)
+                    .build();
             
             return ApiResponse.success("로그인이 성공적으로 완료되었습니다", loginResponse);
             
