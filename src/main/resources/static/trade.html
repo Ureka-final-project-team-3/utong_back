@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실시간 시세 테스트</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            height: 400px;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .connected {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .disconnected {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>실시간 데이터 시세 테스트</h1>
+    
+    <div class="container">
+        <h2>연결 상태</h2>
+        <div id="lteStatus" class="status disconnected">LTE: 연결 안됨</div>
+        <div id="fiveGStatus" class="status disconnected">5G: 연결 안됨</div>
+    </div>
+
+    <div class="container">
+        <h2>연결 제어</h2>
+        <div class="controls">
+            <button id="connectLTE">LTE 연결</button>
+            <button id="disconnectLTE" disabled>LTE 연결 해제</button>
+            <button id="connect5G">5G 연결</button>
+            <button id="disconnect5G" disabled>5G 연결 해제</button>
+            <button id="getConnections">연결 수 확인</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>테스트 거래 생성</h2>
+        <div class="controls">
+            <button id="mockLTE">LTE 랜덤 거래</button>
+            <button id="mock5G">5G 랜덤 거래</button>
+        </div>
+        <div class="controls">
+            <select id="customDataType">
+                <option value="LTE">LTE</option>
+                <option value="5G">5G</option>
+            </select>
+            <input type="number" id="customPrice" placeholder="가격" value="8500">
+            <input type="number" id="customQuantity" placeholder="수량" value="10">
+            <button id="sendCustomTrade">커스텀 거래 전송</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>LTE 시세 차트</h2>
+        <div class="chart-container">
+            <canvas id="lteChart"></canvas>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>5G 시세 차트</h2>
+        <div class="chart-container">
+            <canvas id="fiveGChart"></canvas>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>로그</h2>
+        <div id="log" class="log"></div>
+        <button onclick="clearLog()">로그 지우기</button>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        let lteEventSource = null;
+        let fiveGEventSource = null;
+        let lteChart = null;
+        let fiveGChart = null;
+
+        // 차트 초기화
+        function initCharts() {
+            const chartConfig = {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '가격',
+                        data: [],
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1
+                    }, {
+                        label: '거래량',
+                        data: [],
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        }
+                    }
+                }
+            };
+
+            lteChart = new Chart(document.getElementById('lteChart'), JSON.parse(JSON.stringify(chartConfig)));
+            fiveGChart = new Chart(document.getElementById('fiveGChart'), JSON.parse(JSON.stringify(chartConfig)));
+        }
+
+        // 로그 함수
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('log');
+            logElement.innerHTML += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // 차트 업데이트
+        function updateChart(chart, priceData) {
+            const labels = priceData.map(item => new Date(item.timestamp).toLocaleTimeString());
+            const prices = priceData.map(item => item.price);
+            const volumes = priceData.map(item => item.volume);
+
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = prices;
+            chart.data.datasets[1].data = volumes;
+            chart.update();
+        }
+
+        // SSE 연결
+        function connectSSE(dataType) {
+            const eventSource = new EventSource(`${API_BASE}/trade/price-stream/${dataType}`);
+            
+            eventSource.onopen = function(event) {
+                log(`${dataType} SSE 연결됨`);
+                updateStatus(dataType, true);
+            };
+
+            eventSource.addEventListener('connected', function(event) {
+                log(`${dataType} 연결 확인: ${event.data}`);
+            });
+
+            eventSource.addEventListener('price-data', function(event) {
+                try {
+                    const response = JSON.parse(event.data);
+                    log(`${dataType} 초기 데이터 수신: ${response.priceData.length}개 항목`);
+                    
+                    const chart = dataType === 'LTE' ? lteChart : fiveGChart;
+                    updateChart(chart, response.priceData);
+                } catch (error) {
+                    log(`${dataType} 초기 데이터 파싱 오류: ${error.message}`);
+                }
+            });
+
+            eventSource.addEventListener('price-update', function(event) {
+                try {
+                    const response = JSON.parse(event.data);
+                    log(`${dataType} 가격 업데이트: 최신 가격 ${response.priceData[0]?.price}`);
+                    
+                    const chart = dataType === 'LTE' ? lteChart : fiveGChart;
+                    updateChart(chart, response.priceData);
+                } catch (error) {
+                    log(`${dataType} 업데이트 데이터 파싱 오류: ${error.message}`);
+                }
+            });
+
+            eventSource.onerror = function(event) {
+                log(`${dataType} SSE 연결 오류`);
+                updateStatus(dataType, false);
+            };
+
+            return eventSource;
+        }
+
+        // 상태 업데이트
+        function updateStatus(dataType, connected) {
+            const statusElement = document.getElementById(dataType === 'LTE' ? 'lteStatus' : 'fiveGStatus');
+            const connectBtn = document.getElementById(dataType === 'LTE' ? 'connectLTE' : 'connect5G');
+            const disconnectBtn = document.getElementById(dataType === 'LTE' ? 'disconnectLTE' : 'disconnect5G');
+            
+            if (connected) {
+                statusElement.textContent = `${dataType}: 연결됨`;
+                statusElement.className = 'status connected';
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+            } else {
+                statusElement.textContent = `${dataType}: 연결 안됨`;
+                statusElement.className = 'status disconnected';
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+            }
+        }
+
+        // 테스트 거래 전송
+        async function sendMockTrade(dataType) {
+            try {
+                const response = await fetch(`${API_BASE}/trade/test/mock-trade/${dataType}`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                log(`${dataType} 모의 거래 전송: ${result.message}`);
+            } catch (error) {
+                log(`${dataType} 모의 거래 전송 실패: ${error.message}`);
+            }
+        }
+
+        async function sendCustomTrade() {
+            const dataType = document.getElementById('customDataType').value;
+            const price = document.getElementById('customPrice').value;
+            const quantity = document.getElementById('customQuantity').value;
+
+            if (!price || !quantity) {
+                alert('가격과 수량을 입력해주세요.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/trade/test/custom-trade?dataType=${dataType}&price=${price}&quantity=${quantity}`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                log(`커스텀 거래 전송: ${result.message}`);
+            } catch (error) {
+                log(`커스텀 거래 전송 실패: ${error.message}`);
+            }
+        }
+
+        // 연결 수 확인
+        async function getConnections() {
+            try {
+                const response = await fetch(`${API_BASE}/trade/connections`);
+                const result = await response.json();
+                log(`현재 연결 수: ${JSON.stringify(result.data)}`);
+            } catch (error) {
+                log(`연결 수 확인 실패: ${error.message}`);
+            }
+        }
+
+        // 이벤트 리스너
+        document.getElementById('connectLTE').addEventListener('click', () => {
+            if (!lteEventSource) {
+                lteEventSource = connectSSE('LTE');
+            }
+        });
+
+        document.getElementById('disconnectLTE').addEventListener('click', () => {
+            if (lteEventSource) {
+                lteEventSource.close();
+                lteEventSource = null;
+                updateStatus('LTE', false);
+                log('LTE SSE 연결 해제됨');
+            }
+        });
+
+        document.getElementById('connect5G').addEventListener('click', () => {
+            if (!fiveGEventSource) {
+                fiveGEventSource = connectSSE('5G');
+            }
+        });
+
+        document.getElementById('disconnect5G').addEventListener('click', () => {
+            if (fiveGEventSource) {
+                fiveGEventSource.close();
+                fiveGEventSource = null;
+                updateStatus('5G', false);
+                log('5G SSE 연결 해제됨');
+            }
+        });
+
+        document.getElementById('getConnections').addEventListener('click', getConnections);
+        document.getElementById('mockLTE').addEventListener('click', () => sendMockTrade('LTE'));
+        document.getElementById('mock5G').addEventListener('click', () => sendMockTrade('5G'));
+        document.getElementById('sendCustomTrade').addEventListener('click', sendCustomTrade);
+
+        // 페이지 로드 시 초기화
+        window.addEventListener('load', () => {
+            initCharts();
+            log('실시간 시세 테스트 페이지 로드됨');
+        });
+
+        // 페이지 언로드 시 연결 해제
+        window.addEventListener('beforeunload', () => {
+            if (lteEventSource) lteEventSource.close();
+            if (fiveGEventSource) fiveGEventSource.close();
+        });
+    </script>
+</body>
+</html>
