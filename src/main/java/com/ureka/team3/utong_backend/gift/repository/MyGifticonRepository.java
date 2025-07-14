@@ -1,15 +1,15 @@
 package com.ureka.team3.utong_backend.gift.repository;
 
-import com.ureka.team3.utong_backend.gift.entity.UserGifticon;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.ureka.team3.utong_backend.gift.entity.UserGifticon;
 
 
 // 마이 기프티콘 목록
-public interface MyGifticonRepository extends JpaRepository<UserGifticon, UUID> {
+public interface MyGifticonRepository extends JpaRepository<UserGifticon, String> {
     // User 엔티티 안의 id를 기준으로 조회
     List<UserGifticon> findByUser_Id(String userId);
 

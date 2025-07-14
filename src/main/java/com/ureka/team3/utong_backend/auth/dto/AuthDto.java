@@ -5,9 +5,11 @@ import java.time.LocalDate;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 public class AuthDto {
     
@@ -40,8 +42,12 @@ public class AuthDto {
     }
     
     @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class LoginResponse {
         private String accessToken;
+        @Builder.Default
         private String tokenType = "Bearer";
         private Long expiresIn;
         private UserInfo userInfo;
@@ -50,6 +56,7 @@ public class AuthDto {
             this.accessToken = accessToken;
             this.expiresIn = expiresIn;
             this.userInfo = userInfo;
+            this.tokenType = "Bearer";
         }
     }
     
