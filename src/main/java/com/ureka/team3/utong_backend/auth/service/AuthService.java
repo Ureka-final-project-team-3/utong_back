@@ -209,7 +209,7 @@ public class AuthService {
                 account.getId(),
                 account.getEmail(),
                 account.getNickname(),
-                user != null ? user.getName() : "비회원",
+                user != null ? user.getName() : null,
                 user != null ? user.getBirthDate() : null,
                 account.getMileage()
         );

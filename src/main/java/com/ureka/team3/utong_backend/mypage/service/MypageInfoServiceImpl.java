@@ -33,19 +33,9 @@ public class MypageInfoServiceImpl implements MypageInfoService {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(AccountNotFoundException::new);
 
-        //손민혁이 수정좀 한 코드
-        User user = userRepository.findByAccountId(accountId).orElse(null);
+        User user = userRepository.findByAccountId(accountId)
+                .orElseThrow(UserNotFoundException::new);
 
-        if (user == null || "비회원".equals(user.getName())) {
-            return MyInfoResponseDto.builder()
-                    .name("비회원")
-                    .email(account.getEmail())
-                    .mileage(account.getMileage() != null ? account.getMileage() : 0L)
-                    .phoneNumber(null)
-                    .remainingData(0L)
-                    .build();
-        }
-        
         // line & line_data 정보 가져오기(보유 데이터 조회용)
         Line line = lineRepository.findByUserId(user.getId())
                 .orElseThrow(LineNotFoundException::new);
