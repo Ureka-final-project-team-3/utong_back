@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +19,8 @@ import java.time.LocalDateTime;
 public class UserGifticon {
 
     @Id
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @Column(length = 36)
     private String id;
 
@@ -37,4 +40,5 @@ public class UserGifticon {
 
     @Column(name = "expired_at")
     private LocalDateTime expiredAt;
+
 }
