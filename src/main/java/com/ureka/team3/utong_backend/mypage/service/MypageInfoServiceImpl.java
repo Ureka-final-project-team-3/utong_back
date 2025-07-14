@@ -41,8 +41,9 @@ public class MypageInfoServiceImpl implements MypageInfoService {
                 .orElseThrow(LineNotFoundException::new);
 
 
-        LineData lineData = lineDataRepository.findTopByPhoneNumberOrderByCreatedAtDesc(line.getPhoneNumber())
-                .orElse(null); // 없을 수도 있으니까
+        LineData lineData = lineDataRepository.findTopByLineOrderByMonthDesc(line)
+                .orElse(null);
+
 
         return MyInfoResponseDto.builder()
                 .name(user.getName())

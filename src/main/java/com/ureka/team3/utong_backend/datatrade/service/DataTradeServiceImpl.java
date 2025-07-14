@@ -52,7 +52,7 @@ public class DataTradeServiceImpl implements DataTradeService {
         if (planTotalData == -1) {
             // todo : 해당 회선이 무제한 요금제를 쓰는 경우 거래불가 처리
         }
-
+        // todo : 해당 회선의 판매 요청이 있을 경우 거래불가 처리( 자기가 판 데이터를 자기가 살 수 있기 때문에)
         try {
             account.decreasePoint(dto.getPrice() * dto.getDataAmount());
             accountRepository.save(account);
@@ -186,12 +186,12 @@ public class DataTradeServiceImpl implements DataTradeService {
             // 무제한 요금제는 판매 불가
             return handleUnlimitedPlan();
         }
-
+        // todo : canSaleData  = planTotalData*0.05 - 이번달 판매 데이터
         Long canSaleData = (long) (planTotalData * 0.05);
         if (dto.getDataAmount() > canSaleData) {
             return handleExceedSaleLimit();
         }
-
+        // todo : 해당 회선의 구매 요청이 있을 경우 거래불가 처리( 자기가 판 데이터를 자기가 살 수 있기 때문에)
         SaleDataRequest savedOrder = saveSaleOrder(account, dto);
         return handleSaleMatching(savedOrder);
     }
