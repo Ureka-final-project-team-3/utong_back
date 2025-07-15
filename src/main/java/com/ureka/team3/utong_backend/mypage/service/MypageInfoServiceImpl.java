@@ -3,7 +3,6 @@ package com.ureka.team3.utong_backend.mypage.service;
 import org.springframework.stereotype.Service;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
-import com.ureka.team3.utong_backend.auth.entity.Line;
 import com.ureka.team3.utong_backend.auth.entity.User;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
 import com.ureka.team3.utong_backend.auth.repository.LineRepository;
@@ -11,6 +10,7 @@ import com.ureka.team3.utong_backend.auth.repository.UserRepository;
 import com.ureka.team3.utong_backend.common.exception.business.AccountNotFoundException;
 import com.ureka.team3.utong_backend.common.exception.business.LineNotFoundException;
 import com.ureka.team3.utong_backend.common.exception.business.UserNotFoundException;
+import com.ureka.team3.utong_backend.line.entity.Line;
 import com.ureka.team3.utong_backend.line.entity.LineData;
 import com.ureka.team3.utong_backend.line.repository.LineDataRepository;
 import com.ureka.team3.utong_backend.mypage.dto.MyInfoResponseDto;

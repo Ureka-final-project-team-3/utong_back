@@ -1,6 +1,6 @@
 package com.ureka.team3.utong_backend.line.repository;
 
-import com.ureka.team3.utong_backend.auth.entity.Line;
+import com.ureka.team3.utong_backend.line.entity.Line;
 import com.ureka.team3.utong_backend.line.entity.LineData;
 import org.springframework.data.jpa.repository.JpaRepository;
 

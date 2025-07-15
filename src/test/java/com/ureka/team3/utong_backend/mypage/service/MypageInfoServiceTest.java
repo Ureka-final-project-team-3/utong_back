@@ -1,25 +1,25 @@
-package com.ureka.team3.utong_backend.myapge.service;
+package com.ureka.team3.utong_backend.mypage.service;
 
-import com.ureka.team3.utong_backend.auth.entity.Account;
-import com.ureka.team3.utong_backend.auth.entity.Line;
-import com.ureka.team3.utong_backend.auth.entity.User;
-import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
-import com.ureka.team3.utong_backend.auth.repository.LineRepository;
-import com.ureka.team3.utong_backend.auth.repository.UserRepository;
-import com.ureka.team3.utong_backend.line.entity.LineData;
-import com.ureka.team3.utong_backend.line.repository.LineDataRepository;
-import com.ureka.team3.utong_backend.mypage.dto.MyInfoResponseDto;
-import com.ureka.team3.utong_backend.mypage.service.MypageInfoServiceImpl;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+import com.ureka.team3.utong_backend.auth.entity.Account;
+import com.ureka.team3.utong_backend.auth.entity.User;
+import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
+import com.ureka.team3.utong_backend.auth.repository.LineRepository;
+import com.ureka.team3.utong_backend.auth.repository.UserRepository;
+import com.ureka.team3.utong_backend.line.entity.Line;
+import com.ureka.team3.utong_backend.line.entity.LineData;
+import com.ureka.team3.utong_backend.line.repository.LineDataRepository;
+import com.ureka.team3.utong_backend.mypage.dto.MyInfoResponseDto;
 
 @ExtendWith(MockitoExtension.class)
 class MypageInfoServiceTest {

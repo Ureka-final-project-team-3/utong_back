@@ -2,10 +2,8 @@ package com.ureka.team3.utong_backend.gift.entity;
 
 import com.ureka.team3.utong_backend.auth.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +16,8 @@ import java.time.LocalDateTime;
 public class UserGifticon {
 
     @Id
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @Column(length = 36)
     private String id;
 
@@ -29,10 +29,8 @@ public class UserGifticon {
     @JoinColumn(name = "gifticon_id", nullable = false)
     private Gifticon gifticon;
 
-    @Column(name = "amount")
-    private Integer amount;
-
     @Column(name = "is_active")
+    @Setter
     private Boolean isActive;
 
     @Column(name = "created_at")
@@ -40,4 +38,5 @@ public class UserGifticon {
 
     @Column(name = "expired_at")
     private LocalDateTime expiredAt;
+
 }
