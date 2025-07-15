@@ -38,7 +38,7 @@ public class RouletteCouponService {
                     .user(user)
                     .coupon(rewardCoupon)
                     .createdAt(LocalDateTime.now())
-                    .expiredAt(LocalDateTime.now().plusDays(30)) 
+                    .expiredAt(LocalDateTime.now().plusDays(3).withHour(23).withMinute(59).withSecond(59))
                     .build();
             
             myCouponRepository.save(userCoupon);
