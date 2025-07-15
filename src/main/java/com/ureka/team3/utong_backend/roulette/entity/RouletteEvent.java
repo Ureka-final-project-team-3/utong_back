@@ -1,6 +1,6 @@
 package com.ureka.team3.utong_backend.roulette.entity;
 
-
+import com.ureka.team3.utong_backend.coupon.entity.Coupon;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,6 +48,10 @@ public class RouletteEvent {
     @Column(name = "created_at", nullable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reward_coupon_id")
+    private Coupon rewardCoupon;
     
     public boolean isEventActive() {
         LocalDateTime now = LocalDateTime.now();

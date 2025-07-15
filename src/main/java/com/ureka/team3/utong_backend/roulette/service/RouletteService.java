@@ -59,25 +59,32 @@ public class RouletteService {
     @Transactional
     public ApiResponse<RouletteDto.ParticipateResponse> participate(String eventId, Account account) {
         log.info("룰렛 참여 요청 - EventId: {}, AccountId: {}", eventId, account.getId());
+        
         RouletteEvent event = rouletteEventRepository.findByIdWithLock(eventId)
                 .orElseThrow(RouletteEventNotFoundException::new);
+        
         if (!event.isEventActive()) {
             throw new RouletteEventNotActiveException("이벤트가 종료되었거나 아직 시작되지 않았습니다");
         }
+        
         if (participationRepository.existsByEventIdAndAccountId(eventId, account.getId())) {
             throw new RouletteAlreadyParticipatedException("이미 참여한 이벤트입니다");
         }
+        
         if (!event.hasAvailableSlots()) {
             saveParticipation(event, account, false);
             RouletteDto.ParticipateResponse response = createParticipateResponse(event, false, "당첨자가 모두 마감되었습니다");
             return ApiResponse.success("룰렛 참여가 완료되었습니다", response);
         }
+        
         boolean isWinner = calculateWinProbability(event.getWinProbability());
+        
         if (isWinner) {
             event.incrementWinners();
             rouletteEventRepository.save(event);
             log.info("당첨 처리 완료 - 현재 당첨자 수: {}/{}", event.getCurrentWinners(), event.getMaxWinners());
         }
+        
         saveParticipation(event, account, isWinner);
         
         String message = isWinner ? "축하합니다! 당첨되셨습니다!" : "아쉽게도 당첨되지 않았습니다";
