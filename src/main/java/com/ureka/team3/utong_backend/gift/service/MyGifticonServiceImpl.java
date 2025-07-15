@@ -28,14 +28,7 @@ public class MyGifticonServiceImpl implements MyGifticonService {
         return gifticons.stream()
                 .map(gifticon -> {
                     long daysRemaining = ChronoUnit.DAYS.between(LocalDate.now(), gifticon.getExpiredAt());
-                    String status;
-                    if (gifticon.getIsActive()) {
-                        status = "사용 완료";
-                    } else if (daysRemaining < 0) {
-                        status = "유효기간 만료";
-                    } else {
-                        status = "사용 가능";
-                    }
+                    String status = (daysRemaining < 0) ? "유효기간 만료" : "사용 가능";
 
                     return MyGifticonResponseDto.builder()
                             .id(UUID.fromString(gifticon.getId()))
@@ -56,15 +49,8 @@ public class MyGifticonServiceImpl implements MyGifticonService {
 
 
         long daysRemaining = ChronoUnit.DAYS.between(LocalDate.now(), gifticon.getExpiredAt());
-        Boolean active = gifticon.getIsActive();
-        String status;
-        if (Boolean.TRUE.equals(active)) {
-            status = "사용 완료";
-        } else if (daysRemaining < 0) {
-            status = "유효기간 만료";
-        } else {
-            status = "사용 가능";
-        }
+//        Boolean active = gifticon.getIsActive();
+        String status = (daysRemaining < 0) ? "유효기간 만료" : "사용 가능";
 
         return MyGifticonDetailResponseDto.builder()
                 .id(gifticon.getId())
