@@ -31,4 +31,7 @@ public class UserCoupon {
 
     @Column(name = "expired_at")
     private LocalDateTime expiredAt;
+
+    @Column(name = "status", length = 10, nullable = false)
+    private String status; // 공통코드 040: "001", "002", "003"
 }
