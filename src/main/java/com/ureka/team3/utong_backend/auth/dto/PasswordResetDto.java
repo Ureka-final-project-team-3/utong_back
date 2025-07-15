@@ -31,6 +31,12 @@ public class PasswordResetDto {
     }
     
     @Data
+    public static class TokenValidationRequest {
+        @NotBlank(message = "토큰은 필수입니다")
+        private String token;
+    }
+    
+    @Data
     public static class NewPasswordRequest {
         @NotBlank(message = "토큰은 필수입니다")
         private String token;
