@@ -2,10 +2,7 @@ package com.ureka.team3.utong_backend.gift.entity;
 
 import com.ureka.team3.utong_backend.auth.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
@@ -33,6 +30,7 @@ public class UserGifticon {
     private Gifticon gifticon;
 
     @Column(name = "is_active")
+    @Setter
     private Boolean isActive;
 
     @Column(name = "created_at")
