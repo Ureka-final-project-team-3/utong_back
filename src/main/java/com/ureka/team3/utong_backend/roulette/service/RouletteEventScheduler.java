@@ -41,7 +41,7 @@ public class RouletteEventScheduler {
                         .maxWinners(event.getMaxWinners())
                         .currentWinners(event.getCurrentWinners())
                         .winProbability(event.getWinProbability())
-                        .isActive(false) // 비활성화
+                        .isActive(false)
                         .createdAt(event.getCreatedAt())
                         .build();
                 
