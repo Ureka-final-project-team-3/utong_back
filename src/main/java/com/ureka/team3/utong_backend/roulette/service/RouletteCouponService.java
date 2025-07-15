@@ -3,7 +3,8 @@ package com.ureka.team3.utong_backend.roulette.service;
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.auth.entity.User;
 import com.ureka.team3.utong_backend.auth.repository.UserRepository;
-import com.ureka.team3.utong_backend.common.exception.business.UserNotFoundException;
+import com.ureka.team3.utong_backend.common.dto.ApiResponse;
+import com.ureka.team3.utong_backend.common.exception.ErrorCode;
 import com.ureka.team3.utong_backend.coupon.entity.Coupon;
 import com.ureka.team3.utong_backend.coupon.entity.UserCoupon;
 import com.ureka.team3.utong_backend.coupon.repository.MyCouponRepository;
@@ -20,34 +21,31 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class RouletteCouponService {
-    
     private final MyCouponRepository myCouponRepository;
     private final UserRepository userRepository;
     
-    
     @Transactional
-    public void issueWinnerCoupon(Account account, RouletteEvent event) {
-        if (event.getRewardCoupon() == null) {
-            log.warn("이벤트에 보상 쿠폰이 설정되지 않음 - EventId: {}", event.getId());
-            return;
+    public ApiResponse<Void> issueWinnerCoupon(Account account, RouletteEvent event) {
+        try {
+            if (event.getRewardCoupon() == null) return ApiResponse.fail(ErrorCode.COUPON_NOT_FOUND);
+            
+            User user = userRepository.findByAccountId(account.getId())
+                    .orElse(null);
+            if (user == null) return ApiResponse.fail(ErrorCode.USER_NOT_FOUND);
+            Coupon rewardCoupon = event.getRewardCoupon();
+            UserCoupon userCoupon = UserCoupon.builder()
+                    .id(UUID.randomUUID().toString())
+                    .user(user)
+                    .coupon(rewardCoupon)
+                    .createdAt(LocalDateTime.now())
+                    .expiredAt(LocalDateTime.now().plusDays(30)) 
+                    .build();
+            
+            myCouponRepository.save(userCoupon);
+            return ApiResponse.success("쿠폰이 성공적으로 발급되었습니다", null);
+            
+        } catch (Exception e) {
+            return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR);
         }
-        
-        User user = userRepository.findByAccountId(account.getId())
-                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다"));
-        
-        Coupon rewardCoupon = event.getRewardCoupon();
-        
-        UserCoupon userCoupon = UserCoupon.builder()
-                .id(UUID.randomUUID().toString())
-                .user(user)
-                .coupon(rewardCoupon)
-                .createdAt(LocalDateTime.now())
-                .expiredAt(rewardCoupon.getExpiredAt()) 
-                .build();
-        
-        myCouponRepository.save(userCoupon);
-        
-        log.info("룰렛 당첨 쿠폰 발급 완료 - UserId: {}, CouponId: {}, EventId: {}", 
-                user.getId(), rewardCoupon.getId(), event.getId());
     }
 }
