@@ -35,6 +35,7 @@ public class MyGifticonServiceImpl implements MyGifticonService {
                             .name(gifticon.getGifticon().getName())
                             .description(gifticon.getGifticon().getDescription())
                             .price(gifticon.getGifticon().getPrice())
+                            .imageUrl(gifticon.getGifticon().getImageUrl())
                             .daysRemaining(daysRemaining)
                             .status(status)
                             .build();
