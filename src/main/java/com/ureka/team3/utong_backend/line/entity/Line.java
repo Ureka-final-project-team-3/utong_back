@@ -1,4 +1,7 @@
-package com.ureka.team3.utong_backend.auth.entity;
+package com.ureka.team3.utong_backend.line.entity;
+
+import com.ureka.team3.utong_backend.auth.entity.User;
+import com.ureka.team3.utong_backend.plan.entity.Plan;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
