@@ -25,14 +25,14 @@ public class Coupon {
     @JoinColumn(name = "gifticon_id", nullable = false)
     private Gifticon gifticon;
 
-    @Column(name = "is_active")
-    private Boolean isActive;
+//    @Column(name = "is_active")
+//    private Boolean isActive;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "expired_at")
-    private LocalDateTime expiredAt;
+//    @Column(name = "expired_at")
+//    private LocalDateTime expiredAt;
 
     @Column(name = "coupon_code", length = 3)
     private String couponCode; // 공통코드 030 참조

@@ -18,7 +18,10 @@ public class MyCouponResponseDto {
     private String name; // 기프티콘 이름
     private String imageUrl; // 기프티콘 이미지
     private Long price; // 기프티콘 가격
-    private Boolean isActive; // 사용 여부
+//    private Boolean isActive; // 사용 여부
     private LocalDateTime expiredAt; // 만기
-    private String status; // 사용 가능, 사용 완료, 유효기간 만료
+//    private String status; // 사용 가능, 사용 완료, 유효기간 만료
+    private String statusCode;   // ex) "001"
+    private String statusName;   // ex) "유효기간 만료"
+
 }

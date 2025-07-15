@@ -34,14 +34,20 @@ public class MyCouponServiceImpl implements MyCouponService {
             Coupon coupon = userCoupon.getCoupon();
             Gifticon gifticon = coupon.getGifticon();
 
-            String status;
-            if (Boolean.TRUE.equals(coupon.getIsActive())) {
-                status = "사용 완료";
-            } else if (userCoupon.getExpiredAt() != null && userCoupon.getExpiredAt().isBefore(now)) {
-                status = "유효기간 만료";
-            } else {
-                status = "사용 가능";
-            }
+            String statusCode = userCoupon.getStatus(); // ex: "001"
+            String statusName = getStatusName(statusCode);
+
+
+
+//            String status;
+//            if (Boolean.TRUE.equals(coupon.getIsActive())) {
+//                status = "사용 완료";
+//            } else if (userCoupon.getExpiredAt() != null && userCoupon.getExpiredAt().isBefore(now)) {
+//                status = "유효기간 만료";
+//            } else {
+//                status = "사용 가능";
+//            }
+
 
             return MyCouponResponseDto.builder()
                     .couponId(coupon.getId())
@@ -50,10 +56,19 @@ public class MyCouponServiceImpl implements MyCouponService {
                     .name(gifticon != null ? gifticon.getName() : null)
                     .imageUrl(gifticon != null ? gifticon.getImageUrl() : null)
                     .price(gifticon != null ? gifticon.getPrice() : null)
-                    .isActive(coupon.getIsActive())
                     .expiredAt(userCoupon.getExpiredAt())
-                    .status(status)
+                    .statusCode(statusCode)
+                    .statusName(statusName)
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    private String getStatusName(String statusCode) {
+        return switch (statusCode) {
+            case "001" -> "유효기간 만료";
+            case "002" -> "사용 가능";
+            case "003" -> "사용 완료";
+            default -> "알 수 없음";
+        };
     }
 }
