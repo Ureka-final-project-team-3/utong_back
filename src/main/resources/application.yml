@@ -100,3 +100,6 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+toss:
+  secret-key: test_sk_E92LAa5PVb57wpZ20ZeY37YmpXyJ
