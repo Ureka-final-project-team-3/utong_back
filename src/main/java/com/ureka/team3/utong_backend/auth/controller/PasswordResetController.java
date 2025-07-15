@@ -30,10 +30,10 @@ public class PasswordResetController {
         return ResponseEntity.ok(passwordResetService.requestPasswordReset(request));
     }
     
-    @GetMapping("/validate-reset-token")
+    @PostMapping("/validate-reset-token")
     public ResponseEntity<ApiResponse<PasswordResetDto.TokenValidationResponse>> validateResetToken(
-            @RequestParam("token") String token) {
-        return ResponseEntity.ok(passwordResetService.validateToken(token));
+            @Valid @RequestBody PasswordResetDto.TokenValidationRequest request) {
+        return ResponseEntity.ok(passwordResetService.validateToken(request.getToken()));
     }
     
     @PostMapping("/reset-password")
