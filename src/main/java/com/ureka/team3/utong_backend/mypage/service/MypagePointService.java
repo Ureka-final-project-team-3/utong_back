@@ -6,4 +6,8 @@ import com.ureka.team3.utong_backend.mypage.dto.PointChargeResponseDto;
 
 public interface MypagePointService {
     PointChargeResponseDto chargePoints(Account account, PointChargeRequestDto requestDto);
+
+    void usePoint(Account account, Long coast);
+
+    void givePoint(Account account, Long point);
 }

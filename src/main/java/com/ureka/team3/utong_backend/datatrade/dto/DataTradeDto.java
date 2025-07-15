@@ -25,26 +25,24 @@ public class DataTradeDto {
     public static class SaleDataRequestDto {
         private long dataAmount;
         private long price;
-        private String  dataCode;
+        private String dataCode;
     }
 
     @Getter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class BuyDataResponseDto<T> {
+    public static class BuyDataResponseDto {
         private BuyOrderResult result;
         private long remainData;
-        private T data;
     }
 
     @Getter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class SaleDataResponseDto<T> {
+    public static class SaleDataResponseDto {
         private SaleOrderResult result;
         private long remainData;
-        private T data;
     }
 }
