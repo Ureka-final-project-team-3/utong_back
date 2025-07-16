@@ -18,7 +18,7 @@ import com.ureka.team3.utong_backend.datatrade.utils.TradeCalculator;
 import com.ureka.team3.utong_backend.datatrade.utils.TradeResponseFactory;
 import com.ureka.team3.utong_backend.datatrade.validator.TradeValidator;
 import com.ureka.team3.utong_backend.line.service.LineService;
-import com.ureka.team3.utong_backend.mypage.service.MypagePointService;
+import com.ureka.team3.utong_backend.point.service.PointService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DataTradeFacadeImpl implements DataTradeFacade {
 
     private final TradeValidator tradeValidator;
-    private final MypagePointService pointService;
+    private final PointService pointService;
     private final TradeCalculator tradeCalculator;
     private final BuyDataRequestService buyDataRequestService;
     private final BuyMatchingProcessor buyMatchingProcessor;

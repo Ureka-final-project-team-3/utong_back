@@ -1,0 +1,59 @@
+package com.ureka.team3.utong_backend.user.service;
+
+import com.ureka.team3.utong_backend.line.service.LineService;
+import org.springframework.stereotype.Service;
+
+import com.ureka.team3.utong_backend.auth.entity.Account;
+import com.ureka.team3.utong_backend.user.entity.User;
+import com.ureka.team3.utong_backend.user.repository.UserRepository;
+import com.ureka.team3.utong_backend.common.exception.business.UserNotFoundException;
+import com.ureka.team3.utong_backend.line.entity.Line;
+import com.ureka.team3.utong_backend.line.entity.LineData;
+import com.ureka.team3.utong_backend.user.dto.MyInfoResponseDto;
+
+import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDate;
+
+
+@Service
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
+
+    private final UserRepository userRepository;
+    private final LineService lineService;
+
+    @Override
+    public MyInfoResponseDto getMyInfo(Account account) {
+        User user = userRepository.findByAccountId(account.getId())
+                .orElseThrow(UserNotFoundException::new);
+
+        // line & line_data 정보 가져오기(보유 데이터 조회용)
+//        Line line = lineRepository.findByUserId(user.getId())
+//                .orElseThrow(LineNotFoundException::new);
+        // defaultline ID 로 Line 조회
+        Line line = lineService.findById(account.getDefaultLine());
+
+        // 해당 Line 의 최신 LineData 조회
+        LineData lineData = lineService.getLineDataByLineAndDate(line, LocalDate.now());
+//        LineData lineData = lineDataRepository.findTopByLineOrderByMonthDesc(line)
+//                .orElse(null);
+
+
+        return MyInfoResponseDto.builder()
+                .name(user.getName())
+                .email(account.getEmail())
+                .mileage(account.getMileage())
+                .phoneNumber(line.getPhoneNumber())
+                .remainingData(lineData.getRemaining())
+                .dataCode(lineData.getDataCode())
+                .build();
+    }
+
+//        return new MyInfoResponseDto(
+//                user.getName(),
+//                account.getEmail(),
+//                account.getMileage()
+//        );
+//    }
+}

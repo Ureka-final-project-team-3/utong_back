@@ -13,7 +13,7 @@ import com.ureka.team3.utong_backend.auth.dto.PasswordResetDto;
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.auth.entity.PasswordResetToken;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
-import com.ureka.team3.utong_backend.auth.repository.LineRepository;
+import com.ureka.team3.utong_backend.line.repository.LineRepository;
 import com.ureka.team3.utong_backend.auth.repository.PasswordResetTokenRepository;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.common.exception.business.AccountNotFoundException;

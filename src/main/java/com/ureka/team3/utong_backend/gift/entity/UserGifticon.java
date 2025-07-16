@@ -1,6 +1,6 @@
 package com.ureka.team3.utong_backend.gift.entity;
 
-import com.ureka.team3.utong_backend.auth.entity.User;
+import com.ureka.team3.utong_backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;

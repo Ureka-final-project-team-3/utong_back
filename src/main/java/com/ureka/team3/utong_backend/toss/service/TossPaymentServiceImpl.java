@@ -8,9 +8,9 @@ import com.ureka.team3.utong_backend.common.exception.business.InvalidCouponStat
 import com.ureka.team3.utong_backend.common.exception.business.NotFeeWaiveCouponException;
 import com.ureka.team3.utong_backend.coupon.entity.UserCoupon;
 import com.ureka.team3.utong_backend.coupon.repository.MyCouponRepository;
-import com.ureka.team3.utong_backend.mypage.dto.PointChargeResponseDto;
-import com.ureka.team3.utong_backend.mypage.entity.PointChargeHistory;
-import com.ureka.team3.utong_backend.mypage.repository.PointChargeHistoryRepository;
+import com.ureka.team3.utong_backend.point.dto.PointChargeResponseDto;
+import com.ureka.team3.utong_backend.point.entity.PointChargeHistory;
+import com.ureka.team3.utong_backend.point.repository.PointChargeHistoryRepository;
 import com.ureka.team3.utong_backend.toss.dto.TossApproveResponse;
 import com.ureka.team3.utong_backend.toss.dto.TossPaymentConfirmRequestDto;
 import lombok.RequiredArgsConstructor;

@@ -1,9 +1,9 @@
 package com.ureka.team3.utong_backend.gift.service;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
-import com.ureka.team3.utong_backend.auth.entity.User;
+import com.ureka.team3.utong_backend.user.entity.User;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
-import com.ureka.team3.utong_backend.auth.repository.UserRepository;
+import com.ureka.team3.utong_backend.user.repository.UserRepository;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.common.exception.BusinessException;
 import com.ureka.team3.utong_backend.common.exception.ErrorCode;

@@ -1,6 +1,6 @@
 package com.ureka.team3.utong_backend.line.entity;
 
-import com.ureka.team3.utong_backend.auth.entity.User;
+import com.ureka.team3.utong_backend.user.entity.User;
 import com.ureka.team3.utong_backend.plan.entity.Plan;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

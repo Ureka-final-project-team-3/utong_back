@@ -3,7 +3,7 @@ package com.ureka.team3.utong_backend.auth.service;
 import org.springframework.stereotype.Service;
 
 import com.ureka.team3.utong_backend.auth.dto.FindAccountDto;
-import com.ureka.team3.utong_backend.auth.repository.LineRepository;
+import com.ureka.team3.utong_backend.line.repository.LineRepository;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.common.exception.business.AccountNotFoundException;
 

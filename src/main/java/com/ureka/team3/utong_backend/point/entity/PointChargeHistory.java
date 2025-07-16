@@ -1,4 +1,4 @@
-package com.ureka.team3.utong_backend.mypage.entity;
+package com.ureka.team3.utong_backend.point.entity;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import jakarta.persistence.*;

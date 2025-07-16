@@ -1,6 +1,7 @@
-package com.ureka.team3.utong_backend.auth.entity;
+package com.ureka.team3.utong_backend.user.entity;
 import java.time.LocalDate;
 
+import com.ureka.team3.utong_backend.auth.entity.Account;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

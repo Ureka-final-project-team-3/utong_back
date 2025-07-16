@@ -2,6 +2,7 @@ package com.ureka.team3.utong_backend.auth.entity;
 
 
 import com.ureka.team3.utong_backend.common.exception.business.InsufficientPointException;
+import com.ureka.team3.utong_backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

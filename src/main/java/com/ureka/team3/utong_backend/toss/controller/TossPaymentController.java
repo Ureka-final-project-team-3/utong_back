@@ -2,7 +2,7 @@ package com.ureka.team3.utong_backend.toss.controller;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
-import com.ureka.team3.utong_backend.mypage.dto.PointChargeResponseDto;
+import com.ureka.team3.utong_backend.point.dto.PointChargeResponseDto;
 import com.ureka.team3.utong_backend.toss.dto.TossPaymentConfirmRequestDto;
 import com.ureka.team3.utong_backend.toss.service.TossPaymentService;
 import lombok.RequiredArgsConstructor;

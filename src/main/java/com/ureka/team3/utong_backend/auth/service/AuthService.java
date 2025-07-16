@@ -16,10 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ureka.team3.utong_backend.auth.dto.AuthDto;
 import com.ureka.team3.utong_backend.auth.entity.Account;
-import com.ureka.team3.utong_backend.auth.entity.User;
+import com.ureka.team3.utong_backend.user.entity.User;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
-import com.ureka.team3.utong_backend.auth.repository.LineRepository;
-import com.ureka.team3.utong_backend.auth.repository.UserRepository;
+import com.ureka.team3.utong_backend.line.repository.LineRepository;
+import com.ureka.team3.utong_backend.user.repository.UserRepository;
 import com.ureka.team3.utong_backend.auth.util.JwtProperties;
 import com.ureka.team3.utong_backend.auth.util.JwtUtil;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;

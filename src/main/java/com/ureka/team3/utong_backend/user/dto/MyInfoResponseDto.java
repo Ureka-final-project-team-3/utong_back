@@ -1,4 +1,4 @@
-package com.ureka.team3.utong_backend.mypage.dto;
+package com.ureka.team3.utong_backend.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

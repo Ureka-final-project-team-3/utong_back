@@ -1,11 +1,11 @@
-package com.ureka.team3.utong_backend.mypage.service;
+package com.ureka.team3.utong_backend.point.service;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
-import com.ureka.team3.utong_backend.mypage.dto.PointChargeRequestDto;
-import com.ureka.team3.utong_backend.mypage.dto.PointChargeResponseDto;
-import com.ureka.team3.utong_backend.mypage.entity.PointChargeHistory;
-import com.ureka.team3.utong_backend.mypage.repository.PointChargeHistoryRepository;
+import com.ureka.team3.utong_backend.point.dto.PointChargeRequestDto;
+import com.ureka.team3.utong_backend.point.dto.PointChargeResponseDto;
+import com.ureka.team3.utong_backend.point.entity.PointChargeHistory;
+import com.ureka.team3.utong_backend.point.repository.PointChargeHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class MypagePointServiceImpl implements MypagePointService {
+public class PointServiceImpl implements PointService {
 
     private final PointChargeHistoryRepository pointChargeHistoryRepository;
     private final AccountRepository accountRepository;

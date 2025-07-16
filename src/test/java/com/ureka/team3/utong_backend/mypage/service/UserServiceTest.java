@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import com.ureka.team3.utong_backend.user.service.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,20 +13,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
-import com.ureka.team3.utong_backend.auth.entity.User;
+import com.ureka.team3.utong_backend.user.entity.User;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
-import com.ureka.team3.utong_backend.auth.repository.LineRepository;
-import com.ureka.team3.utong_backend.auth.repository.UserRepository;
+import com.ureka.team3.utong_backend.line.repository.LineRepository;
+import com.ureka.team3.utong_backend.user.repository.UserRepository;
 import com.ureka.team3.utong_backend.line.entity.Line;
 import com.ureka.team3.utong_backend.line.entity.LineData;
 import com.ureka.team3.utong_backend.line.repository.LineDataRepository;
-import com.ureka.team3.utong_backend.mypage.dto.MyInfoResponseDto;
+import com.ureka.team3.utong_backend.user.dto.MyInfoResponseDto;
 
 @ExtendWith(MockitoExtension.class)
-class MypageInfoServiceTest {
+class UserServiceTest {
 
     @InjectMocks
-    private MypageInfoServiceImpl mypageInfoService;
+    private UserServiceImpl mypageInfoService;
 
     @Mock private AccountRepository accountRepository;
     @Mock private UserRepository userRepository;
@@ -47,7 +48,7 @@ class MypageInfoServiceTest {
         when(lineRepository.findByUserId(user.getId())).thenReturn(Optional.of(line));
         when(lineDataRepository.findTopByLineOrderByMonthDesc(line)).thenReturn(Optional.ofNullable(lineData));
 
-        MyInfoResponseDto result = mypageInfoService.getMyInfo(accountId);
+        MyInfoResponseDto result = mypageInfoService.getMyInfo(account);
 
         assertEquals("테스트유저", result.getName());
         assertEquals("user@test.com", result.getEmail());

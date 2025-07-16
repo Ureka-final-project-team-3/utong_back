@@ -2,11 +2,11 @@ package com.ureka.team3.utong_backend.mypage.service;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
-import com.ureka.team3.utong_backend.mypage.dto.PointChargeRequestDto;
-import com.ureka.team3.utong_backend.mypage.dto.PointChargeResponseDto;
-import com.ureka.team3.utong_backend.mypage.entity.PointChargeHistory;
-import com.ureka.team3.utong_backend.mypage.repository.PointChargeHistoryRepository;
-import com.ureka.team3.utong_backend.mypage.service.MypagePointServiceImpl;
+import com.ureka.team3.utong_backend.point.dto.PointChargeRequestDto;
+import com.ureka.team3.utong_backend.point.dto.PointChargeResponseDto;
+import com.ureka.team3.utong_backend.point.entity.PointChargeHistory;
+import com.ureka.team3.utong_backend.point.repository.PointChargeHistoryRepository;
+import com.ureka.team3.utong_backend.point.service.PointServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,10 +18,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class MypagePointServiceTest {
+class PointServiceTest {
 
     @InjectMocks
-    private MypagePointServiceImpl mypagePointService;
+    private PointServiceImpl mypagePointService;
 
     @Mock
     private AccountRepository accountRepository;

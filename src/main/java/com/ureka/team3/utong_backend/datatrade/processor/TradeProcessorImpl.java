@@ -12,7 +12,7 @@ import com.ureka.team3.utong_backend.datatrade.service.ContractService;
 import com.ureka.team3.utong_backend.datatrade.service.SaleDataRequestService;
 import com.ureka.team3.utong_backend.datatrade.utils.TradeCalculator;
 import com.ureka.team3.utong_backend.line.service.LineService;
-import com.ureka.team3.utong_backend.mypage.service.MypagePointService;
+import com.ureka.team3.utong_backend.point.service.PointService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +24,7 @@ public class TradeProcessorImpl implements TradeProcessor {
     private final SaleDataRequestService saleDataRequestService;
     private final ContractService contractService;
     private final TradeCalculator tradeCalculator;
-    private final MypagePointService mypagePointService;
+    private final PointService pointService;
     private final LineService lineService;
 
     @Override
@@ -47,7 +47,7 @@ public class TradeProcessorImpl implements TradeProcessor {
 
         Account account = contract.getBuyDataRequest().getAccount();
         Long totalIncomeForSeller = tradeCalculator.calculateTotalIncomeForSeller(contract.getPrice(), contract.getAmount());
-        mypagePointService.givePoint(account, totalIncomeForSeller);
+        pointService.givePoint(account, totalIncomeForSeller);
 
         String targetLineId = contract.getBuyDataRequest().getLineId();
         lineService.giveData(targetLineId, contract.getAmount());

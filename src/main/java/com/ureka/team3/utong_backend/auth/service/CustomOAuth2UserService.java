@@ -17,9 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ureka.team3.utong_backend.auth.dto.CustomOAuth2UserDto;
 import com.ureka.team3.utong_backend.auth.dto.OAuth2UserInfoDto;
 import com.ureka.team3.utong_backend.auth.entity.Account;
-import com.ureka.team3.utong_backend.auth.entity.User;
+import com.ureka.team3.utong_backend.user.entity.User;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
-import com.ureka.team3.utong_backend.auth.repository.UserRepository;
+import com.ureka.team3.utong_backend.user.repository.UserRepository;
 
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
