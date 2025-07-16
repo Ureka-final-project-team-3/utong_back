@@ -2,7 +2,7 @@ package com.ureka.team3.utong_backend.datatrade.repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ureka.team3.utong_backend.datatrade.dto.OrderMQDto;
+import com.ureka.team3.utong_backend.datatrade.dto.OrderDto;
 import com.ureka.team3.utong_backend.datatrade.utils.RedisKeyUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +19,12 @@ import static com.ureka.team3.utong_backend.datatrade.utils.RedisKeyUtil.*;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-public class OrderRedisRepository implements OrderMQRepository{
+public class OrderRepositoryImpl implements OrderRepository {
     private final StringRedisTemplate stringRedisTemplate;
     private final ObjectMapper objectMapper;
 
     @Override
-    public void savePurchaseOrder(OrderMQDto dto) {
+    public void savePurchaseOrder(OrderDto dto) {
         String listKey = buildBuyListKey(dto.getDataCode(), dto.getPrice());
         String zsetKey = buildBuyZSetKey(dto.getDataCode());
 
@@ -34,7 +34,7 @@ public class OrderRedisRepository implements OrderMQRepository{
     }
 
     @Override
-    public void saveSellOrder(OrderMQDto dto) {
+    public void saveSellOrder(OrderDto dto) {
         String listKey = buildSellListKey(dto.getDataCode(), dto.getPrice());
         String zsetKey = buildSellZSetKey(dto.getDataCode());
 
@@ -44,22 +44,22 @@ public class OrderRedisRepository implements OrderMQRepository{
     }
 
     @Override
-    public List<OrderMQDto> findSellOrdersByPrice(String dataCode, long price) {
+    public List<OrderDto> findSellOrdersByPrice(String dataCode, long price) {
         String listKey = buildSellListKey(dataCode, price);
         List<String> rawOrders = stringRedisTemplate.opsForList().range(listKey, 0, -1);
 
         if (rawOrders == null || rawOrders.isEmpty()) return List.of();
 
-        List<OrderMQDto> orderMQDtoList = new ArrayList<>();
+        List<OrderDto> orderDtoList = new ArrayList<>();
         for (String order : rawOrders) {
             try {
-                orderMQDtoList.add(objectMapper.readValue(order, OrderMQDto.class));
+                orderDtoList.add(objectMapper.readValue(order, OrderDto.class));
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("JSON 파싱 실패: " + order, e);
             }
         }
 
-        return orderMQDtoList;
+        return orderDtoList;
     }
 
     @Override
@@ -79,7 +79,7 @@ public class OrderRedisRepository implements OrderMQRepository{
     }
 
     @Override
-    public OrderMQDto popValidSellOrder(String dataCode, long price) {
+    public OrderDto popValidSellOrder(String dataCode, long price) {
         String listKey = buildSellListKey(dataCode, price);
         String zsetKey = buildSellZSetKey(dataCode);
 
@@ -92,7 +92,7 @@ public class OrderRedisRepository implements OrderMQRepository{
             }
 
             try {
-                OrderMQDto order = objectMapper.readValue(rawOrder, OrderMQDto.class);
+                OrderDto order = objectMapper.readValue(rawOrder, OrderDto.class);
                 if (order.getExpiredAt() >= System.currentTimeMillis()) {
                     // 유효한 주문이면 반환
                     return order;
@@ -104,7 +104,7 @@ public class OrderRedisRepository implements OrderMQRepository{
 
 
     @Override
-    public void requeuePartialSellOrder(OrderMQDto order) {
+    public void requeuePartialSellOrder(OrderDto order) {
         String listKey = buildSellListKey(order.getDataCode(), order.getPrice());
         String zsetKey = buildSellZSetKey(order.getDataCode());
 
@@ -136,7 +136,7 @@ public class OrderRedisRepository implements OrderMQRepository{
     }
 
     @Override
-    public OrderMQDto popValidBuyOrder(String dataCode, Long highestBuyPrice) {
+    public OrderDto popValidBuyOrder(String dataCode, Long highestBuyPrice) {
         String listKey = buildBuyListKey(dataCode, highestBuyPrice);
         String zsetKey = buildBuyZSetKey(dataCode);
 
@@ -149,7 +149,7 @@ public class OrderRedisRepository implements OrderMQRepository{
             }
 
             try {
-                OrderMQDto order = objectMapper.readValue(rawOrder, OrderMQDto.class);
+                OrderDto order = objectMapper.readValue(rawOrder, OrderDto.class);
                 if (order.getExpiredAt() >= System.currentTimeMillis()) {
                     // 유효한 주문이면 반환
                     return order;
@@ -161,7 +161,7 @@ public class OrderRedisRepository implements OrderMQRepository{
     }
 
     @Override
-    public void requeuePartialBuyOrder(OrderMQDto buyOrder) {
+    public void requeuePartialBuyOrder(OrderDto buyOrder) {
         String listKey = buildBuyListKey(buyOrder.getDataCode(), buyOrder.getPrice());
         String zsetKey = buildBuyZSetKey(buyOrder.getDataCode());
 
@@ -175,13 +175,41 @@ public class OrderRedisRepository implements OrderMQRepository{
         }
     }
 
+    @Override
+    public OrderDto popFirstSellOrderFromList(String dataCode, long price) {
+        String listKey = RedisKeyUtil.buildSellListKey(dataCode, price);
+        String rawOrder = stringRedisTemplate.opsForList().leftPop(listKey);
+
+        if (rawOrder == null) return null;
+
+        try {
+            return objectMapper.readValue(rawOrder, OrderDto.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("JSON 파싱 실패: " + rawOrder, e);
+        }
+    }
+
+    @Override
+    public OrderDto popFirstBuyOrderFromList(String dataCode, long price) {
+        String listKey = RedisKeyUtil.buildBuyListKey(dataCode, price);
+        String rawOrder = stringRedisTemplate.opsForList().leftPop(listKey);
+
+        if (rawOrder == null) return null;
+
+        try {
+            return objectMapper.readValue(rawOrder, OrderDto.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("JSON 파싱 실패: " + rawOrder, e);
+        }
+    }
+
 
     private long calculateTTL(long expiredAtMillis) {
         long now = System.currentTimeMillis();
         return Math.max(0, (expiredAtMillis - now) / 1000);
     }
 
-    private String toJson(OrderMQDto dto) {
+    private String toJson(OrderDto dto) {
         try {
             return objectMapper.writeValueAsString(dto);
         } catch (JsonProcessingException e) {

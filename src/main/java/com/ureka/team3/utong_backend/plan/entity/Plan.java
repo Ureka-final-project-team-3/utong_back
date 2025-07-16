@@ -16,14 +16,24 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Plan {
-    
+
     @Id
     @Column(name = "id", length = 36)
     private String id;
-    
+
     @Column(name = "name", length = 100)
     private String name;
-    
+
     @Column(name = "data")
     private Long data;
+
+    @Column(name = "available_trade_rate")
+    private float availableTradeRate;
+
+    public Long canSell() {
+        if (data == null || data == -1L) {
+            return 0L; // 무제한 요금제 혹은 데이터 없음 → 판매 불가
+        }
+        return Math.round((data * availableTradeRate) / 100.0);
+    }
 }

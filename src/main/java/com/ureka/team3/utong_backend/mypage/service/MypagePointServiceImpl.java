@@ -52,5 +52,16 @@ public class MypagePointServiceImpl implements MypagePointService {
                 .build();
     }
 
+    @Override
+    @Transactional
+    public void usePoint(Account account, Long coast) {
+        account.decreasePoint(coast);
+    }
+
+    @Override
+    public void givePoint(Account account, Long point) {
+        account.increasePoint(point);
+    }
+
 
 }

@@ -1,24 +1,23 @@
 package com.ureka.team3.utong_backend.datatrade.repository;
 
-import com.ureka.team3.utong_backend.datatrade.dto.OrderMQDto;
-import org.springframework.stereotype.Repository;
+import com.ureka.team3.utong_backend.datatrade.dto.OrderDto;
 
 import java.util.List;
 
 // kafka로 구현해야함
-public class OrderKafkaRepository implements OrderMQRepository{
+public class OrderKafkaRepository implements OrderRepository {
     @Override
-    public void savePurchaseOrder(OrderMQDto dto) {
+    public void savePurchaseOrder(OrderDto dto) {
 
     }
 
     @Override
-    public void saveSellOrder(OrderMQDto dto) {
+    public void saveSellOrder(OrderDto dto) {
 
     }
 
     @Override
-    public List<OrderMQDto> findSellOrdersByPrice(String dataCode, long price) {
+    public List<OrderDto> findSellOrdersByPrice(String dataCode, long price) {
         return List.of();
     }
 
@@ -28,12 +27,12 @@ public class OrderKafkaRepository implements OrderMQRepository{
     }
 
     @Override
-    public OrderMQDto popValidSellOrder(String dataCode, long price) {
+    public OrderDto popValidSellOrder(String dataCode, long price) {
         return null;
     }
 
     @Override
-    public void requeuePartialSellOrder(OrderMQDto order) {
+    public void requeuePartialSellOrder(OrderDto order) {
 
     }
 
@@ -43,12 +42,22 @@ public class OrderKafkaRepository implements OrderMQRepository{
     }
 
     @Override
-    public OrderMQDto popValidBuyOrder(String dataCode, Long highestBuyPrice) {
+    public OrderDto popValidBuyOrder(String dataCode, Long highestBuyPrice) {
         return null;
     }
 
     @Override
-    public void requeuePartialBuyOrder(OrderMQDto buyOrder) {
+    public void requeuePartialBuyOrder(OrderDto buyOrder) {
 
+    }
+
+    @Override
+    public OrderDto popFirstSellOrderFromList(String dataCode, long price) {
+        return null;
+    }
+
+    @Override
+    public OrderDto popFirstBuyOrderFromList(String dataCode, long price) {
+        return null;
     }
 }

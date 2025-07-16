@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @Setter
 @Builder
-public class OrderMQDto {
+public class OrderDto {
     private String orderId;     // 주문 ID
     private long quantity;      // 데이터 용량 (GB 등)
     private long createdAt;

@@ -4,11 +4,12 @@ import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
-import com.ureka.team3.utong_backend.datatrade.dto.OrderMQDto;
+import com.ureka.team3.utong_backend.datatrade.dto.OrderDto;
 import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
+import com.ureka.team3.utong_backend.datatrade.facade.DataTradeFacadeImpl;
 import com.ureka.team3.utong_backend.datatrade.repository.BuyDataRequestRepository;
-import com.ureka.team3.utong_backend.datatrade.repository.OrderRedisRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.OrderRepositoryImpl;
 import com.ureka.team3.utong_backend.datatrade.repository.SaleDataRequestRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,10 +28,10 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-class DataTradeServiceImplTest {
+class DataTradeFacadeImplTest {
 
     @InjectMocks
-    private DataTradeServiceImpl dataTradeService;
+    private DataTradeFacadeImpl dataTradeService;
 
     @Mock
     private SaleDataRequestRepository saleDataRequestRepository;
@@ -42,7 +43,7 @@ class DataTradeServiceImplTest {
     private AccountRepository accountRepository;
 
     @Mock
-    private OrderRedisRepository orderRedisRepository;
+    private OrderRepositoryImpl orderRepositoryImpl;
 
     @Test
     void requestBuy_정상동작() {
@@ -77,7 +78,7 @@ class DataTradeServiceImplTest {
         assertNotNull(response);
         assertEquals("구매 등록 완료", response.getMessage());
         assertEquals("123", response.getData());
-        verify(orderRedisRepository).savePurchaseOrder(any(OrderMQDto.class));
+        verify(orderRepositoryImpl).savePurchaseOrder(any(OrderDto.class));
     }
 
     @Test
@@ -110,6 +111,6 @@ class DataTradeServiceImplTest {
         // then
         assertNotNull(response);
         assertEquals("판매 등록 완료", response.getMessage());
-        verify(orderRedisRepository).saveSellOrder(any(OrderMQDto.class));
+        verify(orderRepositoryImpl).saveSellOrder(any(OrderDto.class));
     }
 }
