@@ -5,5 +5,10 @@ import com.ureka.team3.utong_backend.mypage.dto.PointChargeResponseDto;
 import com.ureka.team3.utong_backend.toss.dto.TossPaymentConfirmRequestDto;
 
 public interface TossPaymentService {
+
+//    // 토스 걸제
+//    TossPaymentResponseDto startPayment(Account account, TossPaymentRequestDto requestDto);
+
+    // 토스 결제 승인
     PointChargeResponseDto confirmAndCharge(Account account, TossPaymentConfirmRequestDto requestDto);
 }

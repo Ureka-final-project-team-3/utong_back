@@ -2,18 +2,30 @@ package com.ureka.team3.utong_backend.toss.service;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
-import com.ureka.team3.utong_backend.mypage.dto.*;
+import com.ureka.team3.utong_backend.common.exception.business.CouponExpiredException;
+import com.ureka.team3.utong_backend.common.exception.business.CouponNotFoundException;
+import com.ureka.team3.utong_backend.common.exception.business.InvalidCouponStatusException;
+import com.ureka.team3.utong_backend.common.exception.business.NotFeeWaiveCouponException;
+import com.ureka.team3.utong_backend.coupon.entity.UserCoupon;
+import com.ureka.team3.utong_backend.coupon.repository.MyCouponRepository;
+import com.ureka.team3.utong_backend.mypage.dto.PointChargeResponseDto;
 import com.ureka.team3.utong_backend.mypage.entity.PointChargeHistory;
 import com.ureka.team3.utong_backend.mypage.repository.PointChargeHistoryRepository;
 import com.ureka.team3.utong_backend.toss.dto.TossApproveResponse;
 import com.ureka.team3.utong_backend.toss.dto.TossPaymentConfirmRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,14 +34,38 @@ public class TossPaymentServiceImpl implements TossPaymentService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final PointChargeHistoryRepository pointChargeHistoryRepository;
     private final AccountRepository accountRepository;
+    private final MyCouponRepository myCouponRepository;
 
     private static final double FEE_RATE = 0.025;
 
     @Value("${toss.secret-key}")
     private String tossSecretKey;
 
+//    // 토스 결제 시작
+//    @Override
+//    public TossPaymentResponseDto startPayment(Account account, TossPaymentRequestDto requestDto) {
+//        // 1. orderId, 금액, 사용자 정보 등을 저장하거나 검증
+//        String orderId = requestDto.getOrderId();
+//        Long amount = requestDto.getAmount();
+//
+//        // 2. 결제창 URL 생성
+//        // 실제로는 프론트에서 Checkout SDK가 처리, 백에서는 보통 orderId만 관리
+//        String fakeCheckoutUrl = "https://pay.toss.im/checkout/" + orderId;
+//
+//        return TossPaymentResponseDto.builder()
+//                .paymentKey(null) // 결제 후 승인 시에야 paymentKey가 생김
+//                .checkoutUrl(fakeCheckoutUrl)
+//                .build();
+//    }
+
+
     @Override
     public PointChargeResponseDto confirmAndCharge(Account account, TossPaymentConfirmRequestDto requestDto) {
+        System.out.println("[결제 승인 요청] paymentKey: " + requestDto.getPaymentKey());
+        System.out.println("[결제 승인 요청] orderId: " + requestDto.getOrderId());
+        System.out.println("[결제 승인 요청] amount: " + requestDto.getAmount());
+        System.out.println("[결제 승인 요청] couponId: " + requestDto.getUserCouponId());
+
         // 1. 토스 결제 승인 요청
         HttpHeaders headers = new HttpHeaders();
         headers.setBasicAuth(tossSecretKey, "");
@@ -58,12 +94,37 @@ public class TossPaymentServiceImpl implements TossPaymentService {
         }
 
         TossApproveResponse approve = response.getBody();
-
-        // 2. 결제 성공 → 포인트 충전
         Long charged = approve.getTotalAmount();
-        Long fee = Math.round(charged * FEE_RATE);
+
+        // 2. 쿠폰 처리
+        UserCoupon usedCoupon = null;
+        boolean isFeeWaived = false;
+
+        if (requestDto.getUserCouponId() != null) {
+            usedCoupon = myCouponRepository.findById(requestDto.getUserCouponId())
+                    .orElseThrow(CouponNotFoundException::new);
+
+            if (!"002".equals(usedCoupon.getStatus())) {
+                throw new InvalidCouponStatusException();
+            }
+
+            if (!"001".equals(usedCoupon.getCoupon().getCouponCode())) {
+                throw new NotFeeWaiveCouponException();
+            }
+
+            if (usedCoupon.getExpiredAt() != null &&
+                    usedCoupon.getExpiredAt().isBefore(LocalDateTime.now())) {
+                throw new CouponExpiredException();
+            }
+
+            isFeeWaived = true;
+        }
+
+        // 3. 수수료 계싼
+        Long fee = isFeeWaived ? 0L : Math.round(charged * FEE_RATE);
         Long finalAmount = charged - fee;
 
+        // 4. 포인트 적립
         account.addMileage(finalAmount);
         accountRepository.save(account);
 
@@ -76,6 +137,12 @@ public class TossPaymentServiceImpl implements TossPaymentService {
                 .build();
 
         pointChargeHistoryRepository.save(history);
+
+        // 5. 쿠폰 상태 변경
+        if (usedCoupon != null) {
+            usedCoupon.markAsUsed();  // 사용 완료
+            myCouponRepository.save(usedCoupon);
+        }
 
         return PointChargeResponseDto.builder()
                 .chargedAmount(charged)

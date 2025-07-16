@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>포인트 충전</title>
+    <script src="https://js.tosspayments.com/v1/payment"></script>
+    <style>
+        select, input[type="number"] {
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<h1>🔋 포인트 충전하기</h1>
+<p>현재 보유 포인트: <span id="currentMileage">불러오는 중...</span></p>
+
+<hr/>
+
+<label>충전할 포인트 입력: </label>
+<input type="number" id="amount" oninput="calculatePreview()" placeholder="예: 10000" />
+
+<div id="couponSection" style="display:none; margin-top: 20px;">
+    <label><strong>보유 쿠폰 (<span id="couponCount"></span>개)</strong></label><br/>
+    <select id="couponSelect" onchange="calculatePreview()">
+        <option value="">쿠폰을 선택하세요</option>
+    </select>
+</div>
+
+<h3>📊 실시간 계산</h3>
+<p>충전 금액: <span id="inputAmount">0 P</span></p>
+<p>수수료: <span id="fee">0 P</span></p>
+<p>충전 후 포인트: <span id="finalPoint">0 P</span></p>
+<p><strong>예상 총 포인트:</strong> <span id="total">0 P</span></p>
+
+<hr/>
+
+<button onclick="requestPayment()">✅ 구매하기 (결제하기)</button>
+
+<script>
+    let currentMileage = 0;
+    let availableCoupons = [];
+    let customerName = ""; // ✅ 로그인된 사용자 이름 저장용
+
+    window.onload = async function () {
+        const accessToken = localStorage.getItem("accessToken");
+        if (!accessToken) {
+            alert("로그인이 필요합니다.");
+            window.location.href = "/index.html";
+            return;
+        }
+
+        try {
+            // ✅ 사용자 정보 조회 (포인트 + 이름)
+            const infoRes = await fetch('/api/mypage/info', {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            const infoData = await infoRes.json();
+            currentMileage = infoData.data.mileage;
+            customerName = infoData.data.name || "홍길동"; // 이름 없으면 fallback
+
+            document.getElementById("currentMileage").innerText = currentMileage.toLocaleString() + ' P';
+
+            // ✅ 쿠폰 조회
+            const couponRes = await fetch('/api/mypage/coupons', {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            const couponData = await couponRes.json();
+            availableCoupons = couponData.data.filter(c => c.couponCode === "001" && c.statusCode === "002");
+
+            if (availableCoupons.length > 0) {
+                document.getElementById("couponSection").style.display = "block";
+                document.getElementById("couponCount").innerText = availableCoupons.length;
+
+                const select = document.getElementById("couponSelect");
+                availableCoupons.forEach(coupon => {
+                    const option = document.createElement("option");
+                    option.value = coupon.userCouponId; // ✅ user_coupon PK 사용
+                    option.text = `${coupon.name || '수수료 면제 쿠폰'} (만료: ${coupon.expiredAt?.substring(0, 10)})`;
+                    select.appendChild(option);
+                });
+            }
+        } catch (err) {
+            alert("인증 오류가 발생했습니다. 다시 로그인해주세요.");
+            localStorage.removeItem("accessToken");
+            window.location.href = "/index.html";
+        }
+    };
+
+    function calculatePreview() {
+        const input = parseInt(document.getElementById("amount").value) || 0;
+        const feeRate = 0.025;
+        const selectedUserCouponId = document.getElementById("couponSelect").value;
+
+        const useCoupon = selectedUserCouponId !== "";
+        const fee = useCoupon ? 0 : Math.round(input * feeRate);
+        const final = input - fee;
+
+        document.getElementById("inputAmount").innerText = input.toLocaleString() + ' P';
+        document.getElementById("fee").innerText = fee.toLocaleString() + ' P';
+        document.getElementById("finalPoint").innerText = final.toLocaleString() + ' P';
+        document.getElementById("total").innerText = (currentMileage + final).toLocaleString() + ' P';
+
+        // ✅ localStorage에 선택한 쿠폰 ID 저장
+        if (useCoupon) {
+            localStorage.setItem("userCouponId", selectedUserCouponId);
+        } else {
+            localStorage.removeItem("userCouponId");
+        }
+    }
+
+    function requestPayment() {
+        const amount = parseInt(document.getElementById("amount").value) || 0;
+        const orderId = 'order_' + new Date().getTime();
+        const clientKey = 'test_ck_26DlbXAaV0K9nO22Nqkn3qY50Q9R';
+        const tossPayments = TossPayments(clientKey);
+
+        // ✅ 결제 전 정보 저장
+        localStorage.setItem("orderId", orderId);
+        localStorage.setItem("amount", amount);
+
+        // ✅ 결제 요청
+        tossPayments.requestPayment('카드', {
+            amount,
+            orderId,
+            orderName: "포인트 충전",
+            customerName: customerName, // ✅ 사용자 이름 반영
+            successUrl: "http://localhost:8080/success.html",
+            failUrl: "http://localhost:8080/fail.html"
+        }).catch(function (error) {
+            alert(error.message);
+        });
+    }
+</script>
+</body>
+</html>
