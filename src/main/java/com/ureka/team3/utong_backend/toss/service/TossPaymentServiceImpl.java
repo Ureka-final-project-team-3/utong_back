@@ -8,6 +8,7 @@ import com.ureka.team3.utong_backend.common.exception.business.InvalidCouponStat
 import com.ureka.team3.utong_backend.common.exception.business.NotFeeWaiveCouponException;
 import com.ureka.team3.utong_backend.coupon.entity.UserCoupon;
 import com.ureka.team3.utong_backend.coupon.repository.MyCouponRepository;
+import com.ureka.team3.utong_backend.datatrade.utils.TradeCalculator;
 import com.ureka.team3.utong_backend.point.dto.PointChargeResponseDto;
 import com.ureka.team3.utong_backend.point.entity.PointChargeHistory;
 import com.ureka.team3.utong_backend.point.repository.PointChargeHistoryRepository;
@@ -35,8 +36,10 @@ public class TossPaymentServiceImpl implements TossPaymentService {
     private final PointChargeHistoryRepository pointChargeHistoryRepository;
     private final AccountRepository accountRepository;
     private final MyCouponRepository myCouponRepository;
+    private final TradeCalculator tradeCalculator;
 
-    private static final double FEE_RATE = 0.025;
+//    private static final double FEE_RATE = 0.025;
+
 
     @Value("${toss.secret-key}")
     private String tossSecretKey;
@@ -121,7 +124,8 @@ public class TossPaymentServiceImpl implements TossPaymentService {
         }
 
         // 3. 수수료 계싼
-        Long fee = isFeeWaived ? 0L : Math.round(charged * FEE_RATE);
+//        Long fee = isFeeWaived ? 0L : Math.round(charged * FEE_RATE);
+        Long fee = isFeeWaived ? 0L : tradeCalculator.calculateSubtractFee(charged);
         Long finalAmount = charged - fee;
 
         // 4. 포인트 적립
