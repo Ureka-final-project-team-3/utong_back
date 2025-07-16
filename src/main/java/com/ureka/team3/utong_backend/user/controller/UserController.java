@@ -23,7 +23,6 @@ public class UserController {
     // 내 정보 조회(이름, 이메일, 포인트, 핸드폰, 남은 데이터 용량)
     @GetMapping("/info")
     public ResponseEntity<ApiResponse<MyInfoResponseDto>> getMyInfo(@AuthenticationPrincipal Account account){
-        log.info(account.getId());
         return ResponseEntity.ok(ApiResponse.success(userService.getMyInfo(account)));
     }
 }

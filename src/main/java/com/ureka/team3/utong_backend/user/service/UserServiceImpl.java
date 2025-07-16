@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
     private final LineService lineService;
 
     @Override
-    public MyInfoResponseDto getMyInfo(Account account) {
+    public MyInfoResponseDto getMyInfo(Account account) {   // -> 리팩터링 필요
         User user = userRepository.findByAccountId(account.getId())
                 .orElseThrow(UserNotFoundException::new);
 
@@ -32,10 +32,24 @@ public class UserServiceImpl implements UserService {
 //        Line line = lineRepository.findByUserId(user.getId())
 //                .orElseThrow(LineNotFoundException::new);
         // defaultline ID 로 Line 조회
-        Line line = lineService.findById(account.getDefaultLine());
+        String defaultLineId = account.getDefaultLine();
+
+        Line defaultLine = null;
+        if(defaultLineId !=null){
+            defaultLine = lineService.findById(defaultLineId);
+        }
+        String phoneNumber = null;
+        Long remaining = 0L;
+        String dataCode = null;
+        if(defaultLine !=null){
+            LineData lineData = lineService.getLineDataByLineAndDate(defaultLine, LocalDate.now());
+            phoneNumber = defaultLine.getPhoneNumber();
+            remaining = lineData.getRemaining();
+            dataCode = lineData.getDataCode();
+        }
 
         // 해당 Line 의 최신 LineData 조회
-        LineData lineData = lineService.getLineDataByLineAndDate(line, LocalDate.now());
+
 //        LineData lineData = lineDataRepository.findTopByLineOrderByMonthDesc(line)
 //                .orElse(null);
 
@@ -44,9 +58,9 @@ public class UserServiceImpl implements UserService {
                 .name(user.getName())
                 .email(account.getEmail())
                 .mileage(account.getMileage())
-                .phoneNumber(line.getPhoneNumber())
-                .remainingData(lineData.getRemaining())
-                .dataCode(lineData.getDataCode())
+                .phoneNumber(phoneNumber)
+                .remainingData(remaining)
+                .dataCode(dataCode)
                 .build();
     }
 
