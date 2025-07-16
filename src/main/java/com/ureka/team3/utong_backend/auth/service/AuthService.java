@@ -128,7 +128,8 @@ public class AuthService {
                     account.getNickname(),
                     user != null ? user.getName() : null,
                     user != null ? user.getBirthDate() : null,
-                    account.getMileage()
+                    account.getMileage(),
+                    account.getDefaultLine()
             );
             
             AuthDto.LoginResponse loginResponse = AuthDto.LoginResponse.builder()
@@ -211,7 +212,8 @@ public class AuthService {
                 account.getNickname(),
                 user != null ? user.getName() : null,
                 user != null ? user.getBirthDate() : null,
-                account.getMileage()
+                account.getMileage(),
+                account.getDefaultLine()
         );
         
         return ApiResponse.success("사용자 정보를 성공적으로 조회했습니다", userInfo);

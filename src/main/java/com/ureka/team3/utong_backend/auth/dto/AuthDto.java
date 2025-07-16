@@ -68,15 +68,17 @@ public class AuthDto {
         private String name;
         private LocalDate birthDate;
         private Long mileage;
+        private String defaultLine;
         
         public UserInfo(String accountId, String email, String nickname, String name, 
-                       LocalDate birthDate, Long mileage) {
+                       LocalDate birthDate, Long mileage, String defaultLine) {
             this.accountId = accountId;
             this.email = email;
             this.nickname = nickname;
             this.name = name;
             this.birthDate = birthDate;
             this.mileage = mileage;
+            this.defaultLine = defaultLine;
         }
     }
     
