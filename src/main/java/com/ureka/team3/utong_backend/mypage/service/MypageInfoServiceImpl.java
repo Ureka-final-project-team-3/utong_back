@@ -37,13 +37,20 @@ public class MypageInfoServiceImpl implements MypageInfoService {
                 .orElseThrow(UserNotFoundException::new);
 
         // line & line_data 정보 가져오기(보유 데이터 조회용)
-        Line line = lineRepository.findByUserId(user.getId())
+//        Line line = lineRepository.findByUserId(user.getId())
+//                .orElseThrow(LineNotFoundException::new);
+        // defaultline ID 로 Line 조회
+        Line line = lineRepository.findById(account.getDefaultLine())
                 .orElseThrow(LineNotFoundException::new);
 
-
+        // 해당 Line 의 최신 LineData 조회
         LineData lineData = lineDataRepository.findTopByLineOrderByMonthDesc(line)
                 .orElse(null);
 
+        // LTE / 5G 판단용
+        String dataCodeName = (lineData != null && lineData.getDataCode() != null)
+                ? lineData.getDataCode()
+                : "알 수 없음";
 
         return MyInfoResponseDto.builder()
                 .name(user.getName())
@@ -51,6 +58,7 @@ public class MypageInfoServiceImpl implements MypageInfoService {
                 .mileage(account.getMileage())
                 .phoneNumber(line.getPhoneNumber())
                 .remainingData(lineData != null ? lineData.getRemaining() : 0L)
+                .dataCode(dataCodeName)
                 .build();
     }
 

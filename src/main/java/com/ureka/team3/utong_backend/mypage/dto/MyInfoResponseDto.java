@@ -14,4 +14,5 @@ public class MyInfoResponseDto {
     private Long mileage;
     private String phoneNumber;
     private Long remainingData;
+    private String dataCode; // LTE or 5G
 }
