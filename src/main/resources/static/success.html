@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>결제 성공</title>
+</head>
+<body>
+<h1>✅ 포인트 충전 결과</h1>
+<p id="result">결제 승인 중...</p>
+
+<script>
+    window.onload = async function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentKey = urlParams.get("paymentKey");
+        const orderId = urlParams.get("orderId");
+        const amount = parseInt(urlParams.get("amount"));
+        const userCouponId = localStorage.getItem("userCouponId");
+        const accessToken = localStorage.getItem("accessToken");
+
+        console.log("📦 userCouponId in localStorage:", userCouponId);
+
+        if (!paymentKey || !orderId || !amount || !accessToken) {
+            document.getElementById("result").innerText = "잘못된 접근입니다.";
+            return;
+        }
+
+        const body = {
+            paymentKey,
+            orderId,
+            amount
+        };
+        if (userCouponId) {
+            body.userCouponId = userCouponId;
+        }
+
+        try {
+            const res = await fetch("/api/payments/toss/confirm", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${accessToken}`
+                },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (data.codeName === "SUCCESS") {
+                document.getElementById("result").innerText =
+                    `충전 완료 🎉\n충전금액: ${data.data.chargedAmount}원\n수수료: ${data.data.feeAmount}원\n실제 적립 포인트: ${data.data.finalAmount}P\n총 포인트: ${data.data.updatedMileage}P`;
+                localStorage.removeItem("userCouponId");
+            } else {
+                document.getElementById("result").innerText = `충전 실패 ❌\n${data.message}`;
+            }
+        } catch (err) {
+            document.getElementById("result").innerText = "오류 발생: " + err.message;
+        }
+    };
+</script>
+</body>
+</html>

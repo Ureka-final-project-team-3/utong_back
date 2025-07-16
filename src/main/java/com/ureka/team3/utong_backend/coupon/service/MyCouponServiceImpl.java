@@ -50,6 +50,7 @@ public class MyCouponServiceImpl implements MyCouponService {
 
 
             return MyCouponResponseDto.builder()
+                    .userCouponId(userCoupon.getId())
                     .couponId(coupon.getId())
                     .couponCode(coupon.getCouponCode())
                     .description(gifticon != null ? gifticon.getDescription() : null)

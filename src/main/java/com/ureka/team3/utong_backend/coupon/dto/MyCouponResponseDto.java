@@ -12,7 +12,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class MyCouponResponseDto {
-    private String couponId;
+    private String userCouponId; // user_coupon 의 pk
+    private String couponId; // coupon 테이블의 pk
     private String couponCode; // 030 공통코드 (예: "001" = 수수료 면제, "002" = 기프티콘)
     private String description; // 기프티콘이면 gifticon의 description, 아니면 null
     private String name; // 기프티콘 이름

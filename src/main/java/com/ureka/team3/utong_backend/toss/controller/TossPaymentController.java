@@ -20,6 +20,18 @@ public class TossPaymentController {
 
     private final TossPaymentService tossPaymentService;
 
+//    // 결제 시작
+//    @PostMapping("/pay")
+//    public ResponseEntity<ApiResponse<TossPaymentResponseDto>> startPayment(
+//            @AuthenticationPrincipal Account account,
+//            @RequestBody TossPaymentRequestDto requestDto) {
+//
+//        TossPaymentResponseDto response = tossPaymentService.startPayment(account, requestDto);
+//        return ResponseEntity.ok(ApiResponse.success(response));
+//    }
+
+
+    // 결제 승인
     @PostMapping("/confirm")
     public ResponseEntity<ApiResponse<PointChargeResponseDto>> confirmPayment(
             @AuthenticationPrincipal Account account,
