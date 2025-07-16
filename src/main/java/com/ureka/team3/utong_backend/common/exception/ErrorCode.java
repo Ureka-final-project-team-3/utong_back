@@ -22,6 +22,10 @@ public enum ErrorCode {
   GIFTICON_NOT_FOUND(HttpStatus.NOT_FOUND, "G404", "기프티콘 정보를 찾을 수 없습니다."),
 
   COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "C001", "사용자의 쿠폰이 존재하지 않습니다."),
+  COUPON_EXPIRED(HttpStatus.BAD_REQUEST,"C002", "쿠폰이 만료되었습니다."),
+  INVALID_COUPON_STATUS(HttpStatus.BAD_REQUEST,"C003", "쿠폰 상태가 유효하지 않습니다."),
+  NOT_FEE_WAIVE_COUPON(HttpStatus.BAD_REQUEST,"C004", "해당 쿠폰은 수수료 면제 쿠폰이 아닙니다."),
+
 
 
   INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "INVALID_TOKEN", "유효하지 않은 토큰입니다"),
