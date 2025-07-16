@@ -36,12 +36,12 @@ public class RouletteService {
         try {
             RouletteEvent activeEvent = rouletteEventRepository.findActiveEvent()
                     .orElseThrow(RouletteEventNotFoundException::new);
-            
+            System.out.println(activeEvent.toString());
             boolean alreadyParticipated = participationRepository
                     .existsByEventIdAndAccountId(activeEvent.getId(), account.getId());
             
             boolean canParticipate = activeEvent.isEventActive() && 
-                                   !alreadyParticipated && 
+//                                   !alreadyParticipated && 
                                    activeEvent.hasAvailableSlots();
             
             RouletteDto.EventInfoResponse response = RouletteDto.EventInfoResponse.builder()
