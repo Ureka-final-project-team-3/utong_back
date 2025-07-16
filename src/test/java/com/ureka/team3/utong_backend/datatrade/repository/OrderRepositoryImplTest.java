@@ -1,7 +1,7 @@
 package com.ureka.team3.utong_backend.datatrade.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ureka.team3.utong_backend.datatrade.dto.OrderMQDto;
+import com.ureka.team3.utong_backend.datatrade.dto.OrderDto;
 import com.ureka.team3.utong_backend.datatrade.utils.RedisKeyUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,10 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-class OrderRedisRepositoryTest {
+class OrderRepositoryImplTest {
 
     @Autowired
-    private OrderRedisRepository orderRedisRepository;
+    private OrderRepositoryImpl orderRepositoryImpl;
 
     @Autowired
     private StringRedisTemplate redisTemplate;
@@ -42,7 +42,7 @@ class OrderRedisRepositoryTest {
     @Test
     void savePurchaseOrder_정상동작_및_Redis저장확인() throws Exception {
         // given
-        OrderMQDto dto = OrderMQDto.builder()
+        OrderDto dto = OrderDto.builder()
                 .orderId("100L")
                 .price(8900L)
                 .quantity(5L)
@@ -52,7 +52,7 @@ class OrderRedisRepositoryTest {
                 .build();
 
         // when
-        orderRedisRepository.savePurchaseOrder(dto);
+        orderRepositoryImpl.savePurchaseOrder(dto);
 
         // then
         String listKey = RedisKeyUtil.buildBuyListKey(dataCode, dto.getPrice());
@@ -61,7 +61,7 @@ class OrderRedisRepositoryTest {
         String redisJson = redisTemplate.opsForList().leftPop(listKey);
         assertNotNull(redisJson);
 
-        OrderMQDto redisDto = objectMapper.readValue(redisJson, OrderMQDto.class);
+        OrderDto redisDto = objectMapper.readValue(redisJson, OrderDto.class);
         assertEquals(dto.getOrderId(), redisDto.getOrderId());
         assertEquals(dto.getQuantity(), redisDto.getQuantity());
 
@@ -75,7 +75,7 @@ class OrderRedisRepositoryTest {
         long now = Instant.now().toEpochMilli();
         long expiredAt = Instant.now().plus(3, ChronoUnit.DAYS).toEpochMilli();
 
-        OrderMQDto dto = OrderMQDto.builder()
+        OrderDto dto = OrderDto.builder()
                 .orderId("1")
                 .dataCode(dataCode)
                 .price(price)
@@ -85,10 +85,10 @@ class OrderRedisRepositoryTest {
                 .build();
 
         // when
-        orderRedisRepository.saveSellOrder(dto);
+        orderRepositoryImpl.saveSellOrder(dto);
 
         // then
-        String listKey = buildSellListKey(dataCode,price);
+        String listKey = buildSellListKey(dataCode, price);
         String zsetKey = buildSellZSetKey(dataCode);
 
         List<String> listValues = redisTemplate.opsForList().range(listKey, 0, -1);
@@ -98,9 +98,9 @@ class OrderRedisRepositoryTest {
         assertThat(listValues).hasSize(1);
         assertThat(score).isEqualTo((double) price);
 
-        OrderMQDto storedDto = null;
+        OrderDto storedDto = null;
         try {
-            storedDto = objectMapper.readValue(listValues.get(0), OrderMQDto.class);
+            storedDto = objectMapper.readValue(listValues.get(0), OrderDto.class);
         } catch (Exception e) {
             throw new RuntimeException("역직렬화 실패", e);
         }
