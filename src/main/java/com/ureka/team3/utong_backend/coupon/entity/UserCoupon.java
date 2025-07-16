@@ -34,4 +34,9 @@ public class UserCoupon {
 
     @Column(name = "status", length = 10, nullable = false)
     private String status; // 공통코드 040: "001", "002", "003"
+
+    // 쿠폰 사용 처리
+    public void markAsUsed() {
+        this.status = "003";
+    }
 }
