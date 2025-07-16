@@ -29,7 +29,7 @@ public class MyGifticonController {
     }
 
     @PostMapping("/detail")
-//      @Operation(summary = "기프티콘 상세 조회", description = "기프티콘 ID를 JSON으로 받아 상세 정보를 조회합니다.")
+//    @Operation(summary = "기프티콘 상세 조회", description = "기프티콘 ID를 JSON으로 받아 상세 정보를 조회합니다.")
     public ResponseEntity<ApiResponse<MyGifticonDetailResponseDto>> getGifticonDetail(
             @AuthenticationPrincipal Account account,
             @RequestBody GifticonDetailRequestDto request
