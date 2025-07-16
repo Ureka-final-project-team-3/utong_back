@@ -40,10 +40,22 @@ public class RouletteService {
             boolean alreadyParticipated = participationRepository
                     .existsByEventIdAndAccountId(activeEvent.getId(), account.getId());
             
-            boolean canParticipate = activeEvent.isEventActive() && 
-                                   !alreadyParticipated && 
-                                   activeEvent.hasAvailableSlots();
-            
+            boolean canParticipate = activeEvent.isEventActive();
+//            boolean canParticipate = activeEvent.isEventActive() && 
+//                    !alreadyParticipated && 
+//                    activeEvent.hasAvailableSlots();
+//            RouletteDto.EventInfoResponse response = RouletteDto.EventInfoResponse.builder()
+//                    .eventId(activeEvent.getId())
+//                    .title(activeEvent.getTitle())
+//                    .startDate(activeEvent.getStartDate())
+//                    .endDate(activeEvent.getEndDate())
+//                    .maxWinners(activeEvent.getMaxWinners())
+//                    .currentWinners(activeEvent.getCurrentWinners())
+//                    .winProbability(activeEvent.getWinProbability())
+//                    .isActive(activeEvent.isEventActive())
+//                    .canParticipate(canParticipate)
+//                    .alreadyParticipated(alreadyParticipated)
+//                    .build();
             RouletteDto.EventInfoResponse response = RouletteDto.EventInfoResponse.builder()
                     .eventId(activeEvent.getId())
                     .title(activeEvent.getTitle())
@@ -54,7 +66,7 @@ public class RouletteService {
                     .winProbability(activeEvent.getWinProbability())
                     .isActive(activeEvent.isEventActive())
                     .canParticipate(canParticipate)
-                    .alreadyParticipated(alreadyParticipated)
+                    .alreadyParticipated(false)
                     .build();
             
             return ApiResponse.success("활성 이벤트 정보를 조회했습니다", response);
@@ -84,7 +96,7 @@ public class RouletteService {
         }
         boolean isWinner = calculateWinProbability(event.getWinProbability());
         if (isWinner) {
-            event.incrementWinners();
+//            event.incrementWinners(); 개발용
             rouletteEventRepository.save(event);
             rouletteCouponService.issueWinnerCoupon(account, event);
         }
