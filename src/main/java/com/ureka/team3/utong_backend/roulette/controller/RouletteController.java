@@ -24,6 +24,7 @@ public class RouletteController {
     
     @GetMapping("/event")
     public ResponseEntity<ApiResponse<RouletteDto.EventInfoResponse>> getActiveEvent(@AuthenticationPrincipal Account account) {
+    	System.out.println(account.toString());
         return ResponseEntity.ok(rouletteService.getActiveEventInfo(account));
     }
     

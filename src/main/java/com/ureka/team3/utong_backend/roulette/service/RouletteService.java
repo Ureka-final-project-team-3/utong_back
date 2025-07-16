@@ -36,7 +36,7 @@ public class RouletteService {
         try {
             RouletteEvent activeEvent = rouletteEventRepository.findActiveEvent()
                     .orElseThrow(RouletteEventNotFoundException::new);
-            
+            System.out.println(activeEvent.toString());
             boolean alreadyParticipated = participationRepository
                     .existsByEventIdAndAccountId(activeEvent.getId(), account.getId());
             
@@ -68,40 +68,30 @@ public class RouletteService {
     
     @Transactional
     public ApiResponse<RouletteDto.ParticipateResponse> participate(String eventId, Account account) {
+        RouletteEvent event = rouletteEventRepository.findByIdWithLock(eventId)
+                .orElseThrow(RouletteEventNotFoundException::new);
         
-        try {
-            RouletteEvent event = rouletteEventRepository.findByIdWithLock(eventId)
-                    .orElseThrow(RouletteEventNotFoundException::new);
-            if (!event.isEventActive()) return ApiResponse.fail(ErrorCode.ROULETTE_EVENT_NOT_ACTIVE);
-            
-            if (participationRepository.existsByEventIdAndAccountId(eventId, account.getId())) return ApiResponse.fail(ErrorCode.ROULETTE_ALREADY_PARTICIPATED);
-            if (!event.hasAvailableSlots()) {
-                saveParticipation(event, account, false);
-                RouletteDto.ParticipateResponse response = createParticipateResponse(event, false, "당첨자가 모두 마감되었습니다");
-                return ApiResponse.success("룰렛 참여가 완료되었습니다", response);
-            }
-            boolean isWinner = calculateWinProbability(event.getWinProbability());
-            if (isWinner) {
-                event.incrementWinners();
-                rouletteEventRepository.save(event);
-                rouletteCouponService.issueWinnerCoupon(account, event);
-            }
-            saveParticipation(event, account, isWinner);
-            String message = isWinner ? "축하합니다! 당첨되셨습니다!" : "아쉽게도 당첨되지 않았습니다";
-            RouletteDto.ParticipateResponse response = createParticipateResponse(event, isWinner, message);
-            return ApiResponse.success("룰렛 참여가 완료되었습니다", response);
-            
-        } catch (RouletteEventNotFoundException e) {
-            return ApiResponse.fail(ErrorCode.ROULETTE_EVENT_NOT_FOUND);
-        } catch (RouletteEventNotActiveException e) {
-            return ApiResponse.fail(ErrorCode.ROULETTE_EVENT_NOT_ACTIVE);
-        } catch (RouletteAlreadyParticipatedException e) {
-            return ApiResponse.fail(ErrorCode.ROULETTE_ALREADY_PARTICIPATED);
-        } catch (UserNotFoundException e) {
-            return ApiResponse.fail(ErrorCode.USER_NOT_FOUND);
-        } catch (Exception e) {
-            return ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR);
+        if (!event.isEventActive()) {
+            throw new RouletteEventNotActiveException(); 
         }
+        if (participationRepository.existsByEventIdAndAccountId(eventId, account.getId())) {
+            throw new RouletteAlreadyParticipatedException(); 
+        }
+        if (!event.hasAvailableSlots()) {
+            saveParticipation(event, account, false);
+            RouletteDto.ParticipateResponse response = createParticipateResponse(event, false, "당첨자가 모두 마감되었습니다");
+            return ApiResponse.success("룰렛 참여가 완료되었습니다", response);
+        }
+        boolean isWinner = calculateWinProbability(event.getWinProbability());
+        if (isWinner) {
+            event.incrementWinners();
+            rouletteEventRepository.save(event);
+            rouletteCouponService.issueWinnerCoupon(account, event);
+        }
+        saveParticipation(event, account, isWinner);
+        String message = isWinner ? "축하합니다! 당첨되셨습니다!" : "아쉽게도 당첨되지 않았습니다";
+        RouletteDto.ParticipateResponse response = createParticipateResponse(event, isWinner, message);
+        return ApiResponse.success("룰렛 참여가 완료되었습니다", response);
     }
     
     private boolean calculateWinProbability(BigDecimal winProbability) {
