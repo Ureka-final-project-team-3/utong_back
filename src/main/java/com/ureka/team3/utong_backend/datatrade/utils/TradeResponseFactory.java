@@ -74,7 +74,7 @@ public class TradeResponseFactory {
     }
 
     public static ApiResponse waitingPurchase() {
-        return ApiResponse.success("입력한 가격이 최고 구매가보다 높아 예약 판매로 등록되었습니다.",
+        return ApiResponse.success("입력한 가격이 최저 판매가보다 낮아 예약 구매로 등록되었습니다.",
                 DataTradeDto.SaleDataResponseDto.builder()
                         .result(SaleOrderResult.WAITING)
                         .build());
