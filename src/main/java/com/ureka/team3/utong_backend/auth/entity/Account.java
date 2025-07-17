@@ -47,7 +47,9 @@ public class Account implements UserDetails {
 
     @Column(name = "default_line")
     private String defaultLine;
-
+    @Column(name = "is_mail", nullable = false)
+    @Builder.Default
+    private Boolean isMail = true;
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private User user;
 
@@ -55,7 +57,9 @@ public class Account implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
-
+    public void updateMailSetting(Boolean isMail) {
+        this.isMail = isMail;
+    }
     @Override
     public String getUsername() {
         return email;

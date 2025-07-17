@@ -76,6 +76,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .nickname(request.getNickname())
                 .mileage(0L)
+                .isMail(true)
                 .build();
         
         accountRepository.save(account);
@@ -105,6 +106,7 @@ public class AuthService {
         return lineRepository.findByPhoneNumber(phoneNumber)
                 .flatMap(line -> userRepository.findById(line.getUser().getId()));
     }
+
     public ApiResponse<AuthDto.LoginResponse> login(AuthDto.LoginRequest request, HttpServletResponse response) {
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -129,7 +131,8 @@ public class AuthService {
                     user != null ? user.getName() : null,
                     user != null ? user.getBirthDate() : null,
                     account.getMileage(),
-                    account.getDefaultLine()
+                    account.getDefaultLine(),
+                    account.getIsMail()
             );
             
             AuthDto.LoginResponse loginResponse = AuthDto.LoginResponse.builder()
@@ -213,7 +216,8 @@ public class AuthService {
                 user != null ? user.getName() : null,
                 user != null ? user.getBirthDate() : null,
                 account.getMileage(),
-                account.getDefaultLine()
+                account.getDefaultLine(),
+                account.getIsMail()
         );
         
         return ApiResponse.success("사용자 정보를 성공적으로 조회했습니다", userInfo);
