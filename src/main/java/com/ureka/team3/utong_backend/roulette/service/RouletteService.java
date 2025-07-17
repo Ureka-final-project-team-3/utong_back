@@ -1,6 +1,7 @@
 package com.ureka.team3.utong_backend.roulette.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -131,6 +132,7 @@ public class RouletteService {
                 .remainingWinners(remainingWinners)
                 .eventTitle(event.getTitle())
                 .gifticonDescription(event.getRewardCoupon().getGifticon().getDescription())
+                .expiredAt(LocalDateTime.now().plusDays(3).withHour(23).withMinute(59).withSecond(59))
                 .build();
     }
 }
