@@ -1,6 +1,7 @@
 package com.ureka.team3.utong_backend.datatrade.facade;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
+import com.ureka.team3.utong_backend.auth.service.AccountService;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.common.exception.business.InsufficientPointException;
 import com.ureka.team3.utong_backend.datatrade.dto.BuyMatchingResult;
@@ -40,10 +41,12 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
     private final LineService lineService;
     private final SaleMatchingProcessor saleMatchingProcessor;
     private final SaleMatchingResultHandler saleMatchingResultHandler;
+    private final AccountService accountService;
 
     @Override
     @Transactional
     public ApiResponse requestBuy(Account account, DataTradeDto.BuyDataRequestDto dto) {
+        account = accountService.findById(account.getId());
         // 1. 검증
         String defaultLineId = account.getDefaultLine();
         ApiResponse validationResult = tradeValidator.validatePurchase(defaultLineId);
