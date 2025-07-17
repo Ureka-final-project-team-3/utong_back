@@ -45,6 +45,9 @@ public class SaleDataRequest {
     @Column
     private String status;
 
+    @Column
+    private Long remaining;
+
     @PrePersist
     public void initId() {
         if (this.id == null) this.id = UUID.randomUUID().toString();
@@ -53,7 +56,23 @@ public class SaleDataRequest {
 //        if (this.expiredAt == null) this.expiredAt = createdAt.plusMinutes(10);
     }
 
-    public void changeStatus(String status){
+    public void changeStatus(String status) {
         this.status = status;
+    }
+
+    public void changeRemaining(Long remaining) {
+        this.remaining = remaining;
+    }
+
+    public void subtractRemain(long quantity) {
+        this.remaining -= quantity;
+        if (this.remaining == 0) {
+            this.status = "001";
+            return;
+        }
+
+        if (!this.remaining.equals(this.quantity) && this.remaining > 0) {
+            this.status = "002";
+        }
     }
 }

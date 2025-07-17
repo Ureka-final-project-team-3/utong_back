@@ -9,9 +9,5 @@ public interface BuyDataRequestService {
 
     BuyDataRequest findBuyOrderById(String buyOrderId);
 
-    boolean existsWaitingBuyRequest(String lineId);
-
-    void changeStatusToAllComplete(BuyDataRequest saved);
-
-    void changeStatusToPartComplete(BuyDataRequest saved);
+    void subtractPurchased(BuyDataRequest saved, long quantity);
 }

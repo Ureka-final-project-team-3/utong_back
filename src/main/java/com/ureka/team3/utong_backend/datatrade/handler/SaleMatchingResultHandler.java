@@ -25,15 +25,14 @@ public class SaleMatchingResultHandler {
 
     public ApiResponse handle(SaleMatchingResult result, SaleDataRequest saved) {
         List<SaleMatch> matchList = result.getMatchList();
+        saleDataRequestService.subtractSell(saved,saved.getQuantity() - result.getRemain());
         try {
             switch (result.getSaleMatchingStatus()) {
                 case ALL_MATCHED -> {
-                    saleDataRequestService.changeStatusToAllComplete(saved);
                     matchList.forEach(match -> tradeProcessor.processSaleMatches(saved, match));
                     return TradeResponseFactory.successSaleComplete(result);
                 }
                 case PART_MATCHED -> {
-                    saleDataRequestService.changeStatusToPartComplete(saved);
                     matchList.forEach(match -> tradeProcessor.processSaleMatches(saved, match));
                     tradeOrderQueueService.addToSaleOrderQueue(saved, result.getRemain());
                     return TradeResponseFactory.successSalePartComplete(result);

@@ -76,7 +76,7 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
         if (validationResult != null) return validationResult;
 
         SaleDataRequest savedOrder = saleDataRequestService.save(account, dto);
-        lineService.saleData(savedOrder.getLineId(), dto.getDataAmount());
+        lineService.saleData(savedOrder.getLineId(), dto.getDataAmount());  // 데이터 차감
         SaleMatchingResult saleMatchingResult = saleMatchingProcessor.handle(dto);
         return saleMatchingResultHandler.handle(saleMatchingResult, savedOrder);
     }
