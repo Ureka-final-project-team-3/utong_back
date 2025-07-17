@@ -126,13 +126,27 @@ public class RouletteService {
     private RouletteDto.ParticipateResponse createParticipateResponse(
             RouletteEvent event, boolean isWinner, String message) {
         int remainingWinners = Math.max(0, event.getMaxWinners() - event.getCurrentWinners());
-        return RouletteDto.ParticipateResponse.builder()
-                .isWinner(isWinner)
-                .message(message)
-                .remainingWinners(remainingWinners)
-                .eventTitle(event.getTitle())
-                .gifticonDescription(event.getRewardCoupon().getGifticon().getDescription())
-                .expiredAt(LocalDateTime.now().plusDays(3).withHour(23).withMinute(59).withSecond(59))
-                .build();
+        if("002".equals(event.getRewardCoupon().getCouponCode()))
+        {
+        	return RouletteDto.ParticipateResponse.builder()
+                    .isWinner(isWinner)
+                    .message(message)
+                    .remainingWinners(remainingWinners)
+                    .eventTitle(event.getTitle())
+                    .gifticonDescription(event.getRewardCoupon().getGifticon().getDescription())
+                    .expiredAt(LocalDateTime.now().plusDays(3).withHour(23).withMinute(59).withSecond(59))
+                    .build();
+        }
+        else
+        {
+        	return RouletteDto.ParticipateResponse.builder()
+                    .isWinner(isWinner)
+                    .message(message)
+                    .remainingWinners(remainingWinners)
+                    .eventTitle(event.getTitle())
+                    .gifticonDescription(event.getRewardCoupon().getId())
+                    .expiredAt(LocalDateTime.now().plusDays(3).withHour(23).withMinute(59).withSecond(59))
+                    .build();
+        }
     }
 }
