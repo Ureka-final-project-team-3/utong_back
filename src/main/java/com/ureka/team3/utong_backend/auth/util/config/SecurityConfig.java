@@ -90,48 +90,28 @@ public class SecurityConfig {
 //    }
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    	return http
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
-                    
-                    .requestMatchers("/", "/index.html", "/*.html", "/*.css", "/*.js", "/*.ico").permitAll()
-                    .requestMatchers("/static/**", "/public/**", "/resources/**", "/webjars/**").permitAll()
-                    
-                    .requestMatchers("/h2-console/**").permitAll()
-                    .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                    
-                    .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/auth/find-account", 
-                                    "/api/auth/forgot-password", "/api/auth/validate-reset-token", 
-                                    "/api/auth/reset-password").permitAll()
-                    
-                    .requestMatchers("/api/test", "/debug/**").permitAll()
-                    
-                    .requestMatchers("/api/prices").permitAll()
-                    
-                    .requestMatchers("/api/gifticons", "/api/gifticons/count").permitAll()
-                    
-                    .requestMatchers("/api/**").authenticated()
-                    
-                    .anyRequest().permitAll()
+        return http
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .anyRequest().permitAll() 
+            )
+            .headers(headers -> headers
+                .frameOptions(frameOptions -> frameOptions.disable())
+            )
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/")
+                .defaultSuccessUrl("/oauth2/success", true)
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService)
                 )
-                .headers(headers -> headers
-                    .frameOptions(frameOptions -> frameOptions.disable())
-                )
-                .oauth2Login(oauth2 -> oauth2
-                    .loginPage("/")
-                    .defaultSuccessUrl("/oauth2/success", true)
-                    .userInfoEndpoint(userInfo -> userInfo
-                        .userService(customOAuth2UserService)
-                    )
-                    .successHandler(oAuth2SuccessHandler)
-                    .failureUrl("/?error=oauth2_failed")
-                )
-                .exceptionHandling(exceptions -> exceptions
-                    .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
-                )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
-        }
+                .successHandler(oAuth2SuccessHandler)
+                .failureUrl("/?error=oauth2_failed")
+            )
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .build();
     }
+}
