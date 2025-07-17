@@ -2,6 +2,7 @@ package com.ureka.team3.utong_backend.line.entity;
 
 import java.time.LocalDate;
 
+import com.ureka.team3.utong_backend.common.exception.business.InsufficientDataException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -47,6 +48,8 @@ public class LineData {
     }
 
     public void saleData(Long amount){
+        if(amount>remaining)
+            throw new InsufficientDataException();
         this.remaining -= amount;
         this.sell += amount;
     }
