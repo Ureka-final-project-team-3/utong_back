@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.ureka.team3.utong_backend.gift.entity.Gifticon;
+
 public class RouletteDto {
     
     @Data
@@ -44,6 +46,7 @@ public class RouletteDto {
         private String message;
         private Integer remainingWinners;
         private String eventTitle;
+        private String gifticonDescription;
     }
     
     @Data

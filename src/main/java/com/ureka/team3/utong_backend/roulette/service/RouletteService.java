@@ -130,6 +130,7 @@ public class RouletteService {
                 .message(message)
                 .remainingWinners(remainingWinners)
                 .eventTitle(event.getTitle())
+                .gifticonDescription(event.getRewardCoupon().getGifticon().getDescription())
                 .build();
     }
 }
