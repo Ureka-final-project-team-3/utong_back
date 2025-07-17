@@ -45,6 +45,9 @@ public class BuyDataRequest {
     @Column
     private String status;
 
+    @Column
+    private Long remaining;
+
     @PrePersist
     public void initId() {
         if (this.id == null) this.id = UUID.randomUUID().toString();
@@ -54,5 +57,17 @@ public class BuyDataRequest {
 
     public void changeStatus(String status) {
         this.status = status;
+    }
+
+    public void subtractRemain(long quantity) {
+        this.remaining -= quantity;
+        if(this.remaining == 0 ) {
+            this.status = "001";
+            return;
+        }
+
+        if(!this.remaining.equals(this.quantity) && this.remaining > 0){
+            this.status = "002";
+        }
     }
 }

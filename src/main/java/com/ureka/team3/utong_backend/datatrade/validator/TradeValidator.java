@@ -31,8 +31,8 @@ public class TradeValidator {
         if (defaultLine.getPlan().getData() == -1)
             return TradeResponseFactory.unlimitedBuyNotAllowed();
 
-        if (saleDataRequestRepository.existsWaitingRequestByLineId(defaultLine.getId()))
-            return TradeResponseFactory.existSaleRequest();
+//        if (saleDataRequestRepository.existsWaitingRequestByLineId(defaultLine.getId()))
+//            return TradeResponseFactory.existSaleRequest();
 
         return null;
     }
@@ -55,9 +55,9 @@ public class TradeValidator {
             return TradeResponseFactory.exceedSaleLimit();
         }
 
-        if (buyDataRequestRepository.existsWaitingRequestByLineId(defaultLine.getId())) {
-            return TradeResponseFactory.existBuyRequest();
-        }
+//        if (buyDataRequestRepository.existsWaitingRequestByLineId(defaultLine.getId())) {
+//            return TradeResponseFactory.existBuyRequest();
+//        }
 
         return null;
     }

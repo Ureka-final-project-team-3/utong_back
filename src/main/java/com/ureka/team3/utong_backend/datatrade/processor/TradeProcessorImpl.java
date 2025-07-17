@@ -31,25 +31,32 @@ public class TradeProcessorImpl implements TradeProcessor {
     @Transactional
     public void processBuyMatches(BuyDataRequest buyDataRequest, PurchaseMatch matchOrder) {
         SaleDataRequest saleDataRequest = saleDataRequestService.findSaleOrderById(matchOrder.getMatchedOrder().getOrderId());
+        saleDataRequestService.subtractSell(saleDataRequest, matchOrder.getAmount());
         TradeExecutionDto tradeExecutionDto = new TradeExecutionDto(buyDataRequest, saleDataRequest, matchOrder.getAmount(), matchOrder.getPricePerUnit());
         processTrade(tradeExecutionDto);
     }
 
     @Override
+    @Transactional
     public void processSaleMatches(SaleDataRequest request, SaleMatch match) {
         BuyDataRequest buyOrderRequest = buyDataRequestService.findBuyOrderById(match.getMatchedOrder().getOrderId());
+        buyDataRequestService.subtractPurchased(buyOrderRequest,match.getAmount());
         TradeExecutionDto tradeExecutionDto = new TradeExecutionDto(buyOrderRequest, request, match.getAmount(), match.getPricePerUnit());
         processTrade(tradeExecutionDto);
     }
 
     private void processTrade(TradeExecutionDto tradeExecutionDto) {
+        // 체결 내용 contract에 저장
         Contract contract = contractService.save(tradeExecutionDto);
 
         Account account = contract.getBuyDataRequest().getAccount();
         Long totalIncomeForSeller = tradeCalculator.calculateTotalIncomeForSeller(contract.getPrice(), contract.getAmount());
+
+        // 판매자에게 포인트 지급
         pointService.givePoint(account, totalIncomeForSeller);
 
         String targetLineId = contract.getBuyDataRequest().getLineId();
+        // 구매자에게 데이터 지급
         lineService.giveData(targetLineId, contract.getAmount());
     }
 

@@ -22,6 +22,7 @@ public class BuyDataRequestServiceImpl implements BuyDataRequestService {
                 .dataCode(dto.getDataCode())
                 .lineId(account.getDefaultLine())
                 .status("003")
+                .remaining(dto.getDataAmount())
                 .build());
     }
 
@@ -30,19 +31,8 @@ public class BuyDataRequestServiceImpl implements BuyDataRequestService {
         return buyDataRequestRepository.findById(buyOrderId).orElseThrow(OrderNotFoundException::new);
     }
 
-
     @Override
-    public boolean existsWaitingBuyRequest(String lineId) {
-        return buyDataRequestRepository.existsWaitingRequestByLineId(lineId);
-    }
-
-    @Override
-    public void changeStatusToAllComplete(BuyDataRequest saved) {
-        saved.changeStatus("001");
-    }
-
-    @Override
-    public void changeStatusToPartComplete(BuyDataRequest saved) {
-        saved.changeStatus("002");
+    public void subtractPurchased(BuyDataRequest saved, long quantity) {
+        saved.subtractRemain(quantity);
     }
 }

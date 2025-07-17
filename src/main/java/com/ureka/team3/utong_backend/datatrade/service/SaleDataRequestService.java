@@ -9,9 +9,5 @@ public interface SaleDataRequestService {
 
     SaleDataRequest findSaleOrderById(String saleOrderId);
 
-    boolean existsWaitingSaleRequest(String lineId);
-
-    void changeStatusToAllComplete(SaleDataRequest saved);
-
-    void changeStatusToPartComplete(SaleDataRequest saved);
+    void subtractSell(SaleDataRequest saleDataRequest, Long amount);
 }

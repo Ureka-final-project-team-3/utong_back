@@ -21,6 +21,7 @@ public class SaleDataRequestServiceImpl implements SaleDataRequestService {
                 .quantity(dto.getDataAmount())
                 .dataCode(dto.getDataCode())
                 .status("003")
+                .remaining(dto.getDataAmount())
                 .lineId(account.getDefaultLine())
                 .build());
     }
@@ -31,17 +32,7 @@ public class SaleDataRequestServiceImpl implements SaleDataRequestService {
     }
 
     @Override
-    public boolean existsWaitingSaleRequest(String lineId) {
-        return saleDataRequestRepository.existsWaitingRequestByLineId(lineId);
-    }
-
-    @Override
-    public void changeStatusToAllComplete(SaleDataRequest saved) {
-        saved.changeStatus("001");
-    }
-
-    @Override
-    public void changeStatusToPartComplete(SaleDataRequest saved) {
-        saved.changeStatus("002");
+    public void subtractSell(SaleDataRequest saved, Long amount) {
+        saved.subtractRemain(amount);
     }
 }

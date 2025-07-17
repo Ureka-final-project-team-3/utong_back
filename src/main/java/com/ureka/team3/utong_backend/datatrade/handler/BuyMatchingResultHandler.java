@@ -27,16 +27,14 @@ public class BuyMatchingResultHandler {
     @Transactional
     public ApiResponse handle(BuyMatchingResult result, BuyDataRequest saved) {
         List<PurchaseMatch> matchList = result.getMatchList();
-
+        buyDataRequestService.subtractPurchased(saved,saved.getQuantity() - result.getRemain());
         try {
             switch (result.getBuyMatchingStatus()) {
                 case ALL_MATCHED -> {
-                    buyDataRequestService.changeStatusToAllComplete(saved);
                     matchList.forEach(match -> tradeProcessor.processBuyMatches(saved, match));
                     return TradeResponseFactory.successPurchaseComplete();
                 }
                 case PART_MATCHED -> {
-                    buyDataRequestService.changeStatusToPartComplete(saved);
                     matchList.forEach(match -> tradeProcessor.processBuyMatches(saved, match));
                     tradeOrderQueueService.addToBuyOrderQueue(saved, result.getRemain());
                     return TradeResponseFactory.successPurchasePartComplete(result);
