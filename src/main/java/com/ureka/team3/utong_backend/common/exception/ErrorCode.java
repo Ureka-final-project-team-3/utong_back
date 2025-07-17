@@ -47,7 +47,8 @@ public enum ErrorCode {
     EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "EMAIL_ALREADY_EXISTS", "이미 존재하는 이메일입니다"),
     ALREADY_REVIEWED(HttpStatus.BAD_REQUEST, "ALREADY_REVIEWED", "이미 해당 요금제에 대한 리뷰를 작성하셨습니다."),
     INSUFFICIENT_POINT(HttpStatus.BAD_REQUEST, "INSUFFICIENT_POINT", "포인트가 부족합니다"),
-    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "NOT_FOUND_ORDER", "해당 주문이 존재하지 않습니다");
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "NOT_FOUND_ORDER", "해당 주문이 존재하지 않습니다"),
+    INSUFFICIENT_DATA(HttpStatus.BAD_REQUEST,"INSUFFICIENT_DATA", "데이터가 부족합니다");
     private final HttpStatus status;
     private final String code;
     private final String message;

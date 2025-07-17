@@ -1,6 +1,7 @@
 package com.ureka.team3.utong_backend.datatrade.facade;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
+import com.ureka.team3.utong_backend.auth.service.AccountService;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.common.exception.business.InsufficientPointException;
 import com.ureka.team3.utong_backend.datatrade.dto.BuyMatchingResult;
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Slf4j
 @Service
@@ -39,10 +41,12 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
     private final LineService lineService;
     private final SaleMatchingProcessor saleMatchingProcessor;
     private final SaleMatchingResultHandler saleMatchingResultHandler;
+    private final AccountService accountService;
 
     @Override
     @Transactional
     public ApiResponse requestBuy(Account account, DataTradeDto.BuyDataRequestDto dto) {
+        account = accountService.findById(account.getId());
         // 1. 검증
         String defaultLineId = account.getDefaultLine();
         ApiResponse validationResult = tradeValidator.validatePurchase(defaultLineId);
@@ -52,6 +56,7 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
             Long purchaseCoast = tradeCalculator.calculateTotalCoastForConsumer(dto);
             pointService.usePoint(account, purchaseCoast);
         } catch (InsufficientPointException e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return TradeResponseFactory.insufficientPoint();
         }
         // 3. DB에 저장

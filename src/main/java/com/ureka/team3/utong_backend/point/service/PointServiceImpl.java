@@ -56,11 +56,13 @@ public class PointServiceImpl implements PointService {
     @Transactional
     public void usePoint(Account account, Long coast) {
         account.decreasePoint(coast);
+        accountRepository.save(account);
     }
 
     @Override
     public void givePoint(Account account, Long point) {
         account.increasePoint(point);
+        accountRepository.save(account);
     }
 
 
