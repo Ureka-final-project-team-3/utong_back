@@ -12,11 +12,12 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MyDataSaleDto {
+public class SaleResponseDto {
     private String saleId;
-    private String Status;      // 판매예약 / 거래완료
+    private String status;      // 판매예약 / 거래완료
     private String dataCode;         // LTE / 5G
     private Long quantity;           // 판매량
     private LocalDateTime tradeDate; // 거래일 (또는 등록일)
     private Long pricePerGb;         // 1GB당 가격
+    private String phoneNumber;
 }

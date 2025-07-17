@@ -18,9 +18,7 @@ public interface SaleDataRequestRepository extends JpaRepository<SaleDataRequest
     @Query("""
         SELECT s FROM SaleDataRequest s
         WHERE s.account.id = :accountId
-        AND NOT EXISTS (
-            SELECT c FROM Contract c WHERE c.saleDataRequest.id = s.id
-        )
+         AND (s.status = '002' OR s.status = '003')
         AND s.createdAt >= :fromDate
     """)
     List<SaleDataRequest> findWaitingSalesByAccountId(
