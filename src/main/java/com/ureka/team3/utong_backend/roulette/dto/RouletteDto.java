@@ -1,12 +1,12 @@
 package com.ureka.team3.utong_backend.roulette.dto;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 public class RouletteDto {
     
@@ -44,6 +44,8 @@ public class RouletteDto {
         private String message;
         private Integer remainingWinners;
         private String eventTitle;
+        private String gifticonDescription;
+        private LocalDateTime expiredAt;
     }
     
     @Data

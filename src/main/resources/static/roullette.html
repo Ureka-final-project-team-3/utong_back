@@ -3,63 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>룰렛 테스트</title>
+    <title>자동 토큰 검증 룰렛 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px 5px 5px 0;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { 
+            background-color: #6c757d; 
+            cursor: not-allowed; 
+        }
+        .log {
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .token-info {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+        }
+    </style>
 </head>
 <body>
-    <h1>룰렛 이벤트 테스트</h1>
+    <h1>자동 토큰 검증 룰렛 테스트</h1>
     
-    <div>
+    <div class="container">
+        <h2>토큰 상태</h2>
+        <div id="tokenStatus" class="status info">토큰 상태 확인 중...</div>
+        <div id="tokenInfo" class="token-info" style="display: none;"></div>
+        <button onclick="checkTokenManually()">수동 토큰 검증</button>
+        <button onclick="refreshToken()">토큰 갱신</button>
+        <button onclick="clearToken()">토큰 삭제</button>
+    </div>
+    
+    <div class="container">
         <h2>로그인</h2>
         <input type="email" id="loginEmail" placeholder="이메일" value="cliff615@naver.com">
         <input type="password" id="loginPassword" placeholder="비밀번호" value="12345678">
-        <button onclick="login()">로그인</button>
-        <div id="loginResult"></div>
+        <button onclick="login()" id="loginBtn">로그인</button>
+        <div id="loginResult" class="status" style="display: none;"></div>
     </div>
     
-    <hr>
-    
-    <div>
-        <h2>활성 이벤트 정보</h2>
-        <button onclick="getEventInfo()">이벤트 정보 조회</button>
-        <div id="eventInfo"></div>
+    <div class="container">
+        <h2>룰렛 이벤트</h2>
+        <button onclick="getEventInfo()" id="eventBtn" disabled>이벤트 정보 조회</button>
+        <div id="eventInfo" style="margin-top: 10px;"></div>
+        
+        <div style="margin-top: 20px;">
+            <input type="text" id="eventId" placeholder="이벤트 ID">
+            <button onclick="participate()" id="participateBtn" disabled>룰렛 참여</button>
+            <div id="participateResult" style="margin-top: 10px;"></div>
+        </div>
     </div>
     
-    <hr>
-    
-    <div>
-        <h2>룰렛 참여</h2>
-        <input type="text" id="eventId" placeholder="이벤트 ID">
-        <button onclick="participate()">룰렛 돌리기!</button>
-        <div id="participateResult"></div>
-    </div>
-    
-    <hr>
-    
-    <div>
-        <h2>테스트 로그</h2>
+    <div class="container">
+        <h2>디버그 로그</h2>
         <button onclick="clearLog()">로그 지우기</button>
-        <div id="log"></div>
+        <div id="log" class="log"></div>
     </div>
 
     <script>
         const API_BASE = 'http://localhost:8080/api';
         let accessToken = localStorage.getItem('accessToken') || '';
+        let isTokenValid = false;
 
-        function log(message) {
+        function log(message, type = 'info') {
             const timestamp = new Date().toLocaleTimeString();
             const logDiv = document.getElementById('log');
-            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            const color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue';
+            logDiv.innerHTML += `<span style="color: ${color}">[${timestamp}] ${message}</span>\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
         }
 
         function clearLog() {
             document.getElementById('log').innerHTML = '';
         }
 
+        function updateTokenStatus(status, type, tokenData = null) {
+            const statusEl = document.getElementById('tokenStatus');
+            const infoEl = document.getElementById('tokenInfo');
+            
+            statusEl.textContent = status;
+            statusEl.className = `status ${type}`;
+            
+            if (tokenData) {
+                infoEl.innerHTML = `
+                    <strong>토큰 정보:</strong><br>
+                    길이: ${accessToken.length}<br>
+                    시작: ${accessToken.substring(0, 30)}...<br>
+                    끝: ...${accessToken.substring(accessToken.length - 10)}<br>
+                    만료 시간: ${tokenData.expiresAt || 'N/A'}
+                `;
+                infoEl.style.display = 'block';
+            } else {
+                infoEl.style.display = 'none';
+            }
+            
+            updateButtonStates();
+        }
+
+        function updateButtonStates() {
+            const eventBtn = document.getElementById('eventBtn');
+            const participateBtn = document.getElementById('participateBtn');
+            
+            eventBtn.disabled = !isTokenValid;
+            participateBtn.disabled = !isTokenValid;
+        }
+
+        async function checkTokenValidity() {
+            if (!accessToken) {
+                updateTokenStatus('토큰이 없습니다', 'warning');
+                isTokenValid = false;
+                return false;
+            }
+
+            try {
+                log('토큰 유효성 검증 시작');
+                
+                const response = await fetch(`${API_BASE}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log('토큰 유효성 검증 성공', 'success');
+                    updateTokenStatus('토큰이 유효합니다', 'success', { 
+                        expiresAt: new Date(Date.now() + 3600000).toLocaleString() 
+                    });
+                    isTokenValid = true;
+                    return true;
+                } else {
+                    log(`토큰 유효성 검증 실패: ${response.status}`, 'error');
+                    
+                    if (response.status === 401) {
+                        updateTokenStatus('토큰이 만료되었거나 유효하지 않습니다', 'error');
+                        
+                        // 자동으로 리프레시 토큰으로 갱신 시도
+                        const refreshResult = await attemptTokenRefresh();
+                        if (refreshResult) {
+                            return true;
+                        }
+                        
+                        // 리프레시 실패 시 토큰 삭제
+                        clearToken();
+                    } else {
+                        updateTokenStatus('토큰 검증 중 오류 발생', 'error');
+                    }
+                    isTokenValid = false;
+                    return false;
+                }
+            } catch (error) {
+                log(`토큰 검증 오류: ${error.message}`, 'error');
+                updateTokenStatus('토큰 검증 중 네트워크 오류', 'error');
+                isTokenValid = false;
+                return false;
+            }
+        }
+
+        async function attemptTokenRefresh() {
+            try {
+                log('리프레시 토큰으로 갱신 시도');
+                
+                const response = await fetch(`${API_BASE}/auth/refresh`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.data && data.data.accessToken) {
+                        accessToken = data.data.accessToken;
+                        localStorage.setItem('accessToken', accessToken);
+                        log('토큰 갱신 성공', 'success');
+                        updateTokenStatus('토큰이 자동으로 갱신되었습니다', 'success');
+                        isTokenValid = true;
+                        return true;
+                    }
+                }
+                
+                log('토큰 갱신 실패', 'error');
+                return false;
+            } catch (error) {
+                log(`토큰 갱신 오류: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function checkTokenManually() {
+            await checkTokenValidity();
+        }
+
+        async function refreshToken() {
+            const result = await attemptTokenRefresh();
+            if (!result) {
+                updateTokenStatus('토큰 갱신 실패', 'error');
+            }
+        }
+
+        function clearToken() {
+            localStorage.removeItem('accessToken');
+            accessToken = '';
+            isTokenValid = false;
+            updateTokenStatus('토큰이 삭제되었습니다', 'warning');
+            log('토큰 삭제됨');
+        }
+
         async function login() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
+            const loginResult = document.getElementById('loginResult');
             
             try {
+                log('로그인 시도');
+                
                 const response = await fetch(`${API_BASE}/auth/login`, {
                     method: 'POST',
                     headers: {
@@ -70,66 +278,90 @@
                 
                 const result = await response.json();
                 
-                if (result.resultCode === 200 && result.data.accessToken) {
+                if (response.ok && result.data && result.data.accessToken) {
                     accessToken = result.data.accessToken;
                     localStorage.setItem('accessToken', accessToken);
-                    document.getElementById('loginResult').innerHTML = 'LOGIN SUCCESS';
-                    log('로그인 성공');
+                    isTokenValid = true;
+                    
+                    log('로그인 성공', 'success');
+                    loginResult.textContent = '로그인 성공';
+                    loginResult.className = 'status success';
+                    loginResult.style.display = 'block';
+                    
+                    updateTokenStatus('새 토큰으로 로그인 완료', 'success', {
+                        expiresAt: new Date(Date.now() + result.data.expiresIn).toLocaleString()
+                    });
                 } else {
-                    document.getElementById('loginResult').innerHTML = 'LOGIN FAILED: ' + result.message;
-                    log('로그인 실패: ' + result.message);
+                    log('로그인 실패', 'error');
+                    loginResult.textContent = '로그인 실패: ' + (result.message || '알 수 없는 오류');
+                    loginResult.className = 'status error';
+                    loginResult.style.display = 'block';
                 }
             } catch (error) {
-                document.getElementById('loginResult').innerHTML = 'LOGIN ERROR: ' + error.message;
-                log('로그인 오류: ' + error.message);
+                log(`로그인 오류: ${error.message}`, 'error');
+                loginResult.textContent = '로그인 오류: ' + error.message;
+                loginResult.className = 'status error';
+                loginResult.style.display = 'block';
             }
         }
 
         async function getEventInfo() {
-            if (!accessToken) {
-                alert('먼저 로그인하세요');
+            if (!isTokenValid) {
+                alert('먼저 유효한 토큰이 필요합니다');
                 return;
             }
             
             try {
+                log('이벤트 정보 조회 시작');
+                
                 const response = await fetch(`${API_BASE}/roulette/event`, {
                     headers: {
-                        'Authorization': `Bearer ${accessToken}`
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
                     }
                 });
                 
                 const result = await response.json();
                 
-                if (result.resultCode === 200) {
+                if (response.ok) {
                     const data = result.data;
                     document.getElementById('eventInfo').innerHTML = `
-                        <p>이벤트 ID: ${data.eventId}</p>
-                        <p>제목: ${data.title}</p>
-                        <p>시작: ${data.startDate}</p>
-                        <p>종료: ${data.endDate}</p>
-                        <p>최대 당첨자: ${data.maxWinners}명</p>
-                        <p>현재 당첨자: ${data.currentWinners}명</p>
-                        <p>당첨 확률: ${(data.winProbability * 100).toFixed(1)}%</p>
-                        <p>활성 상태: ${data.isActive}</p>
-                        <p>참여 가능: ${data.canParticipate}</p>
-                        <p>이미 참여: ${data.alreadyParticipated}</p>
+                        <div class="status success">
+                            <p><strong>이벤트 ID:</strong> ${data.eventId}</p>
+                            <p><strong>제목:</strong> ${data.title}</p>
+                            <p><strong>시작:</strong> ${data.startDate}</p>
+                            <p><strong>종료:</strong> ${data.endDate}</p>
+                            <p><strong>최대 당첨자:</strong> ${data.maxWinners}명</p>
+                            <p><strong>현재 당첨자:</strong> ${data.currentWinners}명</p>
+                            <p><strong>당첨 확률:</strong> ${(data.winProbability * 100).toFixed(1)}%</p>
+                            <p><strong>활성 상태:</strong> ${data.isActive}</p>
+                            <p><strong>참여 가능:</strong> ${data.canParticipate}</p>
+                        </div>
                     `;
                     
                     document.getElementById('eventId').value = data.eventId;
-                    log('이벤트 정보 조회 성공');
+                    log('이벤트 정보 조회 성공', 'success');
                 } else {
-                    document.getElementById('eventInfo').innerHTML = 'ERROR: ' + result.message;
-                    log('이벤트 정보 조회 실패: ' + result.message);
+                    document.getElementById('eventInfo').innerHTML = `
+                        <div class="status error">오류: ${result.message || '알 수 없는 오류'}</div>
+                    `;
+                    log('이벤트 정보 조회 실패', 'error');
+                    
+                    if (response.status === 401) {
+                        await checkTokenValidity();
+                    }
                 }
             } catch (error) {
-                document.getElementById('eventInfo').innerHTML = 'ERROR: ' + error.message;
-                log('이벤트 정보 조회 오류: ' + error.message);
+                document.getElementById('eventInfo').innerHTML = `
+                    <div class="status error">네트워크 오류: ${error.message}</div>
+                `;
+                log(`이벤트 정보 조회 오류: ${error.message}`, 'error');
             }
         }
 
         async function participate() {
-            if (!accessToken) {
-                alert('먼저 로그인하세요');
+            if (!isTokenValid) {
+                alert('먼저 유효한 토큰이 필요합니다');
                 return;
             }
             
@@ -140,6 +372,8 @@
             }
             
             try {
+                log('룰렛 참여 시도');
+                
                 const response = await fetch(`${API_BASE}/roulette/participate`, {
                     method: 'POST',
                     headers: {
@@ -151,33 +385,46 @@
                 
                 const result = await response.json();
                 
-                if (result.resultCode === 200) {
+                if (response.ok) {
                     const data = result.data;
-                    const resultColor = data.isWinner ? 'red' : 'blue';
+                    const resultColor = data.isWinner ? 'success' : 'info';
                     document.getElementById('participateResult').innerHTML = `
-                        <h3 style="color: ${resultColor}">
-                            ${data.isWinner ? '🎉 당첨!' : '😢 꽝!'}
-                        </h3>
-                        <p>${data.message}</p>
-                        <p>남은 당첨자 수: ${data.remainingWinners}명</p>
-                        <p>이벤트: ${data.eventTitle}</p>
+                        <div class="status ${resultColor}">
+                            <h3>${data.isWinner ? '당첨!' : '아쉽게도...'}</h3>
+                            <p>${data.message}</p>
+                            <p>남은 당첨자 수: ${data.remainingWinners}명</p>
+                            <p>이벤트: ${data.eventTitle}</p>
+                        </div>
                     `;
-                    log(`룰렛 결과: ${data.isWinner ? '당첨' : '꽝'} - ${data.message}`);
+                    log(`룰렛 결과: ${data.isWinner ? '당첨' : '꽝'}`, data.isWinner ? 'success' : 'info');
                 } else {
-                    document.getElementById('participateResult').innerHTML = 'ERROR: ' + result.message;
-                    log('룰렛 참여 실패: ' + result.message);
+                    document.getElementById('participateResult').innerHTML = `
+                        <div class="status error">오류: ${result.message || '알 수 없는 오류'}</div>
+                    `;
+                    log('룰렛 참여 실패', 'error');
+                    
+                    if (response.status === 401) {
+                        await checkTokenValidity();
+                    }
                 }
             } catch (error) {
-                document.getElementById('participateResult').innerHTML = 'ERROR: ' + error.message;
-                log('룰렛 참여 오류: ' + error.message);
+                document.getElementById('participateResult').innerHTML = `
+                    <div class="status error">네트워크 오류: ${error.message}</div>
+                `;
+                log(`룰렛 참여 오류: ${error.message}`, 'error');
             }
         }
 
-        // 페이지 로드시 토큰 확인
-        window.onload = function() {
+        // 페이지 로드 시 자동 토큰 검증
+        window.onload = async function() {
+            log('페이지 로드됨');
+            
             if (accessToken) {
-                document.getElementById('loginResult').innerHTML = 'ALREADY LOGGED IN';
-                log('저장된 토큰으로 로그인 상태');
+                log('저장된 토큰 발견, 유효성 검증 시작');
+                await checkTokenValidity();
+            } else {
+                log('저장된 토큰 없음');
+                updateTokenStatus('저장된 토큰이 없습니다', 'warning');
             }
         };
     </script>
