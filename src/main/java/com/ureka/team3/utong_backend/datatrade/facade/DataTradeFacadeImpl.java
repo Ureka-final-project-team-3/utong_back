@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Slf4j
 @Service
@@ -52,6 +53,7 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
             Long purchaseCoast = tradeCalculator.calculateTotalCoastForConsumer(dto);
             pointService.usePoint(account, purchaseCoast);
         } catch (InsufficientPointException e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return TradeResponseFactory.insufficientPoint();
         }
         // 3. DB에 저장
