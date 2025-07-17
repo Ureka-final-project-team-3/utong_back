@@ -180,6 +180,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                     .provider(userInfo.getProvider())
                     .providerId(userInfo.getProviderId())
                     .mileage(emailAccount.getMileage())
+                    .isMail(emailAccount.getIsMail())
                     .user(emailAccount.getUser())
                     .build();
             

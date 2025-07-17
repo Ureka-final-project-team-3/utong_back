@@ -1,6 +1,5 @@
 package com.ureka.team3.utong_backend.auth.dto;
 
-
 import java.time.LocalDate;
 
 import jakarta.validation.constraints.Email;
@@ -13,23 +12,23 @@ import lombok.NoArgsConstructor;
 
 public class AuthDto {
     
-	@Data
-	public static class SignUpRequest {
-	    @NotBlank(message = "이메일은 필수입니다")
-	    @Email(message = "올바른 이메일 형식이 아닙니다")
-	    private String email;
-	    
-	    @NotBlank(message = "닉네임은 필수입니다")
-	    @Size(max = 50, message = "닉네임은 50자 이하여야 합니다")
-	    private String nickname;
-	    
-	    @NotBlank(message = "비밀번호는 필수입니다")
-	    @Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다")
-	    private String password;
-	    
-	    @NotBlank(message = "전화번호는 필수입니다")
-	    private String phoneNumber;
-	}
+    @Data
+    public static class SignUpRequest {
+        @NotBlank(message = "이메일은 필수입니다")
+        @Email(message = "올바른 이메일 형식이 아닙니다")
+        private String email;
+        
+        @NotBlank(message = "닉네임은 필수입니다")
+        @Size(max = 50, message = "닉네임은 50자 이하여야 합니다")
+        private String nickname;
+        
+        @NotBlank(message = "비밀번호는 필수입니다")
+        @Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다")
+        private String password;
+        
+        @NotBlank(message = "전화번호는 필수입니다")
+        private String phoneNumber;
+    }
     
     @Data
     public static class LoginRequest {
@@ -69,9 +68,10 @@ public class AuthDto {
         private LocalDate birthDate;
         private Long mileage;
         private String defaultLine;
+        private Boolean isMail;
         
         public UserInfo(String accountId, String email, String nickname, String name, 
-                       LocalDate birthDate, Long mileage, String defaultLine) {
+                       LocalDate birthDate, Long mileage, String defaultLine, Boolean isMail) {
             this.accountId = accountId;
             this.email = email;
             this.nickname = nickname;
@@ -79,6 +79,7 @@ public class AuthDto {
             this.birthDate = birthDate;
             this.mileage = mileage;
             this.defaultLine = defaultLine;
+            this.isMail = isMail;
         }
     }
     
