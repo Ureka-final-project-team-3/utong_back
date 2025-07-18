@@ -42,7 +42,7 @@ public class MyLineServiceImpl implements MyLineService {
 
     @Override
     @Transactional
-    public void setDefaultLine(String accountId, String lineId) {
+    public List<MyLineResponseDto> setDefaultLine(String accountId, String lineId) {
         User user = userRepository.findByAccountId(accountId)
                 .orElseThrow(UserNotFoundException::new);
 
@@ -50,5 +50,7 @@ public class MyLineServiceImpl implements MyLineService {
         if (!owned) throw new LineNotFoundException();
 
         accountRepository.updateDefaultLine(accountId, lineId);
+
+        return getMyLines(accountId, lineId);
     }
 }
