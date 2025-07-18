@@ -5,11 +5,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-// 거래 내역 조회 시 날짜 필터 최근 1주일내, 최근 한 달 내, 최근 일년
+import java.util.List;
+
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MyTradeHistoryRequestDto {
-    private String range; // "WEEK", "MONTH", "YEAR"
+public class PurchaseHistoryResponseDto {
+    private List<PurchaseResponseDto> completePurchases;
+    private List<PurchaseResponseDto> waitingPurchases;
 }

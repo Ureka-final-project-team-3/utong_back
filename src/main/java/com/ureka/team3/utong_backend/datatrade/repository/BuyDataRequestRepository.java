@@ -18,9 +18,7 @@ public interface BuyDataRequestRepository extends JpaRepository<BuyDataRequest, 
     @Query("""
         SELECT b FROM BuyDataRequest b
         WHERE b.account.id = :accountId
-        AND NOT EXISTS (
-            SELECT c FROM Contract c WHERE c.buyDataRequest.id = b.id
-        )
+        AND (b.status = '002' OR b.status = '003')
         AND b.createdAt >= :fromDate
     """)
     List<BuyDataRequest> findWaitingPurchasesByAccountId(
