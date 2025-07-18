@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface MyLineService {
     List<MyLineResponseDto> getMyLines(String accountId, String defaultLineId);
-    void setDefaultLine(String accountId, String lineId);
+    List<MyLineResponseDto> setDefaultLine(String accountId, String lineId);
 }

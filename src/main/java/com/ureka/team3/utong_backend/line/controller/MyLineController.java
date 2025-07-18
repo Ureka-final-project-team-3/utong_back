@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/mypage/lines")
+@RequestMapping("/api/lines")
 @RequiredArgsConstructor
 public class MyLineController {
 
@@ -22,17 +22,13 @@ public class MyLineController {
     // 내 전화번호 목록 조회 + 기본 회선 표시
     @GetMapping
     public ResponseEntity<ApiResponse<List<MyLineResponseDto>>> getMyLines(@AuthenticationPrincipal Account account) {
-        List<MyLineResponseDto> response = mypageLineService.getMyLines(account.getId(), account.getDefaultLine());
-        return ResponseEntity.ok(ApiResponse.success(response));
+        return ResponseEntity.ok(ApiResponse.success(mypageLineService.getMyLines(account.getId(), account.getDefaultLine())));
     }
 
     // 기본 회선 설정
-    @PatchMapping("/default")
-    public ResponseEntity<ApiResponse<Void>> setDefaultLine(@AuthenticationPrincipal Account account,
-                                                            @RequestBody MyLineRequestDto requestDto
-    ) {
-        mypageLineService.setDefaultLine(account.getId(), requestDto.getLineId());
-        return ResponseEntity.ok(ApiResponse.success(null));
+    @PatchMapping
+    public ResponseEntity<ApiResponse<List<MyLineResponseDto>>> setDefaultLine(@AuthenticationPrincipal Account account, @RequestBody MyLineRequestDto requestDto) {
+        return ResponseEntity.ok(ApiResponse.success(mypageLineService.setDefaultLine(account.getId(), requestDto.getLineId())));
     }
 }
 
