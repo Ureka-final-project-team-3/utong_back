@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/mypage/coupons")
+@RequestMapping("/api/user/coupons")
 @RequiredArgsConstructor
 public class MyCouponController {
 
@@ -23,11 +23,7 @@ public class MyCouponController {
 
     @GetMapping
     @Operation(summary = "내 쿠폰 목록 조회", description = "로그인된 사용자의 보유 쿠폰 목록을 반환합니다.")
-    public ResponseEntity<ApiResponse<List<MyCouponResponseDto>>> getMyCoupons(
-            @AuthenticationPrincipal Account account
-    ) {
-        String userId = account.getUser().getId(); // 사용자 ID 추출
-        List<MyCouponResponseDto> coupons = myCouponService.getMyCoupons(userId);
-        return ResponseEntity.ok(ApiResponse.success(coupons));
+    public ResponseEntity<ApiResponse<List<MyCouponResponseDto>>> getMyCoupons(@AuthenticationPrincipal Account account) {
+        return ResponseEntity.ok(ApiResponse.success(myCouponService.getMyCoupons(account.getUser().getId())));
     }
 }
