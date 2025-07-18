@@ -25,13 +25,13 @@ public class UserGifticonController {
     @GetMapping
     @Operation(summary = "내 기프티콘 목록 조회",description = "로그인된 사용자의 기프티콘 목록을 반환합니다.")
     public ResponseEntity<ApiResponse<List<UserGifticonResponseDto>>> getMyGifticons(@AuthenticationPrincipal Account account) {
-        return ResponseEntity.ok(ApiResponse.success(userGifticonService.getMyGifticons(account.getId())));
+        return ResponseEntity.ok(ApiResponse.success(userGifticonService.getMyGifticons(account.getUser().getId())));
     }
 
     @PostMapping
     @Operation(summary = "기프티콘 상세 조회", description = "기프티콘 ID를 JSON으로 받아 상세 정보를 조회합니다.")
     public ResponseEntity<ApiResponse<UserGifticonDetailResponseDto>> getGifticonDetail(@AuthenticationPrincipal Account account, @RequestBody UserGifticonDetailRequestDto request) {
-        return ResponseEntity.ok(ApiResponse.success(userGifticonService.getGifticonDetail(request.getGifticonId(), account.getId())));
+        return ResponseEntity.ok(ApiResponse.success(userGifticonService.getGifticonDetail(request.getGifticonId(), account.getUser().getId())));
     }
 
 }
