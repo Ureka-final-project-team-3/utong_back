@@ -24,26 +24,25 @@ import java.util.List;
 public class TradeQueryServiceImpl implements TradeQueryService {
 
     private final ContractRepository contractRepository;
-    private final BuyDataRequestRepository buyRepo;
-    private final SaleDataRequestRepository saleRepo;
+    private final BuyDataRequestRepository buyDataRequestRepository;
+    private final SaleDataRequestRepository saleDataRequestRepository;
     private final LineRepository lineRepository;
 
-    private LocalDateTime calculateFromDate(String range) {
-        LocalDateTime now = LocalDateTime.now();
-        return switch (range != null ? range : "WEEK") {
-            case "MONTH" -> now.minusMonths(1);
-            case "YEAR" -> now.minusYears(1);
-            default -> now.minusDays(7);
-        };
-    }
+    private static final String STATUS_COMPLETED = "001";
+    private static final String STATUS_PARTIAL = "002";
+    private static final String STATUS_WAITING = "003";
+
+    private static final String RANGE_MONTH = "MONTH";
+    private static final String RANGE_YEAR = "YEAR";
+    private static final String RANGE_WEEK = "WEEK";
 
     @Override
     public ApiResponse getMyPurchases(Account account, TradeHistoryRequestDto requestDto) {
         String accountId = account.getId();
         LocalDateTime fromDate = calculateFromDate(requestDto.getRange());
 
-        List<PurchaseResponseDto> completePurchases = getCompletePurchases(accountId, fromDate);
-        List<PurchaseResponseDto> waitingPurchases = getWaitingPurchases(accountId, fromDate);
+        List<PurchaseResponseDto> completePurchases = buildCompletePurchases(accountId, fromDate);
+        List<PurchaseResponseDto> waitingPurchases = buildWaitingPurchases(accountId, fromDate);
 
         PurchaseHistoryResponseDto result = PurchaseHistoryResponseDto.builder()
                 .completePurchases(completePurchases)
@@ -53,51 +52,13 @@ public class TradeQueryServiceImpl implements TradeQueryService {
         return ApiResponse.success(result);
     }
 
-    private List<PurchaseResponseDto> getCompletePurchases(String accountId, LocalDateTime fromDate) {
-        List<PurchaseResponseDto> result = new ArrayList<>();
-        for (Contract c : contractRepository.findCompletedPurchasesByAccountId(accountId, fromDate)) {
-            Line line = lineRepository.findById(c.getBuyDataRequest().getLineId()).orElseThrow(LineNotFoundException::new);
-            result.add(PurchaseResponseDto.builder()
-                    .purchaseId(c.getBuyDataRequest().getId())
-                    .status("001") // 거래완료
-                    .dataCode(c.getBuyDataRequest().getDataCode())
-                    .quantity(c.getAmount())
-                    .tradeDate(c.getCreatedAt())
-                    .pricePerGb(c.getPrice())
-                    .phoneNumber(line.getPhoneNumber())
-                    .build());
-        }
-        return result;
-    }
-
-    private List<PurchaseResponseDto> getWaitingPurchases(String accountId, LocalDateTime fromDate) {
-        List<PurchaseResponseDto> result = new ArrayList<>();
-
-        for (BuyDataRequest buyDataRequest : buyRepo.findWaitingPurchasesByAccountId(accountId, fromDate)) {
-            Long quantity = buyDataRequest.getQuantity();
-            if (buyDataRequest.getStatus().equals("002"))
-                quantity = buyDataRequest.getRemaining();
-            Line line = lineRepository.findById(buyDataRequest.getLineId()).orElseThrow(LineNotFoundException::new);
-            result.add(PurchaseResponseDto.builder()
-                    .purchaseId(buyDataRequest.getId())
-                    .status("003") // 대기 중
-                    .dataCode(buyDataRequest.getDataCode())
-                    .quantity(quantity)
-                    .tradeDate(buyDataRequest.getCreatedAt())
-                    .pricePerGb(buyDataRequest.getPrice())
-                    .phoneNumber(line.getPhoneNumber())
-                    .build());
-        }
-        return result;
-    }
-
     @Override
     public ApiResponse getMySales(Account account, TradeHistoryRequestDto requestDto) {
         String accountId = account.getId();
         LocalDateTime fromDate = calculateFromDate(requestDto.getRange());
 
-        List<SaleResponseDto> completeSales = getCompleteSales(accountId, fromDate);
-        List<SaleResponseDto> waitingSales = getWaitingSales(accountId, fromDate);
+        List<SaleResponseDto> completeSales = buildCompleteSales(accountId, fromDate);
+        List<SaleResponseDto> waitingSales = buildWaitingSales(accountId, fromDate);
 
         SaleHistoryResponseDto result = SaleHistoryResponseDto.builder()
                 .completeSales(completeSales)
@@ -107,41 +68,145 @@ public class TradeQueryServiceImpl implements TradeQueryService {
         return ApiResponse.success(result);
     }
 
-    private List<SaleResponseDto> getCompleteSales(String accountId, LocalDateTime fromDate) {
-        List<SaleResponseDto> result = new ArrayList<>();
-        for (Contract c : contractRepository.findCompletedSalesByAccountId(accountId, fromDate)) {
-            Line line = lineRepository.findById(c.getSaleDataRequest().getLineId()).orElseThrow(LineNotFoundException::new);
-            result.add(SaleResponseDto.builder()
-                    .saleId(c.getBuyDataRequest().getId())
-                    .status("001") // 거래완료
-                    .dataCode(c.getBuyDataRequest().getDataCode())
-                    .quantity(c.getAmount())
-                    .tradeDate(c.getCreatedAt())
-                    .pricePerGb(c.getPrice())
-                    .phoneNumber(line.getPhoneNumber())
-                    .build());
+    private LocalDateTime calculateFromDate(String range) {
+        LocalDateTime now = LocalDateTime.now();
+        String safeRange = range != null ? range : RANGE_WEEK;
+
+        return switch (safeRange) {
+            case RANGE_MONTH -> now.minusMonths(1);
+            case RANGE_YEAR -> now.minusYears(1);
+            default -> now.minusDays(7);
+        };
+    }
+
+    private List<PurchaseResponseDto> buildCompletePurchases(String accountId, LocalDateTime fromDate) {
+        List<Contract> completedContracts = contractRepository.findCompletedPurchasesByAccountId(accountId, fromDate);
+        List<PurchaseResponseDto> result = new ArrayList<>();
+
+        for (Contract contract : completedContracts) {
+            BuyDataRequest buyRequest = contract.getBuyDataRequest();
+            Line line = findLineById(buyRequest.getLineId());
+
+            PurchaseResponseDto dto = createPurchaseResponseDto(
+                    buyRequest.getId(),
+                    STATUS_COMPLETED,
+                    buyRequest.getDataCode(),
+                    contract.getAmount(),
+                    contract.getCreatedAt(),
+                    contract.getPrice(),
+                    line.getPhoneNumber()
+            );
+            result.add(dto);
         }
         return result;
     }
 
-    private List<SaleResponseDto> getWaitingSales(String accountId, LocalDateTime fromDate) {
-        List<SaleResponseDto> result = new ArrayList<>();
+    private List<PurchaseResponseDto> buildWaitingPurchases(String accountId, LocalDateTime fromDate) {
+        List<BuyDataRequest> waitingRequests = buyDataRequestRepository.findWaitingPurchasesByAccountId(accountId, fromDate);
+        List<PurchaseResponseDto> result = new ArrayList<>();
 
-        for (SaleDataRequest saleDataRequest : saleRepo.findWaitingSalesByAccountId(accountId, fromDate)) {
-            Long quantity = saleDataRequest.getQuantity();
-            if (saleDataRequest.getStatus().equals("002"))
-                quantity = saleDataRequest.getRemaining();
-            Line line = lineRepository.findById(saleDataRequest.getLineId()).orElseThrow(LineNotFoundException::new);
-            result.add(SaleResponseDto.builder()
-                    .saleId(saleDataRequest.getId())
-                    .status("003") // 대기 중
-                    .dataCode(saleDataRequest.getDataCode())
-                    .quantity(quantity)
-                    .tradeDate(saleDataRequest.getCreatedAt())
-                    .pricePerGb(saleDataRequest.getPrice())
-                    .phoneNumber(line.getPhoneNumber())
-                    .build());
+        for (BuyDataRequest buyRequest : waitingRequests) {
+            Long quantity = calculateRemainingQuantity(buyRequest);
+            Line line = findLineById(buyRequest.getLineId());
+
+            PurchaseResponseDto dto = createPurchaseResponseDto(
+                    buyRequest.getId(),
+                    STATUS_WAITING,
+                    buyRequest.getDataCode(),
+                    quantity,
+                    buyRequest.getCreatedAt(),
+                    buyRequest.getPrice(),
+                    line.getPhoneNumber()
+            );
+            result.add(dto);
         }
         return result;
+    }
+
+    private List<SaleResponseDto> buildCompleteSales(String accountId, LocalDateTime fromDate) {
+        List<Contract> completedContracts = contractRepository.findCompletedSalesByAccountId(accountId, fromDate);
+        List<SaleResponseDto> result = new ArrayList<>();
+
+        for (Contract contract : completedContracts) {
+            SaleDataRequest saleRequest = contract.getSaleDataRequest();
+            Line line = findLineById(saleRequest.getLineId());
+
+            SaleResponseDto dto = createSaleResponseDto(
+                    saleRequest.getId(),
+                    STATUS_COMPLETED,
+                    saleRequest.getDataCode(),
+                    contract.getAmount(),
+                    contract.getCreatedAt(),
+                    contract.getPrice(),
+                    line.getPhoneNumber()
+            );
+            result.add(dto);
+        }
+        return result;
+    }
+
+    private List<SaleResponseDto> buildWaitingSales(String accountId, LocalDateTime fromDate) {
+        List<SaleDataRequest> waitingRequests = saleDataRequestRepository.findWaitingSalesByAccountId(accountId, fromDate);
+        List<SaleResponseDto> result = new ArrayList<>();
+
+        for (SaleDataRequest saleRequest : waitingRequests) {
+            Long quantity = calculateRemainingQuantity(saleRequest);
+            Line line = findLineById(saleRequest.getLineId());
+
+            SaleResponseDto dto = createSaleResponseDto(
+                    saleRequest.getId(),
+                    STATUS_WAITING,
+                    saleRequest.getDataCode(),
+                    quantity,
+                    saleRequest.getCreatedAt(),
+                    saleRequest.getPrice(),
+                    line.getPhoneNumber()
+            );
+            result.add(dto);
+        }
+        return result;
+    }
+
+    private Line findLineById(String lineId) {
+        return lineRepository.findById(lineId)
+                .orElseThrow(LineNotFoundException::new);
+    }
+
+    private Long calculateRemainingQuantity(BuyDataRequest request) {
+        return STATUS_PARTIAL.equals(request.getStatus()) ?
+                request.getRemaining() : request.getQuantity();
+    }
+
+    private Long calculateRemainingQuantity(SaleDataRequest request) {
+        return STATUS_PARTIAL.equals(request.getStatus()) ?
+                request.getRemaining() : request.getQuantity();
+    }
+
+    private PurchaseResponseDto createPurchaseResponseDto(String purchaseId, String status, String dataCode,
+                                                          Long quantity, LocalDateTime tradeDate,
+                                                          Long pricePerGb, String phoneNumber) {
+        return PurchaseResponseDto.builder()
+                .purchaseId(purchaseId)
+                .status(status)
+                .dataCode(dataCode)
+                .quantity(quantity)
+                .tradeDate(tradeDate)
+                .pricePerGb(pricePerGb)
+                .phoneNumber(phoneNumber)
+                .build();
+    }
+
+    private SaleResponseDto createSaleResponseDto(String saleId, String status, String dataCode,
+                                                  Long quantity, LocalDateTime tradeDate,
+                                                  Long pricePerGb, String phoneNumber) {
+        return SaleResponseDto.builder()
+                .saleId(saleId)
+                .status(status)
+                .dataCode(dataCode)
+                .quantity(quantity)
+                .tradeDate(tradeDate)
+                .pricePerGb(pricePerGb)
+                .phoneNumber(phoneNumber)
+                .build();
     }
 }
