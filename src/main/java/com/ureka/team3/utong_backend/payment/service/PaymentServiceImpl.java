@@ -1,4 +1,4 @@
-package com.ureka.team3.utong_backend.toss.service;
+package com.ureka.team3.utong_backend.payment.service;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
@@ -12,8 +12,8 @@ import com.ureka.team3.utong_backend.datatrade.utils.TradeCalculator;
 import com.ureka.team3.utong_backend.point.dto.PointChargeResponseDto;
 import com.ureka.team3.utong_backend.point.entity.PointChargeHistory;
 import com.ureka.team3.utong_backend.point.repository.PointChargeHistoryRepository;
-import com.ureka.team3.utong_backend.toss.dto.TossApproveResponse;
-import com.ureka.team3.utong_backend.toss.dto.TossPaymentConfirmRequestDto;
+import com.ureka.team3.utong_backend.payment.dto.PaymentApproveResponse;
+import com.ureka.team3.utong_backend.payment.dto.PaymentConfirmRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -30,7 +30,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class TossPaymentServiceImpl implements TossPaymentService {
+public class PaymentServiceImpl implements PaymentService {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final PointChargeHistoryRepository pointChargeHistoryRepository;
@@ -63,7 +63,7 @@ public class TossPaymentServiceImpl implements TossPaymentService {
 
 
     @Override
-    public PointChargeResponseDto confirmAndCharge(Account account, TossPaymentConfirmRequestDto requestDto) {
+    public PointChargeResponseDto confirmAndCharge(Account account, PaymentConfirmRequestDto requestDto) {
         System.out.println("[결제 승인 요청] paymentKey: " + requestDto.getPaymentKey());
         System.out.println("[결제 승인 요청] orderId: " + requestDto.getOrderId());
         System.out.println("[결제 승인 요청] amount: " + requestDto.getAmount());
@@ -81,10 +81,10 @@ public class TossPaymentServiceImpl implements TossPaymentService {
 
         HttpEntity<Map<String, Object>> httpRequest = new HttpEntity<>(body, headers);
 
-        ResponseEntity<TossApproveResponse> response = restTemplate.postForEntity(
+        ResponseEntity<PaymentApproveResponse> response = restTemplate.postForEntity(
                 "https://api.tosspayments.com/v1/payments/confirm",
                 httpRequest,
-                TossApproveResponse.class
+                PaymentApproveResponse.class
         );
 
 
@@ -96,7 +96,7 @@ public class TossPaymentServiceImpl implements TossPaymentService {
             throw new RuntimeException("토스 결제 승인 실패");
         }
 
-        TossApproveResponse approve = response.getBody();
+        PaymentApproveResponse approve = response.getBody();
         Long charged = approve.getTotalAmount();
 
         // 2. 쿠폰 처리

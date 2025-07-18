@@ -1,10 +1,10 @@
-package com.ureka.team3.utong_backend.toss.controller;
+package com.ureka.team3.utong_backend.payment.controller;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.point.dto.PointChargeResponseDto;
-import com.ureka.team3.utong_backend.toss.dto.TossPaymentConfirmRequestDto;
-import com.ureka.team3.utong_backend.toss.service.TossPaymentService;
+import com.ureka.team3.utong_backend.payment.dto.PaymentConfirmRequestDto;
+import com.ureka.team3.utong_backend.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/payments/toss")
+@RequestMapping("/api/payments")
 @RequiredArgsConstructor
-public class TossPaymentController {
+public class PaymentController {
 
-    private final TossPaymentService tossPaymentService;
+    private final PaymentService paymentService;
 
 //    // 결제 시작
 //    @PostMapping("/pay")
@@ -33,11 +33,7 @@ public class TossPaymentController {
 
     // 결제 승인
     @PostMapping("/confirm")
-    public ResponseEntity<ApiResponse<PointChargeResponseDto>> confirmPayment(
-            @AuthenticationPrincipal Account account,
-            @RequestBody TossPaymentConfirmRequestDto requestDto) {
-
-        PointChargeResponseDto response = tossPaymentService.confirmAndCharge(account, requestDto);
-        return ResponseEntity.ok(ApiResponse.success(response));
+    public ResponseEntity<ApiResponse<PointChargeResponseDto>> confirmPayment(@AuthenticationPrincipal Account account, @RequestBody PaymentConfirmRequestDto requestDto) {
+        return ResponseEntity.ok(ApiResponse.success(paymentService.confirmAndCharge(account, requestDto)));
     }
 }
