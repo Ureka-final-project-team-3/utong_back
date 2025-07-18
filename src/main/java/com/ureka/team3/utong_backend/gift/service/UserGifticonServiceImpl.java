@@ -1,10 +1,10 @@
 package com.ureka.team3.utong_backend.gift.service;
 
 import com.ureka.team3.utong_backend.common.exception.business.GifticonNotFoundException;
-import com.ureka.team3.utong_backend.gift.dto.MyGifticonDetailResponseDto;
-import com.ureka.team3.utong_backend.gift.dto.MyGifticonResponseDto;
+import com.ureka.team3.utong_backend.gift.dto.UserGifticonDetailResponseDto;
+import com.ureka.team3.utong_backend.gift.dto.UserGifticonResponseDto;
 import com.ureka.team3.utong_backend.gift.entity.UserGifticon;
-import com.ureka.team3.utong_backend.gift.repository.MyGifticonRepository;
+import com.ureka.team3.utong_backend.gift.repository.UserGifticonRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,12 +17,12 @@ import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
-public class MyGifticonServiceImpl implements MyGifticonService {
+public class UserGifticonServiceImpl implements UserGifticonService {
 
-    private final MyGifticonRepository myGifticonRepository;
+    private final UserGifticonRepository myGifticonRepository;
 
     @Override
-    public List<MyGifticonResponseDto> getMyGifticons(String userId) {
+    public List<UserGifticonResponseDto> getMyGifticons(String userId) {
         List<UserGifticon> gifticons = myGifticonRepository.findByUser_Id(userId);
 
         return gifticons.stream()
@@ -30,7 +30,7 @@ public class MyGifticonServiceImpl implements MyGifticonService {
                     long daysRemaining = ChronoUnit.DAYS.between(LocalDate.now(), gifticon.getExpiredAt());
                     String status = (daysRemaining < 0) ? "유효기간 만료" : "사용 가능";
 
-                    return MyGifticonResponseDto.builder()
+                    return UserGifticonResponseDto.builder()
                             .id(UUID.fromString(gifticon.getId()))
                             .name(gifticon.getGifticon().getName())
                             .description(gifticon.getGifticon().getDescription())
@@ -44,7 +44,7 @@ public class MyGifticonServiceImpl implements MyGifticonService {
     }
 
     @Override
-    public MyGifticonDetailResponseDto getGifticonDetail(String Id, String userId) {
+    public UserGifticonDetailResponseDto getGifticonDetail(String Id, String userId) {
         UserGifticon gifticon = myGifticonRepository.findByIdAndUser_Id(Id, userId)
                 .orElseThrow(GifticonNotFoundException::new);
 
@@ -53,7 +53,7 @@ public class MyGifticonServiceImpl implements MyGifticonService {
 //        Boolean active = gifticon.getIsActive();
         String status = (daysRemaining < 0) ? "유효기간 만료" : "사용 가능";
 
-        return MyGifticonDetailResponseDto.builder()
+        return UserGifticonDetailResponseDto.builder()
                 .id(gifticon.getId())
                 .name(gifticon.getGifticon().getName())
                 .description(gifticon.getGifticon().getDescription())

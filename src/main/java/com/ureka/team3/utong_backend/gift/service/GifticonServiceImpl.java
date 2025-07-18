@@ -15,7 +15,7 @@ import com.ureka.team3.utong_backend.gift.dto.GifticonResponseDto;
 import com.ureka.team3.utong_backend.gift.entity.Gifticon;
 import com.ureka.team3.utong_backend.gift.entity.UserGifticon;
 import com.ureka.team3.utong_backend.gift.repository.GifticonRepository;
-import com.ureka.team3.utong_backend.gift.repository.MyGifticonRepository;
+import com.ureka.team3.utong_backend.gift.repository.UserGifticonRepository;
 import jakarta.persistence.PessimisticLockException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,7 @@ public class GifticonServiceImpl implements GifticonService {
 
     private final GifticonRepository gifticonRepository;
 
-    private final MyGifticonRepository myGifticonRepository;
+    private final UserGifticonRepository myGifticonRepository;
 
     private final AccountRepository accountRepository;
 

@@ -15,7 +15,7 @@ import com.ureka.team3.utong_backend.gift.dto.GifticonResponseDto;
 import com.ureka.team3.utong_backend.gift.entity.Gifticon;
 import com.ureka.team3.utong_backend.gift.entity.UserGifticon;
 import com.ureka.team3.utong_backend.gift.repository.GifticonRepository;
-import com.ureka.team3.utong_backend.gift.repository.MyGifticonRepository;
+import com.ureka.team3.utong_backend.gift.repository.UserGifticonRepository;
 import jakarta.persistence.PessimisticLockException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -44,7 +44,7 @@ class GifticonServiceTest {
     private GifticonRepository gifticonRepository;
 
     @Mock
-    private MyGifticonRepository myGifticonRepository;
+    private UserGifticonRepository myGifticonRepository;
 
     @Mock
     private AccountRepository accountRepository;

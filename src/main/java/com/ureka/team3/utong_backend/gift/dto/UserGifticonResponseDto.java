@@ -10,7 +10,7 @@ import java.util.UUID;
 @Data
 @Builder
 @AllArgsConstructor
-public class MyGifticonResponseDto {
+public class UserGifticonResponseDto {
     private UUID id; // userGifticonId
     private String name; // 예: "베스킨라빈스"
     private String description; // 예: "베라 파인트"
