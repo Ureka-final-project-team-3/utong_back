@@ -1,5 +1,6 @@
 package com.ureka.team3.utong_backend.user.service;
 
+import com.ureka.team3.utong_backend.datatrade.utils.TradeCalculator;
 import com.ureka.team3.utong_backend.line.service.LineService;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final LineService lineService;
+    private final TradeCalculator tradeCalculator;
 
     @Override
     public MyInfoResponseDto getMyInfo(Account account) {   // -> 리팩터링 필요
@@ -40,12 +42,15 @@ public class UserServiceImpl implements UserService {
         }
         String phoneNumber = null;
         Long remaining = 0L;
+        Long canSale = 0L;
         String dataCode = null;
         if(defaultLine !=null){
             LineData lineData = lineService.getLineDataByLineAndDate(defaultLine, LocalDate.now());
             phoneNumber = defaultLine.getPhoneNumber();
-            remaining = lineData.getRemaining();
+            remaining = lineData.getRemaining()+lineData.getPurchased();
             dataCode = lineData.getDataCode();
+            canSale = tradeCalculator.calculateCanSellAmount(defaultLine.getPlan().canSell(), lineData.getSell());
+            canSale = Math.min(remaining,canSale);
         }
 
         // 해당 Line 의 최신 LineData 조회
@@ -61,6 +66,7 @@ public class UserServiceImpl implements UserService {
                 .phoneNumber(phoneNumber)
                 .remainingData(remaining)
                 .dataCode(dataCode)
+                .canSale(canSale)
                 .build();
     }
 
