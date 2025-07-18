@@ -13,7 +13,7 @@ import com.ureka.team3.utong_backend.coupon.entity.Coupon;
 import com.ureka.team3.utong_backend.coupon.entity.UserCoupon;
 import com.ureka.team3.utong_backend.coupon.repository.MyCouponRepository;
 import com.ureka.team3.utong_backend.gift.entity.UserGifticon;
-import com.ureka.team3.utong_backend.gift.repository.MyGifticonRepository;
+import com.ureka.team3.utong_backend.gift.repository.UserGifticonRepository;
 import com.ureka.team3.utong_backend.roulette.entity.RouletteEvent;
 import com.ureka.team3.utong_backend.user.entity.User;
 import com.ureka.team3.utong_backend.user.repository.UserRepository;
@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RouletteCouponService {
     private final MyCouponRepository myCouponRepository;
     private final UserRepository userRepository;
-    private final MyGifticonRepository myGifticonRepository;
+    private final UserGifticonRepository myGifticonRepository;
     @Transactional
     public ApiResponse<Void> issueWinnerCoupon(Account account, RouletteEvent event) {
         try {

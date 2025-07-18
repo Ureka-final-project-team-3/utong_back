@@ -1,10 +1,10 @@
 package com.ureka.team3.utong_backend.gift.service;
 
 
-import com.ureka.team3.utong_backend.gift.dto.MyGifticonDetailResponseDto;
+import com.ureka.team3.utong_backend.gift.dto.UserGifticonDetailResponseDto;
 import com.ureka.team3.utong_backend.gift.entity.Gifticon;
 import com.ureka.team3.utong_backend.gift.entity.UserGifticon;
-import com.ureka.team3.utong_backend.gift.repository.MyGifticonRepository;
+import com.ureka.team3.utong_backend.gift.repository.UserGifticonRepository;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -15,10 +15,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class MyGifticonServiceTest {
+class UserGifticonServiceTest {
 
-    private final MyGifticonRepository myGifticonRepository = mock(MyGifticonRepository.class);
-    private final MyGifticonServiceImpl service = new MyGifticonServiceImpl(myGifticonRepository);
+    private final UserGifticonRepository myGifticonRepository = mock(UserGifticonRepository.class);
+    private final UserGifticonServiceImpl service = new UserGifticonServiceImpl(myGifticonRepository);
 
     @Test
     void getMyGifticons_정상_리턴() {
@@ -68,7 +68,7 @@ class MyGifticonServiceTest {
         when(myGifticonRepository.findByIdAndUser_Id(uuid, "user-1"))
                 .thenReturn(Optional.of(mockGifticon));
 
-        MyGifticonDetailResponseDto result = service.getGifticonDetail(uuid, "user-1");
+        UserGifticonDetailResponseDto result = service.getGifticonDetail(uuid, "user-1");
 
         assertEquals("배라", result.getName());
         assertEquals("사용 가능", result.getStatus());

@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
-public class MyGifticonDetailResponseDto {
+public class UserGifticonDetailResponseDto {
     private String id;
     private String name;
     private String description;
