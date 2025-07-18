@@ -57,6 +57,7 @@ public class RouletteCouponService {
                         .id(UUID.randomUUID().toString())
                         .user(user)
                         .coupon(rewardCoupon)
+                        .status("002")
                         .createdAt(LocalDateTime.now())
                         .expiredAt(LocalDateTime.now().plusDays(3).withHour(23).withMinute(59).withSecond(59))
                         .build();
