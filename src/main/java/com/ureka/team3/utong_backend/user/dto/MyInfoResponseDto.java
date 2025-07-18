@@ -15,4 +15,5 @@ public class MyInfoResponseDto {
     private String phoneNumber;
     private Long remainingData;
     private String dataCode; // LTE or 5G
+    private Long canSale;
 }
