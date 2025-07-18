@@ -1,11 +1,11 @@
-package com.ureka.team3.utong_backend.toss.dto;
+package com.ureka.team3.utong_backend.payment.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TossApproveResponse {
+public class PaymentApproveResponse {
     private String paymentKey;
     private String orderId;
     private String status; // DONE

@@ -1,4 +1,4 @@
-package com.ureka.team3.utong_backend.toss.config;
+package com.ureka.team3.utong_backend.payment.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
