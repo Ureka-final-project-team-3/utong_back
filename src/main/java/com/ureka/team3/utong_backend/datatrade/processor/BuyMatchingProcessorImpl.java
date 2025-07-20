@@ -4,7 +4,7 @@ import com.ureka.team3.utong_backend.datatrade.dto.BuyMatchingResult;
 import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
 import com.ureka.team3.utong_backend.datatrade.dto.OrderDto;
 import com.ureka.team3.utong_backend.datatrade.dto.PurchaseMatch;
-import com.ureka.team3.utong_backend.datatrade.service.TradeOrderQueueService;
+import com.ureka.team3.utong_backend.datatrade.service.trade.queue.TradeOrderQueueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package com.ureka.team3.utong_backend.datatrade.service;
+package com.ureka.team3.utong_backend.datatrade.service.chart;
 
 import com.ureka.team3.utong_backend.datatrade.dto.AvgPerHour;
 import com.ureka.team3.utong_backend.datatrade.repository.ContractHourlyAvgPriceRedisRepository;
@@ -23,7 +23,7 @@ public class SseServiceImpl implements SseService {
 
     // SSE 연결 및 초기 데이터 전송
     @Override
-    public SseEmitter connect(String dataCode) {
+    public SseEmitter connectForCurrentPrice(String dataCode) {
         SseEmitter emitter = new SseEmitter(60 * 60 * 1000L);
         clients.add(emitter);
         log.info("SSE 연결됨. 현재 연결 수: {}", clients.size());
@@ -46,7 +46,7 @@ public class SseServiceImpl implements SseService {
     }
 
     @Override
-    public void broadcast(List<AvgPerHour> allData) {
+    public void broadcastForCurrentPrice(List<AvgPerHour> allData) {
         Set<SseEmitter> deadEmitters = ConcurrentHashMap.newKeySet();
         for (SseEmitter emitter : clients) {
             try {

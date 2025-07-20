@@ -1,13 +1,11 @@
 package com.ureka.team3.utong_backend.datatrade.controller;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
-import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
 import com.ureka.team3.utong_backend.datatrade.dto.TradeHistoryRequestDto;
 import com.ureka.team3.utong_backend.datatrade.facade.DataTradeFacade;
-import com.ureka.team3.utong_backend.datatrade.service.CurrentPriceService;
-import com.ureka.team3.utong_backend.datatrade.service.SseService;
-import com.ureka.team3.utong_backend.datatrade.service.TradeQueryService;
+import com.ureka.team3.utong_backend.datatrade.service.chart.SseService;
+import com.ureka.team3.utong_backend.datatrade.service.query.TradeQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -15,8 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import java.util.concurrent.Executors;
 
 @Slf4j
 @RestController
@@ -53,6 +49,6 @@ public class DataTradeController {
 
     @GetMapping(value = "/current-prices/stream/{dataCode}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamCurrentPrices(@PathVariable String dataCode) {
-        return sseService.connect(dataCode);
+        return sseService.connectForCurrentPrice(dataCode);
     }
 }

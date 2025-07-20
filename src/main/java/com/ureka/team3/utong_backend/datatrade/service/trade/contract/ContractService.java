@@ -1,4 +1,4 @@
-package com.ureka.team3.utong_backend.datatrade.service;
+package com.ureka.team3.utong_backend.datatrade.service.trade.contract;
 
 import com.ureka.team3.utong_backend.datatrade.dto.TradeExecutionDto;
 import com.ureka.team3.utong_backend.datatrade.entity.Contract;

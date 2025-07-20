@@ -1,4 +1,4 @@
-package com.ureka.team3.utong_backend.datatrade.service;
+package com.ureka.team3.utong_backend.datatrade.service.trade.queue;
 
 import com.ureka.team3.utong_backend.datatrade.dto.OrderDto;
 import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
