@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.ureka.team3.utong_backend.datatrade.config.DataTradePolicy.SSE_TIMEOUT;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -19,12 +21,11 @@ public class SseServiceImpl implements SseService {
 
     private final Set<SseEmitter> clients = ConcurrentHashMap.newKeySet();
     private final ContractHourlyAvgPriceRedisRepository redisRepository;
-    private static final List<String> DATA_CODES = List.of("001", "002");
 
     // SSE 연결 및 초기 데이터 전송
     @Override
     public SseEmitter connectForCurrentPrice(String dataCode) {
-        SseEmitter emitter = new SseEmitter(60 * 60 * 1000L);
+        SseEmitter emitter = new SseEmitter(SSE_TIMEOUT);
         clients.add(emitter);
         log.info("SSE 연결됨. 현재 연결 수: {}", clients.size());
         emitter.onCompletion(() -> removeClient(emitter));

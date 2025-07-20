@@ -48,7 +48,7 @@ public class DataTradeController {
     }
 
     @GetMapping(value = "/current-prices/stream/{dataCode}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter streamCurrentPrices(@PathVariable String dataCode) {
+    public SseEmitter streamCurrentPrices(@PathVariable("dataCode") String dataCode) {
         return sseService.connectForCurrentPrice(dataCode);
     }
 }
