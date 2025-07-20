@@ -6,13 +6,14 @@ import com.ureka.team3.utong_backend.point.dto.MyPointDto;
 import com.ureka.team3.utong_backend.point.dto.PointChargeRequestDto;
 import com.ureka.team3.utong_backend.point.dto.PointChargeResponseDto;
 import com.ureka.team3.utong_backend.point.service.PointService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/mypage/points")
+@RequestMapping("/api/user/points")
 @RequiredArgsConstructor
 public class PointController {
 
@@ -20,6 +21,7 @@ public class PointController {
 
     // 단순 포인트 조회
     @GetMapping
+    @Operation(summary = "포인트 조회", description = "본인 포인트를 조회할 수 있습니다.")
     public ResponseEntity<ApiResponse<MyPointDto>> getMyPoint(@AuthenticationPrincipal Account account) {
         return ResponseEntity.ok(ApiResponse.success(new MyPointDto(account.getMileage())));
     }
@@ -27,6 +29,7 @@ public class PointController {
 
     // 포인트 충전
     @PostMapping("/charge")
+    @Operation(summary = "사용하지 않음", description = "포인트 충전은 /api/payments/confirm 을 사용해주세요. ")
     public ResponseEntity<ApiResponse<PointChargeResponseDto>> chargePoints(@AuthenticationPrincipal Account account,
             @RequestBody PointChargeRequestDto requestDto) {
 
