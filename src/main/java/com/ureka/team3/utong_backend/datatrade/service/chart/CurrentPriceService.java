@@ -1,10 +1,9 @@
 package com.ureka.team3.utong_backend.datatrade.service.chart;
 
-import java.time.LocalDateTime;
+import com.ureka.team3.utong_backend.datatrade.dto.AvgPerHour;
+
+import java.util.List;
 
 public interface CurrentPriceService {
-
-    void updateRedisCache(LocalDateTime aggregatedAt);
-
-    void broadCastToSseClients();
+    List<AvgPerHour> getInitData(String dataCode);
 }
