@@ -1,4 +1,12 @@
+
+  
 spring:
+  servlet:
+    session:
+      cookie:
+        same-site: lax
+        http-only: true
+        secure: false
   application:
     name: utong_backend
   datasource:
