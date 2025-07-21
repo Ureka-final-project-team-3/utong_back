@@ -229,9 +229,10 @@ public class AuthService {
         Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(true);
         cookie.setSecure(false);
+        cookie.setAttribute("SameSite", "Lax");
         cookie.setPath("/");
         cookie.setMaxAge((int) (jwtProperties.getRefreshTokenExpiration() / 1000));
-        cookie.setDomain("54.180.0.98");
+//        cookie.setDomain("54.180.0.98");
         return cookie;
     }
     
