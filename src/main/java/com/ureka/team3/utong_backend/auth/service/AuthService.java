@@ -128,7 +128,7 @@ public class AuthService {
                     .path("/")
                     .maxAge(jwtProperties.getRefreshTokenExpiration() / 1000)
                     .sameSite("None") // SameSite 속성 설정
-                    .domain("54.180.0.98")
+//                    .domain("54.180.0.98")
                     .build();
             
             response.addHeader("Set-Cookie", refreshTokenCookie.toString());
