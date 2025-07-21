@@ -124,10 +124,10 @@ public class AuthService {
 
             ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", refreshToken)
                     .httpOnly(true)
-                    .secure(false) // 개발환경에서는 false, 운영환경에서는 true
+                    .secure(true) // 개발환경에서는 false, 운영환경에서는 true
                     .path("/")
                     .maxAge(jwtProperties.getRefreshTokenExpiration() / 1000)
-                    .sameSite("Lax") // SameSite 속성 설정
+                    .sameSite("None") // SameSite 속성 설정
                     .domain("54.180.0.98")
                     .build();
             
