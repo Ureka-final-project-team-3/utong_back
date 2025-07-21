@@ -23,8 +23,8 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         List<String> origins = List.of(allowedOrigins.split(","));
-        config.setAllowedOriginPatterns(origins);
-
+//        config.setAllowedOriginPatterns(origins);
+        config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(allowCredentials);
