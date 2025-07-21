@@ -224,10 +224,10 @@ public class AuthService {
     }
     
     private void addRefreshTokenCookie(HttpServletResponse response, String name, String value, long maxAgeMs) {
-        String cookieValue = String.format(
-            "%s=%s; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=%d",
-            name, value, maxAgeMs / 1000
-        );
+    	String cookieValue = String.format(
+    		    "%s=%s; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=%d; Domain=54.180.0.98",
+    		    name, value, maxAgeMs / 1000
+    		);
         response.addHeader("Set-Cookie", cookieValue);
     }
 //    private Cookie createRefreshTokenCookie(String name, String value) {
