@@ -6,6 +6,11 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: true  # 콘솔에 SQL 출력
+    properties:
+      hibernate:
+        format_sql: true  # SQL 보기 좋게 정렬
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     producer:
@@ -94,6 +99,8 @@ server:
 logging:
   level:
     com.eureka.ip.team1: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 springdoc:
   api-docs:

@@ -70,22 +70,20 @@
     }
 
     function connectLTE() {
-        disconnect(); // 기존 연결 끊기
-
+        disconnect();
         eventSource = new EventSource("http://localhost:8080/api/data/current-prices/stream/001");
-        setupEventListeners('LTE (001)');
+        setupEventListeners('LTE (001)', '001');
         addLog('🔗 LTE 데이터 스트림에 연결 시도 중...', 'info');
     }
 
     function connect5G() {
-        disconnect(); // 기존 연결 끊기
-
+        disconnect();
         eventSource = new EventSource("http://localhost:8080/api/data/current-prices/stream/002");
-        setupEventListeners('5G (002)');
+        setupEventListeners('5G (002)', '002');
         addLog('🔗 5G 데이터 스트림에 연결 시도 중...', 'info');
     }
 
-    function setupEventListeners(subscriptionType) {
+    function setupEventListeners(subscriptionType, dataCode) {
         eventSource.onopen = () => {
             updateStatus(true, subscriptionType);
             addLog(`✅ ${subscriptionType} 연결 성공!`, 'info');
@@ -94,38 +92,27 @@
         eventSource.addEventListener("initial-data", (event) => {
             const data = JSON.parse(event.data);
             addLog(`📦 초기 데이터 수신 (${data.length}개):`, 'initial');
-
-            // 모든 데이터 표시
             const allData = data.map(item =>
                 `시간: ${item.aggregatedAt}, 가격: ${item.avgPrice}원, 코드: ${item.dataCode}`
             ).join('<br>');
-
             addLog(allData, 'initial');
         });
 
-        eventSource.addEventListener("hourly-update", (event) => {
+        // ✅ dataCode 기반의 hourly 이벤트 등록
+        const hourlyEventName = `${dataCode}-hourly-update`;
+        eventSource.addEventListener(hourlyEventName, (event) => {
             const data = JSON.parse(event.data);
-            addLog(`📈 실시간 업데이트 수신 (${data.length}개):`, 'update');
+            addLog(`📈 [${dataCode}] 실시간 업데이트 수신 (${data.length}개):`, 'update');
 
-            // 모든 업데이트 데이터 표시
             const allUpdates = data.map(item =>
                 `시간: ${item.aggregatedAt}, 가격: ${item.avgPrice}원, 코드: ${item.dataCode}`
             ).join('<br>');
-
             addLog(allUpdates, 'update');
-        });
-
-        eventSource.addEventListener("datacode-update", (event) => {
-            const data = JSON.parse(event.data);
-            addLog(`🎯 특정 코드 업데이트 수신:`, 'update');
-            addLog(`데이터: ${JSON.stringify(data)}`, 'update');
         });
 
         eventSource.onerror = (e) => {
             addLog('❌ SSE 연결 오류 발생', 'error');
             updateStatus(false);
-
-            // 연결 상태 확인
             if (eventSource.readyState === EventSource.CLOSED) {
                 addLog('🔌 연결이 서버에 의해 닫혔습니다', 'error');
             } else if (eventSource.readyState === EventSource.CONNECTING) {

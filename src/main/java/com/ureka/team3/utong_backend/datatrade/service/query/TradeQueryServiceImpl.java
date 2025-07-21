@@ -1,4 +1,4 @@
-package com.ureka.team3.utong_backend.datatrade.service;
+package com.ureka.team3.utong_backend.datatrade.service.query;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
