@@ -122,8 +122,8 @@ public class AuthService {
             
             redisTokenService.saveRefreshToken(account.getId(), refreshToken);
             
-            addRefreshTokenCookie(response, "refresh_token", refreshToken, jwtProperties.getRefreshTokenExpiration());
-
+            Cookie refreshTokenCookie = createRefreshTokenCookie("refresh_token", refreshToken);
+            response.addCookie(refreshTokenCookie);
             
             
             
@@ -194,8 +194,10 @@ public class AuthService {
                     redisTokenService.blacklistAccessToken(accessToken, remainingTime);
                 }
             }
-            addRefreshTokenCookie(response, "refresh_token", "", 0);
-
+            
+            Cookie refreshTokenCookie = createRefreshTokenCookie("refresh_token", "");
+            refreshTokenCookie.setMaxAge(0);
+            response.addCookie(refreshTokenCookie);
         }
         
         return ApiResponse.success("로그아웃이 완료되었습니다", null);
@@ -223,21 +225,16 @@ public class AuthService {
         return ApiResponse.success("사용자 정보를 성공적으로 조회했습니다", userInfo);
     }
     
-    private void addRefreshTokenCookie(HttpServletResponse response, String name, String value, long maxAgeMs) {
-    	String cookieValue = String.format(
-    		    "%s=%s; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=%d; Domain=54.180.0.98",
-    		    name, value, maxAgeMs / 1000
-    		);
-        response.addHeader("Set-Cookie", cookieValue);
+    private Cookie createRefreshTokenCookie(String name, String value) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setPath("/");
+        cookie.setMaxAge((int) (jwtProperties.getRefreshTokenExpiration() / 1000));
+        cookie.setDomain("54.180.0.98");
+        return cookie;
     }
-//    private Cookie createRefreshTokenCookie(String name, String value) {
-//        Cookie cookie = new Cookie(name, value);
-//        cookie.setHttpOnly(true);
-//        cookie.setSecure(true);
-//        cookie.setPath("/");
-//        cookie.setMaxAge((int) (jwtProperties.getRefreshTokenExpiration() / 1000));
-//        return cookie;
-//    }
+    
     private String getRefreshTokenFromCookie(HttpServletRequest request) {
         if (request.getCookies() != null) {
             return Arrays.stream(request.getCookies())
