@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -120,10 +121,17 @@ public class AuthService {
             String refreshToken = jwtUtil.generateRefreshToken(account.getId());
             
             redisTokenService.saveRefreshToken(account.getId(), refreshToken);
+
+            ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", refreshToken)
+                    .httpOnly(true)
+                    .secure(false) // 개발환경에서는 false, 운영환경에서는 true
+                    .path("/")
+                    .maxAge(jwtProperties.getRefreshTokenExpiration() / 1000)
+                    .sameSite("Lax") // SameSite 속성 설정
+                    .build();
             
-            Cookie refreshTokenCookie = createRefreshTokenCookie("refresh_token", refreshToken);
-            response.addCookie(refreshTokenCookie);
-            
+            response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+
             AuthDto.UserInfo userInfo = new AuthDto.UserInfo(
                     account.getId(),
                     account.getEmail(),
@@ -193,9 +201,17 @@ public class AuthService {
                 }
             }
             
-            Cookie refreshTokenCookie = createRefreshTokenCookie("refresh_token", "");
-            refreshTokenCookie.setMaxAge(0);
-            response.addCookie(refreshTokenCookie);
+            ResponseCookie deleteCookie = ResponseCookie.from("refresh_token", "")
+                    .httpOnly(true)
+                    .secure(false)
+                    .path("/")
+                    .maxAge(0) // 즉시 만료
+                    .sameSite("Lax")
+                    .build();
+            
+            response.addHeader("Set-Cookie", deleteCookie.toString());
+            
+            SecurityContextHolder.clearContext();
         }
         
         return ApiResponse.success("로그아웃이 완료되었습니다", null);
