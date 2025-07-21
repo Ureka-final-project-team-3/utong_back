@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ureka.team3.utong_backend.subscriber.AggregationStatusSubscriber;
+import com.ureka.team3.utong_backend.subscriber.OrderQueueStatusSubscriber;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +17,9 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 public class RedisConfig {
 
     private final AggregationStatusSubscriber aggregationStatusSubscriber;
-    private final String CONTRACT_AGGREGATION_STATUS_CHANNEL = "contract:aggregation:status";
-
+    private final OrderQueueStatusSubscriber orderQueueStatusSubscriber;
+    private static final String CONTRACT_AGGREGATION_STATUS_CHANNEL = "contract:aggregation:status";
+    private static final String QUEUE_AGGREGATION_STATUS_CHANNEL = "queue:aggregation:status";
     @Bean
     public RedisMessageListenerContainer redisMessageListenerContainer(
             RedisConnectionFactory connectionFactory
@@ -28,6 +30,11 @@ public class RedisConfig {
         container.addMessageListener(
                 aggregationStatusSubscriber,
                 new ChannelTopic(CONTRACT_AGGREGATION_STATUS_CHANNEL)
+        );
+
+        container.addMessageListener(
+                orderQueueStatusSubscriber,
+                new ChannelTopic(QUEUE_AGGREGATION_STATUS_CHANNEL)
         );
 
         return container;

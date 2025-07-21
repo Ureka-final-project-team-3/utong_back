@@ -3,6 +3,7 @@ package com.ureka.team3.utong_backend.datatrade.repository;
 import com.ureka.team3.utong_backend.datatrade.dto.OrderDto;
 
 import java.util.List;
+import java.util.Map;
 
 public interface OrderRepository {
     // 구매 대기열 등록
@@ -30,4 +31,8 @@ public interface OrderRepository {
     OrderDto popFirstSellOrderFromList(String dataCode, long price);
 
     OrderDto popFirstBuyOrderFromList(String dataCode, long price);
+
+    Map<Long, Long> getAllSellOrderNumbers(String dataCode);
+
+    Map<Long, Long> getAllBuyOrderNumbers(String dataCode);
 }
