@@ -16,10 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ureka.team3.utong_backend.auth.dto.AuthDto;
 import com.ureka.team3.utong_backend.auth.entity.Account;
-import com.ureka.team3.utong_backend.user.entity.User;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
-import com.ureka.team3.utong_backend.line.repository.LineRepository;
-import com.ureka.team3.utong_backend.user.repository.UserRepository;
 import com.ureka.team3.utong_backend.auth.util.JwtProperties;
 import com.ureka.team3.utong_backend.auth.util.JwtUtil;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
@@ -27,6 +24,9 @@ import com.ureka.team3.utong_backend.common.exception.business.EmailAlreadyExist
 import com.ureka.team3.utong_backend.common.exception.business.InvalidPasswordException;
 import com.ureka.team3.utong_backend.common.exception.business.InvalidTokenException;
 import com.ureka.team3.utong_backend.common.exception.business.UserNotFoundException;
+import com.ureka.team3.utong_backend.line.repository.LineRepository;
+import com.ureka.team3.utong_backend.user.entity.User;
+import com.ureka.team3.utong_backend.user.repository.UserRepository;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -156,15 +156,14 @@ public class AuthService {
         }
         
         if (!jwtUtil.validateToken(refreshToken)) {
+        	
             throw new InvalidTokenException("유효하지 않은 리프레시 토큰입니다");
         }
         
         String accountId = jwtUtil.extractAccountId(refreshToken);
-        String storedRefreshToken = redisTokenService.getRefreshToken(accountId);
+//        String storedRefreshToken = redisTokenService.getRefreshToken(accountId);
         
-        if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
-            throw new InvalidTokenException("유효하지 않은 리프레시 토큰입니다");
-        }
+        
         
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다"));
@@ -226,7 +225,7 @@ public class AuthService {
     private Cookie createRefreshTokenCookie(String name, String value) {
         Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(false);
         cookie.setPath("/");
         cookie.setMaxAge((int) (jwtProperties.getRefreshTokenExpiration() / 1000));
         return cookie;
