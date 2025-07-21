@@ -21,7 +21,7 @@ public class SaleMatchingProcessorImpl implements SaleMatchingProcessor {
         Long highestBuyPrice = tradeOrderQueueService.getHighestBuyPrice(request.getDataCode());
         long remaining = request.getDataAmount();
 
-        if (highestBuyPrice == null || request.getPrice() > highestBuyPrice) {
+        if (highestBuyPrice == null || request.getPrice() < highestBuyPrice) {
             return SaleMatchingResult.overMaxPurchasePrice(remaining);
         }
 
