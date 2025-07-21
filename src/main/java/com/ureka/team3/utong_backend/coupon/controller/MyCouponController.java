@@ -2,15 +2,14 @@ package com.ureka.team3.utong_backend.coupon.controller;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
+import com.ureka.team3.utong_backend.coupon.dto.CouponUseResponseDto;
 import com.ureka.team3.utong_backend.coupon.dto.MyCouponResponseDto;
 import com.ureka.team3.utong_backend.coupon.service.MyCouponService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,4 +25,11 @@ public class MyCouponController {
     public ResponseEntity<ApiResponse<List<MyCouponResponseDto>>> getMyCoupons(@AuthenticationPrincipal Account account) {
         return ResponseEntity.ok(ApiResponse.success(myCouponService.getMyCoupons(account.getUser().getId())));
     }
+
+    @PostMapping("/{userCouponId}")
+    @Operation(summary = "데이터 쿠폰 사용", description = "사용자가 특정 데이터 쿠폰을 사용합니다. 데이터 쿠폰인 경우에만 처리가 가능합니다.")
+    public ResponseEntity<ApiResponse<CouponUseResponseDto>> useCoupon(@AuthenticationPrincipal Account account, @PathVariable String userCouponId) {
+        return ResponseEntity.ok(myCouponService.useCoupon(account.getUser().getId(),userCouponId));
+    }
+
 }
