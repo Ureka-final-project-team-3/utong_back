@@ -121,26 +121,11 @@ public class AuthService {
             String refreshToken = jwtUtil.generateRefreshToken(account.getId());
             
             redisTokenService.saveRefreshToken(account.getId(), refreshToken);
-            System.out.println("=== 쿠키 설정 디버깅 시작 ===");
-            System.out.println("Generated refreshToken: " + refreshToken);
             
             Cookie refreshTokenCookie = createRefreshTokenCookie("refresh_token", refreshToken);
-            System.out.println("Cookie Name: " + refreshTokenCookie.getName());
-            System.out.println("Cookie Value: " + refreshTokenCookie.getValue());
-            System.out.println("Cookie Path: " + refreshTokenCookie.getPath());
-            System.out.println("Cookie MaxAge: " + refreshTokenCookie.getMaxAge());
-            System.out.println("Cookie HttpOnly: " + refreshTokenCookie.isHttpOnly());
-            System.out.println("Cookie Secure: " + refreshTokenCookie.getSecure());
             response.addCookie(refreshTokenCookie);
-            System.out.println("Response headers after addCookie: " + response.getHeaderNames());
-            System.out.println("Set-Cookie header: " + response.getHeader("Set-Cookie"));
             
-            // 🔍 디버깅: 모든 Set-Cookie 헤더 출력 (여러 개일 수 있음)
-            Collection<String> setCookieHeaders = response.getHeaders("Set-Cookie");
-            System.out.println("All Set-Cookie headers count: " + setCookieHeaders.size());
-            for (String header : setCookieHeaders) {
-                System.out.println("Set-Cookie: " + header);
-            }
+            
             
             System.out.println("=== 쿠키 설정 디버깅 끝 ===");
             AuthDto.UserInfo userInfo = new AuthDto.UserInfo(
@@ -243,7 +228,7 @@ public class AuthService {
     private Cookie createRefreshTokenCookie(String name, String value) {
         Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false);
+        cookie.setSecure(true);
         cookie.setPath("/");
         cookie.setMaxAge((int) (jwtProperties.getRefreshTokenExpiration() / 1000));
         return cookie;
