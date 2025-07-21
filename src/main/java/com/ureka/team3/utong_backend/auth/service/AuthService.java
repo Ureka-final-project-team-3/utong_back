@@ -124,7 +124,7 @@ public class AuthService {
 
             ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", refreshToken)
                     .httpOnly(true)
-                    .secure(true) // 개발환경에서는 false, 운영환경에서는 true
+                    .secure(false) // 개발환경에서는 false, 운영환경에서는 true
                     .path("/")
                     .maxAge(jwtProperties.getRefreshTokenExpiration() / 1000)
                     .sameSite("None") // SameSite 속성 설정
