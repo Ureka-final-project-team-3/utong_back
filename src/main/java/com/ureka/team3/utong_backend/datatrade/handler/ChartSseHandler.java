@@ -19,14 +19,16 @@ import static com.ureka.team3.utong_backend.datatrade.config.DataTradePolicy.SSE
 @RequiredArgsConstructor
 @Slf4j
 @Qualifier("chartSseHandler")
-public class SseHandlerImpl implements SseHandler {
+public class ChartSseHandler implements SseHandler<List<AvgPerHour>> {
 
     private final CurrentPriceService currentPriceService;
     private final ConcurrentHashMap<String, Set<SseEmitter>> emitterMap = new ConcurrentHashMap<>();
 
+    private static final String TOPIC ="chart-initial-data";
+
     // SSE 연결 및 초기 데이터 전송
     @Override
-    public SseEmitter connect(String dataCode, String topic) {
+    public SseEmitter connect(String dataCode) {
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT);
         emitterMap.putIfAbsent(dataCode, ConcurrentHashMap.newKeySet());
         emitterMap.get(dataCode).add(emitter);
@@ -37,15 +39,15 @@ public class SseHandlerImpl implements SseHandler {
         emitter.onTimeout(() -> removeEmitter(dataCode, emitter));
         emitter.onError((e) -> removeEmitter(dataCode, emitter));
 
-        sendInitialData(dataCode, emitter, topic);
+        sendInitialData(dataCode, emitter);
         return emitter;
     }
 
-    private void sendInitialData(String dataCode, SseEmitter emitter, String topic) {
+    private void sendInitialData(String dataCode, SseEmitter emitter) {
         try {
             List<AvgPerHour> data = currentPriceService.getInitData(dataCode);
             emitter.send(SseEmitter.event()
-                    .name(topic)
+                    .name(TOPIC)
                     .data(data));
             log.info("초기 데이터 전송 완료 [dataCode: {}] 개수: {}", dataCode, data.size());
         } catch (Exception e) {
@@ -55,7 +57,7 @@ public class SseHandlerImpl implements SseHandler {
     }
 
     @Override
-    public void broadCast(String dataCode, List<AvgPerHour> allData) {
+    public void broadCast(String dataCode, List<AvgPerHour> data) {
         Set<SseEmitter> emitters = emitterMap.getOrDefault(dataCode, ConcurrentHashMap.newKeySet());
         Set<SseEmitter> deadEmitters = ConcurrentHashMap.newKeySet();
         String eventName = buildEventName(dataCode);
@@ -64,7 +66,7 @@ public class SseHandlerImpl implements SseHandler {
             try {
                 emitter.send(SseEmitter.event()
                         .name(eventName)
-                        .data(allData));
+                        .data(data));
             } catch (IOException e) {
                 log.warn("SSE 전송 실패 [dataCode: {}] → 제거 예정: {}", dataCode, e.getMessage());
                 deadEmitters.add(emitter);
@@ -82,6 +84,6 @@ public class SseHandlerImpl implements SseHandler {
     }
 
     private String buildEventName(String dataCode) {
-        return dataCode + "-hourly-update";
+        return dataCode + "-chart-hourly-update";
     }
 }
