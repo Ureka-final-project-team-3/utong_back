@@ -128,6 +128,7 @@ public class AuthService {
                     .path("/")
                     .maxAge(jwtProperties.getRefreshTokenExpiration() / 1000)
                     .sameSite("Lax") // SameSite 속성 설정
+                    .domain("54.180.0.98")
                     .build();
             
             response.addHeader("Set-Cookie", refreshTokenCookie.toString());
@@ -207,6 +208,7 @@ public class AuthService {
                     .path("/")
                     .maxAge(0) // 즉시 만료
                     .sameSite("Lax")
+                    .domain("54.180.0.98")
                     .build();
             
             response.addHeader("Set-Cookie", deleteCookie.toString());
@@ -247,7 +249,7 @@ public class AuthService {
         cookie.setAttribute("SameSite", "Lax");
         cookie.setPath("/");
         cookie.setMaxAge((int) (jwtProperties.getRefreshTokenExpiration() / 1000));
-//        cookie.setDomain("54.180.0.98");
+        cookie.setDomain("54.180.0.98");
 
         return cookie;
     }
