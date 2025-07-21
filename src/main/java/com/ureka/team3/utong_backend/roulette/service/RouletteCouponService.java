@@ -1,11 +1,5 @@
 package com.ureka.team3.utong_backend.roulette.service;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.common.exception.ErrorCode;
@@ -17,9 +11,13 @@ import com.ureka.team3.utong_backend.gift.repository.UserGifticonRepository;
 import com.ureka.team3.utong_backend.roulette.entity.RouletteEvent;
 import com.ureka.team3.utong_backend.user.entity.User;
 import com.ureka.team3.utong_backend.user.repository.UserRepository;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -53,6 +51,9 @@ public class RouletteCouponService {
             }
             else
             {
+                // 쿠폰 코드가 데이터 쿠폰("003")이면 amount 직접 지정
+                Long amount = "003".equals(rewardCoupon.getCouponCode()) ? 1L : null; // 1GB 고정
+
             	UserCoupon userCoupon = UserCoupon.builder()
                         .id(UUID.randomUUID().toString())
                         .user(user)
@@ -60,6 +61,7 @@ public class RouletteCouponService {
                         .status("002")
                         .createdAt(LocalDateTime.now())
                         .expiredAt(LocalDateTime.now().plusDays(3).withHour(23).withMinute(59).withSecond(59))
+                        .amount(amount)
                         .build();
                 
                 myCouponRepository.save(userCoupon);
