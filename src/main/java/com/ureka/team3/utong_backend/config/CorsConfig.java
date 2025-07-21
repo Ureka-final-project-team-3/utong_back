@@ -31,7 +31,8 @@ public class CorsConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
-
+        config.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
+        config.setAllowCredentials(true);
         return new CorsFilter(source);
     }
 }

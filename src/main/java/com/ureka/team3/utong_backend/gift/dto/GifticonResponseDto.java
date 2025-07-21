@@ -21,7 +21,7 @@ public class GifticonResponseDto {
     private String imageUrl;
 
     private String imageKey;
-
+    //TODO: CATEGORY 추가
     public static GifticonResponseDto from(Gifticon gifticon) {
         GifticonResponseDto gifticonResponseDto = new GifticonResponseDto();
 
