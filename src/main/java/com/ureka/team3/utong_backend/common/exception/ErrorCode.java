@@ -25,6 +25,10 @@ public enum ErrorCode {
   COUPON_EXPIRED(HttpStatus.BAD_REQUEST,"C002", "쿠폰이 만료되었습니다."),
   INVALID_COUPON_STATUS(HttpStatus.BAD_REQUEST,"C003", "쿠폰 상태가 유효하지 않습니다."),
   NOT_FEE_WAIVE_COUPON(HttpStatus.BAD_REQUEST,"C004", "해당 쿠폰은 수수료 면제 쿠폰이 아닙니다."),
+    NOT_MY_COUPON(HttpStatus.BAD_REQUEST, "C005", "사용자 소유 쿠폰이 아닙니다."),
+    NOT_DATA_COUPON(HttpStatus.BAD_REQUEST, "C006", "데이터 쿠폰이 아닙니다."),
+
+
 
 
 
