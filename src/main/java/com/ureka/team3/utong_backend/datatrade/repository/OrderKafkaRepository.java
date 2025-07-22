@@ -3,6 +3,7 @@ package com.ureka.team3.utong_backend.datatrade.repository;
 import com.ureka.team3.utong_backend.datatrade.dto.OrderDto;
 
 import java.util.List;
+import java.util.Map;
 
 // kafka로 구현해야함
 public class OrderKafkaRepository implements OrderRepository {
@@ -59,5 +60,15 @@ public class OrderKafkaRepository implements OrderRepository {
     @Override
     public OrderDto popFirstBuyOrderFromList(String dataCode, long price) {
         return null;
+    }
+
+    @Override
+    public Map<Long, Long> getAllSellOrderNumbers(String dataCode) {
+        return Map.of();
+    }
+
+    @Override
+    public Map<Long, Long> getAllBuyOrderNumbers(String dataCode) {
+        return Map.of();
     }
 }

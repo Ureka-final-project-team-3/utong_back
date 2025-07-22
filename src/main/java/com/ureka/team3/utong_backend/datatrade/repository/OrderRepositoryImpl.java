@@ -10,9 +10,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.ureka.team3.utong_backend.datatrade.utils.RedisKeyUtil.*;
 
@@ -201,6 +199,33 @@ public class OrderRepositoryImpl implements OrderRepository {
         } catch (JsonProcessingException e) {
             throw new RuntimeException("JSON 파싱 실패: " + rawOrder, e);
         }
+    }
+
+    @Override
+    public Map<Long, Long> getAllSellOrderNumbers(String dataCode) {
+        return getOrderNumbers("sell:numbers:" + dataCode);
+    }
+
+    @Override
+    public Map<Long, Long> getAllBuyOrderNumbers(String dataCode) {
+        return getOrderNumbers("buy:numbers:" + dataCode);
+    }
+
+    private Map<Long, Long> getOrderNumbers(String key) {
+        Map<Object, Object> raw = stringRedisTemplate.opsForHash().entries(key);
+        if (raw == null || raw.isEmpty()) return Map.of();
+
+        Map<Long, Long> result = new TreeMap<>();
+        for (Map.Entry<Object, Object> entry : raw.entrySet()) {
+            try {
+                Long price = Long.parseLong(entry.getKey().toString());
+                Long quantity = Long.parseLong(entry.getValue().toString());
+                result.put(price, quantity);
+            } catch (NumberFormatException e) {
+                log.warn("Redis 값 파싱 오류: key={}, value={}", entry.getKey(), entry.getValue());
+            }
+        }
+        return result;
     }
 
 

@@ -5,9 +5,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
-public interface SseHandler {
+public interface SseHandler<T> {
 
-    SseEmitter connect(String dataCode, String topic);
+    SseEmitter connect(String dataCode);
 
-    void broadCast(String dataCode,List<AvgPerHour> allData);
+    void broadCast(String dataCode,T Data);
 }
