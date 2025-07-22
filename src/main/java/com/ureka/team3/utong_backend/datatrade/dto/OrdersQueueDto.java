@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -14,4 +15,5 @@ import java.util.Map;
 public class OrdersQueueDto {
     private Map<Long,Long> buyOrderQuantity;
     private Map<Long,Long> sellOrderQuantity;
+    private List<ContractDto> recentContracts;
 }
