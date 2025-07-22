@@ -2,6 +2,7 @@ package com.ureka.team3.utong_backend.coupon.controller;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
+import com.ureka.team3.utong_backend.coupon.dto.CouponUseRequestDto;
 import com.ureka.team3.utong_backend.coupon.dto.CouponUseResponseDto;
 import com.ureka.team3.utong_backend.coupon.dto.MyCouponResponseDto;
 import com.ureka.team3.utong_backend.coupon.service.MyCouponService;
@@ -26,10 +27,10 @@ public class MyCouponController {
         return ResponseEntity.ok(ApiResponse.success(myCouponService.getMyCoupons(account.getUser().getId())));
     }
 
-    @PostMapping("/{userCouponId}") // Todo : body로 넘기기
+    @PostMapping // Todo : body로 넘기기 - 완료
     @Operation(summary = "데이터 쿠폰 사용", description = "사용자가 특정 데이터 쿠폰을 사용합니다. 데이터 쿠폰인 경우에만 처리가 가능합니다.")
-    public ResponseEntity<ApiResponse<CouponUseResponseDto>> useCoupon(@AuthenticationPrincipal Account account, @PathVariable("userCouponId") String userCouponId) {
-        return ResponseEntity.ok(myCouponService.useCoupon(account.getUser().getId(),userCouponId));
+    public ResponseEntity<ApiResponse<CouponUseResponseDto>> useCoupon(@AuthenticationPrincipal Account account, @RequestBody CouponUseRequestDto requestDto) {
+        return ResponseEntity.ok(myCouponService.useCoupon(account.getUser().getId(), requestDto.getUserCouponId()));
     }
 
 }
