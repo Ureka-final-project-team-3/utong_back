@@ -83,4 +83,14 @@ public class OrderKafkaRepository implements OrderRepository {
     public void removeFromSaleQueue(SaleDataRequest saleOrderById) {
         
     }
+
+    @Override
+    public Map<Long, List<OrderDto>> findAllSellOrders(String dataCode) {
+        return Map.of();
+    }
+
+    @Override
+    public Map<Long, List<OrderDto>> findAllBuyOrders(String dataCode) {
+        return Map.of();
+    }
 }

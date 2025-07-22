@@ -293,6 +293,60 @@ public class OrderRepositoryImpl implements OrderRepository {
         }
     }
 
+    @Override
+    public Map<Long, List<OrderDto>> findAllSellOrders(String dataCode) {
+        return findAllOrdersByPattern(RedisKeyUtil.buildCommonSellListKey(dataCode));
+    }
+
+    @Override
+    public Map<Long, List<OrderDto>> findAllBuyOrders(String dataCode) {
+        return findAllOrdersByPattern(RedisKeyUtil.buildCommonBuyListKey(dataCode));
+    }
+
+    private Map<Long, List<OrderDto>> findAllOrdersByPattern(String keyPattern) {
+        Set<String> keys = stringRedisTemplate.keys(keyPattern);
+        if (keys == null || keys.isEmpty()) return Map.of();
+
+        Map<Long, List<OrderDto>> result = new HashMap<>();
+
+        for (String listKey : keys) {
+            List<String> rawOrders = stringRedisTemplate.opsForList().range(listKey, 0, -1);
+            if (rawOrders == null || rawOrders.isEmpty()) continue;
+
+            Optional<Long> priceOpt = extractPriceFromKey(listKey);
+            if (priceOpt.isEmpty()) continue;
+
+            List<OrderDto> orders = parseOrderList(rawOrders);
+            result.put(priceOpt.get(), orders);
+        }
+
+        return result;
+    }
+
+    private Optional<Long> extractPriceFromKey(String listKey) {
+        String[] parts = listKey.split(":");
+        if (parts.length != 4) return Optional.empty();
+
+        try {
+            return Optional.of(Long.parseLong(parts[3]));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
+    }
+
+    private List<OrderDto> parseOrderList(List<String> rawOrders) {
+        List<OrderDto> orders = new ArrayList<>();
+        for (String json : rawOrders) {
+            try {
+                orders.add(objectMapper.readValue(json, OrderDto.class));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("JSON 파싱 실패: " + json, e);
+            }
+        }
+        return orders;
+    }
+
+
     private Map<Long, Long> getOrderNumbers(String key) {
         Map<Object, Object> raw = stringRedisTemplate.opsForHash().entries(key);
         if (raw == null || raw.isEmpty()) return Map.of();
