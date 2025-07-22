@@ -46,8 +46,9 @@ public class TradeCalculator {
     /**
      * 판매 가능한 데이터 양 계산
      */
-    public Long calculateCanSellAmount(Long planData, Long alreadySold) {
-        return planData - alreadySold;
+    public Long calculateCanSellAmount(Long remaining, Long canSale, Long alreadySold) {
+
+        return Math.min(remaining, canSale - alreadySold);
     }
 
     /**

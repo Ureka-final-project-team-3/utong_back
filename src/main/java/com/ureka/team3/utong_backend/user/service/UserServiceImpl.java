@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
             phoneNumber = defaultLine.getPhoneNumber();
             remaining = lineData.getRemaining()+lineData.getPurchased();
             dataCode = lineData.getDataCode();
-            canSale = tradeCalculator.calculateCanSellAmount(defaultLine.getPlan().canSell(), lineData.getSell());
+            canSale = tradeCalculator.calculateCanSellAmount(lineData.getRemaining(), defaultLine.getPlan().canSell(), lineData.getSell());
             canSale = Math.min(remaining,canSale);
         }
 

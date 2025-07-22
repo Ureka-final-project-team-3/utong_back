@@ -50,8 +50,8 @@ public class TradeValidator {
             return TradeResponseFactory.unlimitedTradeNotAllowed();
 
         LineData lineData = lineService.getLineDataByLineAndDate(defaultLine, LocalDate.now());
-        Long canSell = tradeCalculator.calculateCanSellAmount(plan.canSell(), lineData.getSell() );
-        if (dto.getDataAmount() > canSell) {
+        Long canSell = tradeCalculator.calculateCanSellAmount(lineData.getRemaining(),plan.canSell(), lineData.getSell() );
+        if (dto.getDataAmount() > canSell ) {
             return TradeResponseFactory.exceedSaleLimit();
         }
 
