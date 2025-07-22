@@ -23,6 +23,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         List<String> origins = List.of(allowedOrigins.split(","));
+        origins.add("http://d2rykyv7hqvhku.cloudfront.net");
         config.setAllowedOriginPatterns(origins);
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
