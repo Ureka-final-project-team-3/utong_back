@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
     private final TradeCalculator tradeCalculator;
     private final MyCouponRepository myCouponRepository;
 
-    @Override
+    @Override   // todo : 메서드 리팩터링 : 책임과 역할에 맞게 메서드 분리 ( 클래스도 분리할거 있는지 고민해보길)
     public MyInfoResponseDto getMyInfo(Account account) {   // -> 리팩터링 필요
         User user = userRepository.findByAccountId(account.getId())
                 .orElseThrow(UserNotFoundException::new);

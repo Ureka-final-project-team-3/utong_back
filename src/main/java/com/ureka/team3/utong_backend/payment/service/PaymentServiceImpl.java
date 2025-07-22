@@ -62,12 +62,13 @@ public class PaymentServiceImpl implements PaymentService {
 //    }
 
 
-    @Override
+    @Override   // todo : 메서드 리팩터링 : 책임과 역할에 맞게 메서드 분리 ( 클래스도 분리할거 있는지 고민해보길)
     public PointChargeResponseDto confirmAndCharge(Account account, PaymentConfirmRequestDto requestDto) {
         System.out.println("[결제 승인 요청] paymentKey: " + requestDto.getPaymentKey());
         System.out.println("[결제 승인 요청] orderId: " + requestDto.getOrderId());
         System.out.println("[결제 승인 요청] amount: " + requestDto.getAmount());
         System.out.println("[결제 승인 요청] couponId: " + requestDto.getUserCouponId());
+        // todo : 로그 수정
 
         // 1. 토스 결제 승인 요청
         HttpHeaders headers = new HttpHeaders();
@@ -82,12 +83,13 @@ public class PaymentServiceImpl implements PaymentService {
         HttpEntity<Map<String, Object>> httpRequest = new HttpEntity<>(body, headers);
 
         ResponseEntity<PaymentApproveResponse> response = restTemplate.postForEntity(
-                "https://api.tosspayments.com/v1/payments/confirm",
+                "https://api.tosspayments.com/v1/payments/confirm", // todo : 환경 변수로 (도연이꺼 아님)
                 httpRequest,
                 PaymentApproveResponse.class
         );
 
 
+        // Todo : log 수정
         System.out.println(" Toss 응답 원문: " + response);
         System.out.println(" Toss 응답 body: " + response.getBody());
         System.out.println(" Toss amount: " + response.getBody().getTotalAmount());

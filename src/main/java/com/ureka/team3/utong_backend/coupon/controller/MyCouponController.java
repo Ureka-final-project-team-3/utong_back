@@ -26,9 +26,9 @@ public class MyCouponController {
         return ResponseEntity.ok(ApiResponse.success(myCouponService.getMyCoupons(account.getUser().getId())));
     }
 
-    @PostMapping("/{userCouponId}")
+    @PostMapping("/{userCouponId}") // Todo : body로 넘기기
     @Operation(summary = "데이터 쿠폰 사용", description = "사용자가 특정 데이터 쿠폰을 사용합니다. 데이터 쿠폰인 경우에만 처리가 가능합니다.")
-    public ResponseEntity<ApiResponse<CouponUseResponseDto>> useCoupon(@AuthenticationPrincipal Account account, @PathVariable String userCouponId) {
+    public ResponseEntity<ApiResponse<CouponUseResponseDto>> useCoupon(@AuthenticationPrincipal Account account, @PathVariable("userCouponId") String userCouponId) {
         return ResponseEntity.ok(myCouponService.useCoupon(account.getUser().getId(),userCouponId));
     }
 

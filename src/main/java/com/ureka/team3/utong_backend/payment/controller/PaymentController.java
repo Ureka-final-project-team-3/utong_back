@@ -20,18 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class PaymentController {
 
     private final PaymentService paymentService;
-
-//    // 결제 시작
-//    @PostMapping("/pay")
-//    public ResponseEntity<ApiResponse<TossPaymentResponseDto>> startPayment(
-//            @AuthenticationPrincipal Account account,
-//            @RequestBody TossPaymentRequestDto requestDto) {
-//
-//        TossPaymentResponseDto response = tossPaymentService.startPayment(account, requestDto);
-//        return ResponseEntity.ok(ApiResponse.success(response));
-//    }
-
-
     // 결제 승인
     @PostMapping("/confirm")
     @Operation(summary = "포인트 충전 결제 연동", description = "포인트 충전 시 결제 api 연동으로 결제 가능합니다. 수수료 면제 쿠폰이 있는 경우 적용할 수 있습니다.")

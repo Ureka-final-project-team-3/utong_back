@@ -5,10 +5,6 @@ import com.ureka.team3.utong_backend.point.dto.PointChargeResponseDto;
 import com.ureka.team3.utong_backend.payment.dto.PaymentConfirmRequestDto;
 
 public interface PaymentService {
-
-//    // 토스 걸제
-//    TossPaymentResponseDto startPayment(Account account, TossPaymentRequestDto requestDto);
-
     // 토스 결제 승인
     PointChargeResponseDto confirmAndCharge(Account account, PaymentConfirmRequestDto requestDto);
 }
