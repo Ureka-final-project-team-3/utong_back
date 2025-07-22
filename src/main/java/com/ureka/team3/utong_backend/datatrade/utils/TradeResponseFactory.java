@@ -7,55 +7,32 @@ import com.ureka.team3.utong_backend.datatrade.dto.SaleMatchingResult;
 import com.ureka.team3.utong_backend.datatrade.enums.BuyOrderResult;
 import com.ureka.team3.utong_backend.datatrade.enums.SaleOrderResult;
 
+import static com.ureka.team3.utong_backend.common.exception.ErrorCode.*;
+
 public class TradeResponseFactory {
 
     public static ApiResponse needDefaultLine() {
-        return ApiResponse.success("데이터 거래에 필요한 기본 회선 선택 필수",
-                DataTradeDto.BuyDataResponseDto.builder()
-                        .result(BuyOrderResult.NEED_DEFAULT_LINE)
-                        .build());
+        return ApiResponse.fail(NEED_DEFAULT_LINE);
     }
 
-    public static ApiResponse unlimitedBuyNotAllowed() {
-        return ApiResponse.success("무제한 요금제는 데이터를 구매할 수 없습니다.",
-                DataTradeDto.SaleDataResponseDto.builder()
-                        .result(SaleOrderResult.BORDERLESS)
-                        .build());
-    }
-
-    public static ApiResponse unlimitedSaleNotAllowed() {
-        return ApiResponse.success("무제한 요금제는 데이터를 판매할 수 없습니다.",
-                DataTradeDto.SaleDataResponseDto.builder()
-                        .result(SaleOrderResult.BORDERLESS)
-                        .build());
+    public static ApiResponse unlimitedTradeNotAllowed() {
+        return ApiResponse.fail(BORDERLESS);
     }
 
     public static ApiResponse existSaleRequest() {
-        return ApiResponse.success("이미 판매 대기중인 데이터가 있습니다. 취소 후 다시 이용해주세요",
-                DataTradeDto.BuyDataResponseDto.builder()
-                        .result(BuyOrderResult.EXIST_SALE_REQUEST)
-                        .build());
+        return ApiResponse.fail(EXIST_SALE_REQUEST);
     }
 
     public static ApiResponse existBuyRequest() {
-        return ApiResponse.success("이미 구매 대기중인 데이터가 있습니다. 취소 후 다시 이용해주세요",
-                DataTradeDto.SaleDataResponseDto.builder()
-                        .result(SaleOrderResult.EXIST_BUY_REQUEST)
-                        .build());
+        return ApiResponse.fail(EXIST_PURCHASE_REQUEST);
     }
 
     public static ApiResponse insufficientPoint() {
-        return ApiResponse.success("포인트 부족",
-                DataTradeDto.BuyDataResponseDto.builder()
-                        .result(BuyOrderResult.INSUFFICIENT_POINT)
-                        .build());
+        return ApiResponse.fail(INSUFFICIENT_POINT);
     }
 
     public static ApiResponse exceedSaleLimit() {
-        return ApiResponse.success("판매 요청한 데이터가 판매 가능량을 초과했습니다.",
-                DataTradeDto.SaleDataResponseDto.builder()
-                        .result(SaleOrderResult.EXCEED_SALE_LIMIT)
-                        .build());
+        return ApiResponse.fail(EXCEED_SALE_LIMIT);
     }
 
     public static ApiResponse successPurchaseComplete() {

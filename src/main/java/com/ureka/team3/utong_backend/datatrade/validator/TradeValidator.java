@@ -29,7 +29,7 @@ public class TradeValidator {
 
         Line defaultLine = lineService.findById(defaultLineId);
         if (defaultLine.getPlan().getData() == -1)
-            return TradeResponseFactory.unlimitedBuyNotAllowed();
+            return TradeResponseFactory.unlimitedTradeNotAllowed();
 
 //        if (saleDataRequestRepository.existsWaitingRequestByLineId(defaultLine.getId()))
 //            return TradeResponseFactory.existSaleRequest();
@@ -47,7 +47,7 @@ public class TradeValidator {
         Long planData = plan.getData();
 
         if (planData == -1)
-            return TradeResponseFactory.unlimitedBuyNotAllowed();
+            return TradeResponseFactory.unlimitedTradeNotAllowed();
 
         LineData lineData = lineService.getLineDataByLineAndDate(defaultLine, LocalDate.now());
         Long canSell = tradeCalculator.calculateCanSellAmount(plan.canSell(), lineData.getSell() );
