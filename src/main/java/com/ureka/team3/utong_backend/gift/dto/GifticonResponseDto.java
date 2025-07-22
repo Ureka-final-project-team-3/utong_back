@@ -21,7 +21,9 @@ public class GifticonResponseDto {
     private String imageUrl;
 
     private String imageKey;
-    //TODO: CATEGORY 추가
+
+    private String category;
+    
     public static GifticonResponseDto from(Gifticon gifticon) {
         GifticonResponseDto gifticonResponseDto = new GifticonResponseDto();
 
@@ -31,7 +33,7 @@ public class GifticonResponseDto {
         gifticonResponseDto.name = gifticon.getName();
         gifticonResponseDto.imageUrl = gifticon.getImageUrl();
         gifticonResponseDto.imageKey = gifticon.getImageKey();
-
+        gifticonResponseDto.category = gifticon.getCategory();
         return gifticonResponseDto;
     }
 }
