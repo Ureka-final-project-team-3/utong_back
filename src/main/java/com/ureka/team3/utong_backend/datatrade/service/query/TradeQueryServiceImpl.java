@@ -33,9 +33,12 @@ public class TradeQueryServiceImpl implements TradeQueryService {
     private static final String STATUS_PARTIAL = "002";
     private static final String STATUS_WAITING = "003";
 
+    private static final String RANGE_TODAY = "TODAY";
     private static final String RANGE_MONTH = "MONTH";
     private static final String RANGE_YEAR = "YEAR";
     private static final String RANGE_WEEK = "WEEK";
+    private static final String RANGE_ALL = "ALL";
+
 
     @Override
     public ApiResponse getMyPurchases(Account account, TradeHistoryRequestDto requestDto) {
@@ -71,12 +74,14 @@ public class TradeQueryServiceImpl implements TradeQueryService {
 
     private LocalDateTime calculateFromDate(String range) {
         LocalDateTime now = LocalDateTime.now();
-        String safeRange = range != null ? range : RANGE_WEEK;
+        String safeRange = range != null ? range : RANGE_ALL;
 
         return switch (safeRange) {
+            case RANGE_TODAY -> now.toLocalDate().atStartOfDay();
+            case RANGE_WEEK -> now.minusDays(7);
             case RANGE_MONTH -> now.minusMonths(1);
             case RANGE_YEAR -> now.minusYears(1);
-            default -> now.minusDays(7);
+            default -> LocalDateTime.of(2000, 1, 1, 0, 0);
         };
     }
 

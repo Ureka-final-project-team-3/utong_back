@@ -1,29 +1,33 @@
 package com.ureka.team3.utong_backend.gift.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.ureka.team3.utong_backend.auth.entity.Account;
-import com.ureka.team3.utong_backend.user.entity.User;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
-import com.ureka.team3.utong_backend.user.repository.UserRepository;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
+import com.ureka.team3.utong_backend.common.entity.Code;
 import com.ureka.team3.utong_backend.common.exception.BusinessException;
 import com.ureka.team3.utong_backend.common.exception.ErrorCode;
 import com.ureka.team3.utong_backend.common.exception.business.AccountNotFoundException;
 import com.ureka.team3.utong_backend.common.exception.business.ConcurrentAccessException;
 import com.ureka.team3.utong_backend.common.exception.business.GifticonNotFoundException;
 import com.ureka.team3.utong_backend.common.exception.business.UserNotFoundException;
+import com.ureka.team3.utong_backend.common.repository.CodeRepository;
 import com.ureka.team3.utong_backend.gift.dto.GifticonResponseDto;
 import com.ureka.team3.utong_backend.gift.entity.Gifticon;
 import com.ureka.team3.utong_backend.gift.entity.UserGifticon;
 import com.ureka.team3.utong_backend.gift.repository.GifticonRepository;
 import com.ureka.team3.utong_backend.gift.repository.UserGifticonRepository;
+import com.ureka.team3.utong_backend.user.entity.User;
+import com.ureka.team3.utong_backend.user.repository.UserRepository;
+
 import jakarta.persistence.PessimisticLockException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,15 +41,20 @@ public class GifticonServiceImpl implements GifticonService {
     private final AccountRepository accountRepository;
 
     private final UserRepository userRepository;
-
+    
+    private final CodeRepository codeRepository;
     @Override
     public ApiResponse<List<GifticonResponseDto>> getGifticonList() {
         try {
+        	List<Code> codeList = codeRepository.findByGroupCode("080");
+        	for (Code code : codeList) {
+				System.out.println(code.getCode());
+			}
             List<GifticonResponseDto> list = gifticonRepository.findAll()
                     .stream()
                     .map(GifticonResponseDto::from)
                     .toList();
-
+            for (GifticonResponseDto gifticonResponseDto : list) for (Code code : codeList) if(gifticonResponseDto.getCategory().equals(code.getCode()))gifticonResponseDto.setCategory(code.getCodeName());
             return ApiResponse.success(list);
         } catch (Exception e) {
             log.error("기프티콘 목록 조회 중 오류가 발생하였습니다. {}", e.getMessage());
