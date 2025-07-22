@@ -105,4 +105,8 @@ public class Account implements UserDetails {
             throw new InsufficientPointException();
         this.mileage -= purchasePrice;
     }
+
+    public boolean isMyId(String id){
+        return this.id.equals(id);
+    }
 }

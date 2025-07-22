@@ -45,4 +45,14 @@ public class DataTradeDto {
         private SaleOrderResult result;
         private long remainData;
     }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CancelWaitingTradeRequestDto {
+        private String orderId;
+    }
+
+
 }

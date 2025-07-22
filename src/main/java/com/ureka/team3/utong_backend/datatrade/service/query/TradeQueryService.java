@@ -3,6 +3,7 @@ package com.ureka.team3.utong_backend.datatrade.service.query;
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.datatrade.dto.TradeHistoryRequestDto;
+import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
 
 public interface TradeQueryService {
 
@@ -11,4 +12,5 @@ public interface TradeQueryService {
 
     // 본인 데이터 판매 내역
     ApiResponse getMySales(Account account, TradeHistoryRequestDto requestDto);
+
 }

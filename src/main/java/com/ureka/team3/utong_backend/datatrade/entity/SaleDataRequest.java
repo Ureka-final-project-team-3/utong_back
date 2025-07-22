@@ -75,4 +75,12 @@ public class SaleDataRequest {
             this.status = "002";
         }
     }
+
+    public boolean isOwner(String id) {
+        return this.account.isMyId(id);
+    }
+
+    public boolean isStatus(String code) {
+        return this.status.equals(code);
+    }
 }

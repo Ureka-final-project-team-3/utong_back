@@ -70,4 +70,12 @@ public class BuyDataRequest {
             this.status = "002";
         }
     }
+
+    public boolean isStatus(String status){
+        return this.status.equals(status);
+    }
+
+    public boolean isOwner(String id) {
+        return account.isMyId(id);
+    }
 }

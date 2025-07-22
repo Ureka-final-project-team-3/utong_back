@@ -72,4 +72,14 @@ public class TradeOrderQueueServiceImpl implements TradeOrderQueueService {
     public void requeuePartialBuyOrder(OrderDto buyOrder) {
         orderRepository.requeuePartialBuyOrder(buyOrder);
     }
+
+    @Override
+    public void removeFromBuyQueue(BuyDataRequest buyOrderById) {
+        orderRepository.removeFromBuyQueue(buyOrderById);
+    }
+
+    @Override
+    public void removeFromSaleQueue(SaleDataRequest saleOrderById) {
+        orderRepository.removeFromSaleQueue(saleOrderById);
+    }
 }

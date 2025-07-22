@@ -20,6 +20,12 @@ public class DataTradePolicy {
     public static final int CHART_LIST_SIZE = 8;
     public static final Long SSE_TIMEOUT = 60 * 60 * 1000L;
 
+    public Code getStatusCode(String status){
+        return tradeStatusCodeList.stream()
+                .filter(code->code.getCodeName().equals(status))
+                .findFirst().orElseThrow();
+    }
+
 
     @PostConstruct
     void init() {
