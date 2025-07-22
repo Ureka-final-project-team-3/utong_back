@@ -64,17 +64,31 @@ public class OrderRepositoryImpl implements OrderRepository {
     public Long getLowestSellPrice(String dataCode) {
         String zsetKey = RedisKeyUtil.buildSellZSetKey(dataCode);
 
-        // 가격이 낮은 순으로 1개 가져오기
-        Set<ZSetOperations.TypedTuple<String>> result = stringRedisTemplate.opsForZSet().rangeWithScores(zsetKey, 0, 0);
+        while (true) {
+            // 가격 낮은 순으로 하나 가져오기
+            Set<ZSetOperations.TypedTuple<String>> result = stringRedisTemplate.opsForZSet().rangeWithScores(zsetKey, 0, 0);
 
-        if (result == null || result.isEmpty()) {
-            return null;
+            if (result == null || result.isEmpty()) {
+                return null; // 더 이상 ZSet에 유효한 키 없음
+            }
+
+            ZSetOperations.TypedTuple<String> tuple = result.iterator().next();
+            String listKey = tuple.getValue();
+            Double price = tuple.getScore();
+
+            // 리스트가 비었는지 확인
+            Long size = stringRedisTemplate.opsForList().size(listKey);
+            if (size == null || size == 0) {
+                // 리스트가 비었으면 ZSet에서도 제거
+                stringRedisTemplate.opsForZSet().remove(zsetKey, listKey);
+                stringRedisTemplate.delete(listKey); // 필요 시 리스트도 삭제
+                continue; // 다음 최저 가격 확인
+            }
+
+            return price != null ? price.longValue() : null;
         }
-
-        ZSetOperations.TypedTuple<String> tuple = result.iterator().next();
-        Double price = tuple.getScore();
-        return price != null ? price.longValue() : null;
     }
+
 
     @Override
     public OrderDto popValidSellOrder(String dataCode, long price) {
@@ -120,18 +134,31 @@ public class OrderRepositoryImpl implements OrderRepository {
     public Long getHighestBuyPrice(String dataCode) {
         String zsetKey = RedisKeyUtil.buildBuyZSetKey(dataCode);
 
-        // 가격이 높은 순으로 1개 가져오기
-        Set<ZSetOperations.TypedTuple<String>> result =
-                stringRedisTemplate.opsForZSet().reverseRangeWithScores(zsetKey, 0, 0);
+        while (true) {
+            // 가격 높은 순으로 1개 가져오기
+            Set<ZSetOperations.TypedTuple<String>> result =
+                    stringRedisTemplate.opsForZSet().reverseRangeWithScores(zsetKey, 0, 0);
 
-        if (result == null || result.isEmpty()) {
-            return null;
+            if (result == null || result.isEmpty()) {
+                return null; // ZSet에 유효한 키 없음
+            }
+
+            ZSetOperations.TypedTuple<String> tuple = result.iterator().next();
+            String listKey = tuple.getValue();
+            Double price = tuple.getScore();
+
+            // 리스트가 비었는지 확인
+            Long size = stringRedisTemplate.opsForList().size(listKey);
+            if (size == null || size == 0) {
+                stringRedisTemplate.opsForZSet().remove(zsetKey, listKey);
+                stringRedisTemplate.delete(listKey); // 필요 시 리스트도 삭제
+                continue; // 다음으로 높은 가격 확인
+            }
+
+            return price != null ? price.longValue() : null;
         }
-
-        ZSetOperations.TypedTuple<String> tuple = result.iterator().next();
-        Double price = tuple.getScore();
-        return price != null ? price.longValue() : null;
     }
+
 
     @Override
     public OrderDto popValidBuyOrder(String dataCode, Long highestBuyPrice) {

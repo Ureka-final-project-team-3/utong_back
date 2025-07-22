@@ -48,7 +48,13 @@ public enum ErrorCode {
     ALREADY_REVIEWED(HttpStatus.BAD_REQUEST, "ALREADY_REVIEWED", "이미 해당 요금제에 대한 리뷰를 작성하셨습니다."),
     INSUFFICIENT_POINT(HttpStatus.BAD_REQUEST, "INSUFFICIENT_POINT", "포인트가 부족합니다"),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "NOT_FOUND_ORDER", "해당 주문이 존재하지 않습니다"),
-    INSUFFICIENT_DATA(HttpStatus.BAD_REQUEST,"INSUFFICIENT_DATA", "데이터가 부족합니다");
+    INSUFFICIENT_DATA(HttpStatus.BAD_REQUEST,"INSUFFICIENT_DATA", "데이터가 부족합니다"),
+    NEED_DEFAULT_LINE(HttpStatus.BAD_REQUEST, "NEED_DEFAULT_LINE", "기본 회선이 존재하지 않습니다"),
+    BORDERLESS(HttpStatus.BAD_REQUEST, "BORDERLESS","무제한 데이터는 데이터 거래를 이용할 수 없습니다"),
+    EXIST_SALE_REQUEST(HttpStatus.BAD_REQUEST, "EXIST_SALE_REQUEST","이미 판매 대기중인 데이터가 있습니다"),
+    EXIST_PURCHASE_REQUEST(HttpStatus.BAD_REQUEST, "EXIST_PURCHASE_REQUEST","이미 구매 대기중인 데이터가 있습니다"),
+    EXCEED_SALE_LIMIT(HttpStatus.BAD_REQUEST, "EXCEED_SALE_LIMIT","판매 요청한 데이터가 판매 가능량을 초과했습니다");
+
     private final HttpStatus status;
     private final String code;
     private final String message;
