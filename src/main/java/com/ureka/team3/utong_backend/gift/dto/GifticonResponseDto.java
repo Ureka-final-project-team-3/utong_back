@@ -1,9 +1,17 @@
 package com.ureka.team3.utong_backend.gift.dto;
 
 import com.ureka.team3.utong_backend.gift.entity.Gifticon;
-import lombok.*;
+
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
+@Setter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -26,7 +34,7 @@ public class GifticonResponseDto {
     
     public static GifticonResponseDto from(Gifticon gifticon) {
         GifticonResponseDto gifticonResponseDto = new GifticonResponseDto();
-
+        
         gifticonResponseDto.id = gifticon.getId();
         gifticonResponseDto.price = gifticon.getPrice();
         gifticonResponseDto.description = gifticon.getDescription();
