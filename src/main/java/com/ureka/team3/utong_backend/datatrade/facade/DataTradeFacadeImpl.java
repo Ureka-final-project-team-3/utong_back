@@ -129,6 +129,6 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
         saleDataRequestService.changeStatus(saleOrderById, SaleOrderResult.CANCEL);
         // 4. 레디스에서 제거
         tradeOrderQueueService.removeFromSaleQueue(saleOrderById);
-        return ApiResponse.success("구매 대기 취소 완료",null);
+        return ApiResponse.success("판매 대기 취소 완료",null);
     }
 }
