@@ -41,4 +41,8 @@ public interface OrderRepository {
     void removeFromBuyQueue(BuyDataRequest buyOrderById);
 
     void removeFromSaleQueue(SaleDataRequest saleOrderById);
+
+    Map<Long, List<OrderDto>> findAllSellOrders(String dataCode);
+
+    Map<Long, List<OrderDto>> findAllBuyOrders(String dataCode);
 }

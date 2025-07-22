@@ -29,4 +29,12 @@ public class RedisKeyUtil {
     public static String buildOrderKey(String type, Long orderId) {
         return "order:" + type + ":" + orderId;
     }
+
+    public static String buildCommonSellListKey(String dataCode){
+        return ORDER_QUEUE_PREFIX + ":sell:" + dataCode + ":" + "*";
+    }
+
+    public static String buildCommonBuyListKey(String dataCode){
+        return ORDER_QUEUE_PREFIX + ":buy:" + dataCode + ":" + "*";
+    }
 }
