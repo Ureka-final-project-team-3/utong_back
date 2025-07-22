@@ -35,4 +35,7 @@ public class Gifticon {
 
     @Column(name = "image_key", length = 500)
     private String imageKey;
+    
+    @Column(name = "category")
+    private String category;
 }
