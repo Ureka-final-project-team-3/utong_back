@@ -10,6 +10,6 @@ import lombok.Data;
 public class JwtProperties {
     
     private String secret = "mySecretKey1234567890123456789012345678901234567890";
-    private Long accessTokenExpiration = 360000L; // 6분
+    private Long accessTokenExpiration = 36000000L; // 6분
     private Long refreshTokenExpiration = 604800000L; // 7일
 }
