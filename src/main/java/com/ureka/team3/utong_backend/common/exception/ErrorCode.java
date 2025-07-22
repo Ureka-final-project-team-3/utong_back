@@ -57,7 +57,10 @@ public enum ErrorCode {
     BORDERLESS(HttpStatus.BAD_REQUEST, "BORDERLESS","무제한 데이터는 데이터 거래를 이용할 수 없습니다"),
     EXIST_SALE_REQUEST(HttpStatus.BAD_REQUEST, "EXIST_SALE_REQUEST","이미 판매 대기중인 데이터가 있습니다"),
     EXIST_PURCHASE_REQUEST(HttpStatus.BAD_REQUEST, "EXIST_PURCHASE_REQUEST","이미 구매 대기중인 데이터가 있습니다"),
-    EXCEED_SALE_LIMIT(HttpStatus.BAD_REQUEST, "EXCEED_SALE_LIMIT","판매 요청한 데이터가 판매 가능량을 초과했습니다");
+    EXCEED_SALE_LIMIT(HttpStatus.BAD_REQUEST, "EXCEED_SALE_LIMIT","판매 요청한 데이터가 판매 가능량을 초과했습니다"),
+    NOT_MY_ORDER(HttpStatus.FORBIDDEN,"NOT_MY_ORDER", "사용자의 주문이 아닙니다"),
+    CANNOT_CANCEL_COMPLETE_ORDER(HttpStatus.BAD_REQUEST,"CANNOT_CANCEL_COMPLETE_ORDER" ,"이미 거래가 체결된 주문입니다" ),
+    ALREADY_CANCELED(HttpStatus.BAD_REQUEST,"ALREADY_CANCELED" , "이미 거래가 취소된 주문입니다" );
 
     private final HttpStatus status;
     private final String code;

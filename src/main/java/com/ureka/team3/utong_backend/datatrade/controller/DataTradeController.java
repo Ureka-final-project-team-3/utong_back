@@ -21,15 +21,20 @@ public class DataTradeController {
     private final DataTradeFacade dataTradeFacade;
     private final TradeQueryService tradeQueryService;
 
+    @GetMapping("/purchase")
+    public ResponseEntity<?> getMyPurchases(
+            @AuthenticationPrincipal Account account, @ModelAttribute TradeHistoryRequestDto requestDto) {
+        return ResponseEntity.ok(tradeQueryService.getMyPurchases(account, requestDto));
+    }
+
     @PostMapping("/purchase")
     public ResponseEntity getPurchaseHistory(@AuthenticationPrincipal Account account, @RequestBody DataTradeDto.BuyDataRequestDto buyRequestDto) {
         return ResponseEntity.ok(dataTradeFacade.requestBuy(account, buyRequestDto));
     }
 
-    @GetMapping("/purchase")
-    public ResponseEntity<?> getMyPurchases(
-            @AuthenticationPrincipal Account account, @ModelAttribute TradeHistoryRequestDto requestDto) {
-        return ResponseEntity.ok(tradeQueryService.getMyPurchases(account, requestDto));
+    @DeleteMapping("/purchase")
+    public ResponseEntity cancelBuyWaiting(@AuthenticationPrincipal Account account, @RequestBody DataTradeDto.CancelWaitingTradeRequestDto requestDto) {
+        return ResponseEntity.ok(dataTradeFacade.cancelBuyWaiting(account, requestDto));
     }
 
     @GetMapping("/sale")
@@ -42,5 +47,11 @@ public class DataTradeController {
     public ResponseEntity requestSale(@AuthenticationPrincipal Account account, @RequestBody DataTradeDto.SaleDataRequestDto saleRequestDto) {
         log.info("로그인한 id : {}", account.getId());
         return ResponseEntity.ok(dataTradeFacade.requestSale(account, saleRequestDto));
+    }
+
+    @DeleteMapping("/sale")
+    public ResponseEntity cancelSaleWaiting(@AuthenticationPrincipal Account account, @RequestBody DataTradeDto.CancelWaitingTradeRequestDto requestDto) {
+        log.info("로그인한 id : {}", account.getId());
+        return ResponseEntity.ok(dataTradeFacade.cancelSaleWaiting(account, requestDto));
     }
 }

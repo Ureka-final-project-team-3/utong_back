@@ -22,4 +22,8 @@ public interface TradeOrderQueueService {
     OrderDto popValidBuyOrder(String dataCode, Long priceLimit);
 
     void requeuePartialBuyOrder(OrderDto buyOrder);
+
+    void removeFromBuyQueue(BuyDataRequest buyOrderById);
+
+    void removeFromSaleQueue(SaleDataRequest saleOrderById);
 }

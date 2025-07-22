@@ -1,8 +1,11 @@
 package com.ureka.team3.utong_backend.datatrade.repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ureka.team3.utong_backend.datatrade.dto.OrderDto;
+import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
+import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
 import com.ureka.team3.utong_backend.datatrade.utils.RedisKeyUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -236,6 +239,58 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public Map<Long, Long> getAllBuyOrderNumbers(String dataCode) {
         return getOrderNumbers("buy:numbers:" + dataCode);
+    }
+
+    @Override
+    public void removeFromBuyQueue(BuyDataRequest buyOrderById) {
+        String listKey = buildBuyListKey(buyOrderById.getDataCode(), buyOrderById.getPrice());
+        // 전체 리스트 가져오기
+        List<String> queue = stringRedisTemplate.opsForList().range(listKey, 0, -1);
+        if (queue == null) return;
+
+        for (String item : queue) {
+            try {
+                // JSON 파싱
+                JsonNode jsonNode = new ObjectMapper().readTree(item);
+                String itemOrderId = jsonNode.get("orderId").asText();
+
+                // 일치하는 항목 찾으면 제거
+                if (buyOrderById.getId().equals(itemOrderId)) {
+                    stringRedisTemplate.opsForList().remove(listKey, 1, item);
+                    break;
+                }
+
+            } catch (JsonProcessingException e) {
+                // JSON 파싱 오류 시 로그 남기기
+                log.warn("Invalid JSON in Redis queue: {}", item);
+            }
+        }
+    }
+
+    @Override
+    public void removeFromSaleQueue(SaleDataRequest saleOrderById) {
+        String listKey = buildSellListKey(saleOrderById.getDataCode(), saleOrderById.getPrice());
+        // 전체 리스트 가져오기
+        List<String> queue = stringRedisTemplate.opsForList().range(listKey, 0, -1);
+        if (queue == null) return;
+
+        for (String item : queue) {
+            try {
+                // JSON 파싱
+                JsonNode jsonNode = new ObjectMapper().readTree(item);
+                String itemOrderId = jsonNode.get("orderId").asText();
+
+                // 일치하는 항목 찾으면 제거
+                if (saleOrderById.getId().equals(itemOrderId)) {
+                    stringRedisTemplate.opsForList().remove(listKey, 1, item);
+                    break;
+                }
+
+            } catch (JsonProcessingException e) {
+                // JSON 파싱 오류 시 로그 남기기
+                log.warn("Invalid JSON in Redis queue: {}", item);
+            }
+        }
     }
 
     private Map<Long, Long> getOrderNumbers(String key) {

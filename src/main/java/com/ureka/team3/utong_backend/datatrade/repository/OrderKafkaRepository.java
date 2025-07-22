@@ -1,6 +1,8 @@
 package com.ureka.team3.utong_backend.datatrade.repository;
 
 import com.ureka.team3.utong_backend.datatrade.dto.OrderDto;
+import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
+import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -70,5 +72,15 @@ public class OrderKafkaRepository implements OrderRepository {
     @Override
     public Map<Long, Long> getAllBuyOrderNumbers(String dataCode) {
         return Map.of();
+    }
+
+    @Override
+    public void removeFromBuyQueue(BuyDataRequest buyOrderById) {
+
+    }
+
+    @Override
+    public void removeFromSaleQueue(SaleDataRequest saleOrderById) {
+        
     }
 }

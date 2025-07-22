@@ -3,17 +3,26 @@ package com.ureka.team3.utong_backend.datatrade.facade;
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.auth.service.AccountService;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
+import com.ureka.team3.utong_backend.common.entity.Code;
+import com.ureka.team3.utong_backend.common.exception.business.AlreadyCancelOrderException;
+import com.ureka.team3.utong_backend.common.exception.business.CannotCancelCompletedOrderException;
 import com.ureka.team3.utong_backend.common.exception.business.InsufficientPointException;
+import com.ureka.team3.utong_backend.common.exception.business.NotMyOrderException;
+import com.ureka.team3.utong_backend.datatrade.config.DataTradePolicy;
 import com.ureka.team3.utong_backend.datatrade.dto.BuyMatchingResult;
 import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
 import com.ureka.team3.utong_backend.datatrade.dto.SaleMatchingResult;
 import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
+import com.ureka.team3.utong_backend.datatrade.enums.BuyOrderResult;
+import com.ureka.team3.utong_backend.datatrade.enums.SaleOrderResult;
 import com.ureka.team3.utong_backend.datatrade.handler.BuyMatchingResultHandler;
 import com.ureka.team3.utong_backend.datatrade.handler.SaleMatchingResultHandler;
 import com.ureka.team3.utong_backend.datatrade.processor.BuyMatchingProcessor;
 import com.ureka.team3.utong_backend.datatrade.processor.SaleMatchingProcessor;
+import com.ureka.team3.utong_backend.datatrade.service.query.TradeQueryService;
 import com.ureka.team3.utong_backend.datatrade.service.trade.purchase.BuyDataRequestService;
+import com.ureka.team3.utong_backend.datatrade.service.trade.queue.TradeOrderQueueService;
 import com.ureka.team3.utong_backend.datatrade.service.trade.sale.SaleDataRequestService;
 import com.ureka.team3.utong_backend.datatrade.utils.TradeCalculator;
 import com.ureka.team3.utong_backend.datatrade.utils.TradeResponseFactory;
@@ -25,6 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+
+import static com.ureka.team3.utong_backend.datatrade.enums.SaleOrderResult.*;
 
 @Slf4j
 @Service
@@ -42,6 +53,8 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
     private final SaleMatchingProcessor saleMatchingProcessor;
     private final SaleMatchingResultHandler saleMatchingResultHandler;
     private final AccountService accountService;
+    private final DataTradePolicy dataTradePolicy;
+    private final TradeOrderQueueService tradeOrderQueueService;
 
     @Override
     @Transactional
@@ -79,5 +92,52 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
         lineService.saleData(savedOrder.getLineId(), dto.getDataAmount());  // 데이터 차감
         SaleMatchingResult saleMatchingResult = saleMatchingProcessor.handle(dto);
         return saleMatchingResultHandler.handle(saleMatchingResult, savedOrder);
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse cancelBuyWaiting(Account account, DataTradeDto.CancelWaitingTradeRequestDto requestDto) {
+        // 1. 본인의 orderId가 맞는지 확인
+        BuyDataRequest buyOrderById = buyDataRequestService.findBuyOrderById(requestDto.getOrderId());
+        if(!buyOrderById.isOwner(account.getId()))
+            throw new NotMyOrderException();
+        // 2. AllComplete가 아닌지 확인
+        Code completeStatusCode = dataTradePolicy.getStatusCode(ALL_COMPLETE.name());
+        if(buyOrderById.isStatus(completeStatusCode.getCode())){
+            throw new CannotCancelCompletedOrderException();
+        }
+
+        Code cancelStatusCode = dataTradePolicy.getStatusCode(CANCEL.name());
+        if(buyOrderById.isStatus(cancelStatusCode.getCode())){
+            throw new AlreadyCancelOrderException();
+        }
+        // 3. mysql에서 004로 변경
+        buyDataRequestService.changeStatus(buyOrderById,BuyOrderResult.CANCEL);
+        // 4. 레디스에서 제거
+        tradeOrderQueueService.removeFromBuyQueue(buyOrderById);
+        return ApiResponse.success("구매 대기 취소 완료",null);
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse cancelSaleWaiting(Account account, DataTradeDto.CancelWaitingTradeRequestDto requestDto) {
+        // 1. 본인의 orderId가 맞는지 확인
+        SaleDataRequest saleOrderById = saleDataRequestService.findSaleOrderById(requestDto.getOrderId());
+        if(!saleOrderById.isOwner(account.getId()))
+            throw new NotMyOrderException();
+        // 2. AllComplete가 아닌지 확인
+        Code statusCode = dataTradePolicy.getStatusCode(ALL_COMPLETE.name());
+        if(saleOrderById.isStatus(statusCode.getCode())){
+            throw new CannotCancelCompletedOrderException();
+        }
+        Code cancelStatusCode = dataTradePolicy.getStatusCode(CANCEL.name());
+        if(saleOrderById.isStatus(cancelStatusCode.getCode())){
+            throw new AlreadyCancelOrderException();
+        }
+        // 3. mysql에서 004로 변경
+        saleDataRequestService.changeStatus(saleOrderById, SaleOrderResult.CANCEL);
+        // 4. 레디스에서 제거
+        tradeOrderQueueService.removeFromSaleQueue(saleOrderById);
+        return ApiResponse.success("판매 대기 취소 완료",null);
     }
 }
