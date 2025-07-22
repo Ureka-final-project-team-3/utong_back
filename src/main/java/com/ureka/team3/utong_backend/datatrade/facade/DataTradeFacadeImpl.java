@@ -4,6 +4,7 @@ import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.auth.service.AccountService;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.common.entity.Code;
+import com.ureka.team3.utong_backend.common.exception.business.AlreadyCancelOrderException;
 import com.ureka.team3.utong_backend.common.exception.business.CannotCancelCompletedOrderException;
 import com.ureka.team3.utong_backend.common.exception.business.InsufficientPointException;
 import com.ureka.team3.utong_backend.common.exception.business.NotMyOrderException;
@@ -34,8 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-import static com.ureka.team3.utong_backend.datatrade.enums.SaleOrderResult.ALL_COMPLETE;
-import static com.ureka.team3.utong_backend.datatrade.enums.SaleOrderResult.WAITING;
+import static com.ureka.team3.utong_backend.datatrade.enums.SaleOrderResult.*;
 
 @Slf4j
 @Service
@@ -102,9 +102,14 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
         if(!buyOrderById.isOwner(account.getId()))
             throw new NotMyOrderException();
         // 2. AllComplete가 아닌지 확인
-        Code statusCode = dataTradePolicy.getStatusCode(ALL_COMPLETE.name());
-        if(buyOrderById.isStatus(statusCode.getCode())){
+        Code completeStatusCode = dataTradePolicy.getStatusCode(ALL_COMPLETE.name());
+        if(buyOrderById.isStatus(completeStatusCode.getCode())){
             throw new CannotCancelCompletedOrderException();
+        }
+
+        Code cancelStatusCode = dataTradePolicy.getStatusCode(CANCEL.name());
+        if(buyOrderById.isStatus(cancelStatusCode.getCode())){
+            throw new AlreadyCancelOrderException();
         }
         // 3. mysql에서 004로 변경
         buyDataRequestService.changeStatus(buyOrderById,BuyOrderResult.CANCEL);
@@ -124,6 +129,10 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
         Code statusCode = dataTradePolicy.getStatusCode(ALL_COMPLETE.name());
         if(saleOrderById.isStatus(statusCode.getCode())){
             throw new CannotCancelCompletedOrderException();
+        }
+        Code cancelStatusCode = dataTradePolicy.getStatusCode(CANCEL.name());
+        if(saleOrderById.isStatus(cancelStatusCode.getCode())){
+            throw new AlreadyCancelOrderException();
         }
         // 3. mysql에서 004로 변경
         saleDataRequestService.changeStatus(saleOrderById, SaleOrderResult.CANCEL);
