@@ -20,6 +20,7 @@ public interface BuyDataRequestRepository extends JpaRepository<BuyDataRequest, 
         WHERE b.account.id = :accountId
         AND (b.status = '002' OR b.status = '003')
         AND b.createdAt >= :fromDate
+        ORDER BY b.createdAt DESC
     """)
     List<BuyDataRequest> findWaitingPurchasesByAccountId(
             @Param("accountId") String accountId,

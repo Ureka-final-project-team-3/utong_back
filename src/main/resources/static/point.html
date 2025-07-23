@@ -53,7 +53,7 @@
 
         try {
             // ✅ 사용자 정보 조회 (포인트 + 이름)
-            const infoRes = await fetch('/api/mypage/info', {
+            const infoRes = await fetch('/api/user/info', {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             });
             const infoData = await infoRes.json();
@@ -63,7 +63,7 @@
             document.getElementById("currentMileage").innerText = currentMileage.toLocaleString() + ' P';
 
             // ✅ 쿠폰 조회
-            const couponRes = await fetch('/api/mypage/coupons', {
+            const couponRes = await fetch('/api/user/coupons', {
                 headers: { 'Authorization': `Bearer ${accessToken}` }
             });
             const couponData = await couponRes.json();

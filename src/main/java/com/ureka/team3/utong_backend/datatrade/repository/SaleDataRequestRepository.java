@@ -20,6 +20,7 @@ public interface SaleDataRequestRepository extends JpaRepository<SaleDataRequest
         WHERE s.account.id = :accountId
          AND (s.status = '002' OR s.status = '003')
         AND s.createdAt >= :fromDate
+        ORDER BY s.createdAt DESC
     """)
     List<SaleDataRequest> findWaitingSalesByAccountId(
             @Param("accountId") String accountId,

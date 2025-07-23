@@ -18,6 +18,7 @@ public interface ContractRepository extends JpaRepository<Contract, String> {
         SELECT c FROM Contract c
         WHERE c.buyDataRequest.account.id = :accountId
         AND c.createdAt >= :fromDate
+        ORDER BY c.createdAt DESC
     """)
     List<Contract> findCompletedPurchasesByAccountId(
             @Param("accountId") String accountId,
@@ -29,6 +30,7 @@ public interface ContractRepository extends JpaRepository<Contract, String> {
         SELECT c FROM Contract c
         WHERE c.saleDataRequest.account.id = :accountId
         AND c.createdAt >= :fromDate
+        ORDER BY c.createdAt DESC
     """)
     List<Contract> findCompletedSalesByAccountId(
             @Param("accountId") String accountId,
