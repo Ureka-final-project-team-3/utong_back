@@ -104,6 +104,17 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
         // 1. 본인의 orderId가 맞는지 확인
         account = accountService.findById(account.getId());
         BuyDataRequest buyOrderById = buyDataRequestService.findBuyOrderById(requestDto.getOrderId());
+        validateCancelBuyWaiting(account, buyOrderById);
+        // 3. mysql에서 004로 변경
+        buyDataRequestService.changeStatus(buyOrderById,BuyOrderResult.CANCEL);
+        // 4. 포인트 반환
+        account.increasePoint(tradeCalculator.calculatePayPoint(buyOrderById.getRemaining(), buyOrderById.getPrice()));
+        // 5. 레디스에서 제거
+        tradeOrderQueueService.removeFromBuyQueue(buyOrderById);
+        return ApiResponse.success("구매 대기 취소 완료",null);
+    }
+
+    private void validateCancelBuyWaiting(Account account, BuyDataRequest buyOrderById) {
         if(!buyOrderById.isOwner(account.getId()))
             throw new NotMyOrderException();
         // 2. AllComplete가 아닌지 확인
@@ -116,13 +127,6 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
         if(buyOrderById.isStatus(cancelStatusCode.getCode())){
             throw new AlreadyCancelOrderException();
         }
-        // 3. mysql에서 004로 변경
-        buyDataRequestService.changeStatus(buyOrderById,BuyOrderResult.CANCEL);
-        // 4. 포인트 반환
-        account.increasePoint(tradeCalculator.calculatePayPoint(buyOrderById.getRemaining(), buyOrderById.getPrice()));
-        // 5. 레디스에서 제거
-        tradeOrderQueueService.removeFromBuyQueue(buyOrderById);
-        return ApiResponse.success("구매 대기 취소 완료",null);
     }
 
     @Override
