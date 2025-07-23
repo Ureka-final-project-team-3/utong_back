@@ -9,8 +9,4 @@ public interface DataTradeFacade {
     ApiResponse requestBuy(Account account, DataTradeDto.BuyDataRequestDto buyRequestDto);
 
     ApiResponse requestSale(Account account, DataTradeDto.SaleDataRequestDto saleRequestDto);
-
-    ApiResponse cancelBuyWaiting(Account account, DataTradeDto.CancelWaitingTradeRequestDto requestDto);
-
-    ApiResponse cancelSaleWaiting(Account account, DataTradeDto.CancelWaitingTradeRequestDto requestDto);
 }

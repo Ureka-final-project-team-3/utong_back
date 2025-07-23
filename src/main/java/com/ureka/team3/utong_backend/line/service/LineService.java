@@ -1,5 +1,6 @@
 package com.ureka.team3.utong_backend.line.service;
 
+import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
 import com.ureka.team3.utong_backend.line.repository.LineRepository;
 import com.ureka.team3.utong_backend.common.exception.business.LineNotFoundException;
 import com.ureka.team3.utong_backend.line.entity.Line;
