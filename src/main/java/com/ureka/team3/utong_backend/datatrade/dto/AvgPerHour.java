@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 public class AvgPerHour {
 
+    @Setter
     private String dataCode;
 
     private Long avgPrice;
