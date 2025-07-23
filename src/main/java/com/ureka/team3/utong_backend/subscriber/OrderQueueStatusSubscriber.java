@@ -14,6 +14,8 @@ import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -32,7 +34,8 @@ public class OrderQueueStatusSubscriber implements MessageListener {   // 평균
 
             OrderQueueMessage orderQueueMessage = getOrderQueueStatusMessage(message);
             if ("SUCCESS".equals(orderQueueMessage.getStatus())) {
-                requestBroadCast(orderQueueMessage);
+//                requestBroadCast(orderQueueMessage);
+                requestAllBroadCast(orderQueueMessage);
             } else {
                 log.warn("집계 실패 알림 수신: {}", orderQueueMessage.getMessage());
             }
@@ -53,4 +56,23 @@ public class OrderQueueStatusSubscriber implements MessageListener {   // 평균
             sseHandler.broadCast(code.getCode(), dataMap.get(code.getCode()));
         }
     }
+
+    private void requestAllBroadCast(OrderQueueMessage message) {
+        Map<String, OrdersQueueDto> dataMap = message.getDataMap();
+
+        // 모든 데이터를 통합해서 브로드캐스트만
+        List<OrdersQueueDto> allOrdersData = new ArrayList<>();
+        for (Code code : dataTradePolicy.getDataTypeCodeList()) {
+            OrdersQueueDto queueData = dataMap.get(code.getCode());
+            if (queueData != null) {
+                if (queueData.getDataCode() == null) {
+                    queueData.setDataCode(code.getCode());
+                }
+                allOrdersData.add(queueData);
+            }
+        }
+
+        sseHandler.broadCastAllData(allOrdersData);
+    }
+
 }

@@ -1,9 +1,6 @@
 package com.ureka.team3.utong_backend.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.ureka.team3.utong_backend.subscriber.AggregationStatusSubscriber;
+import com.ureka.team3.utong_backend.subscriber.ChartStatusSubscriber;
 import com.ureka.team3.utong_backend.subscriber.OrderQueueStatusSubscriber;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +13,7 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 @RequiredArgsConstructor
 public class RedisConfig {
 
-    private final AggregationStatusSubscriber aggregationStatusSubscriber;
+    private final ChartStatusSubscriber chartStatusSubscriber;
     private final OrderQueueStatusSubscriber orderQueueStatusSubscriber;
     private static final String CONTRACT_AGGREGATION_STATUS_CHANNEL = "contract:aggregation:status";
     private static final String QUEUE_AGGREGATION_STATUS_CHANNEL = "queue:aggregation:status";
@@ -28,7 +25,7 @@ public class RedisConfig {
         container.setConnectionFactory(connectionFactory);
 
         container.addMessageListener(
-                aggregationStatusSubscriber,
+                chartStatusSubscriber,
                 new ChannelTopic(CONTRACT_AGGREGATION_STATUS_CHANNEL)
         );
 

@@ -18,12 +18,18 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequestMapping("/api/data")
 @RequiredArgsConstructor
 public class DataTradeQueueStatusController {
+
     private final @Qualifier("orderQueueStatusSseHandler") SseHandler<OrdersQueueDto> sseHandler;
     private final OrderQueueStatusService orderQueueStatusService;
 
-    @GetMapping(value = "/order-queue/stream/{dataCode}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter streamCurrentPrices(@PathVariable("dataCode") String dataCode) {
-        return sseHandler.connect(dataCode);
+//    @GetMapping(value = "/order-queue/stream/{dataCode}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+//    public SseEmitter streamOrderQueue(@PathVariable("dataCode") String dataCode) {
+//        return sseHandler.connect(dataCode);
+//    }
+
+    @GetMapping(value = "/order-queue/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamAllOrderQueue() {
+        return sseHandler.connect("ALL_DATA");
     }
 
     @GetMapping("/order-queue")

@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>SSE 테스트</title>
+    <title>Chart SSE 테스트 (통합)</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         .container { max-width: 800px; margin: 0 auto; }
@@ -23,11 +23,11 @@
 </head>
 <body>
 <div class="container">
-    <h1>SSE 실시간 데이터 테스트</h1>
+    <h1>Chart SSE 실시간 데이터 테스트 (통합)</h1>
     <div class="controls">
         <h3>연결 설정</h3>
-        <button class="connect" onclick="connectLTE()">LTE 데이터 구독 (001)</button>
-        <button class="connect" onclick="connect5G()">5G 데이터 구독 (002)</button>
+        <button class="connect" onclick="connectAllCharts()">모든 차트 데이터 구독</button>
+        <button class="connect" onclick="showDetailedData = !showDetailedData; addLog(`상세 모드: ${showDetailedData ? 'ON' : 'OFF'}`)">상세 모드 토글</button>
         <button class="disconnect" onclick="disconnect()">연결 끊기</button>
         <button class="clear" onclick="clearLog()">로그 지우기</button>
         <div class="status" id="status">연결 상태: <span class="disconnected">끊어짐</span></div>
@@ -39,9 +39,11 @@
 </div>
 <script>
     let eventSource = null;
+    let showDetailedData = false; // 상세 데이터 표시 여부
     const log = document.getElementById('log');
     const status = document.getElementById('status');
     const currentSubscription = document.getElementById('currentSubscription');
+
     function addLog(message, type = 'info') {
         const timestamp = new Date().toLocaleTimeString();
         const logClass = type === 'error' ? 'error' :
@@ -52,6 +54,7 @@
         </div>`;
         log.scrollTop = log.scrollHeight;
     }
+
     function updateStatus(connected, subscription = '') {
         if (connected) {
             status.innerHTML = '연결 상태: <span class="connected">연결됨</span>';
@@ -61,68 +64,112 @@
             currentSubscription.textContent = '없음';
         }
     }
-    function connectLTE() {
+
+    function connectAllCharts() {
         disconnect(); // 기존 연결 끊기
-        eventSource = new EventSource("http://localhost:8080/api/data/current-prices/stream/001");
-        setupEventListeners('LTE (001)');
-        addLog(':링크: LTE 데이터 스트림에 연결 시도 중...', 'info');
+        eventSource = new EventSource("http://localhost:8080/api/data/current-prices/stream");
+        setupEventListeners();
+        addLog('🔗 모든 차트 데이터 스트림에 연결 시도 중...', 'info');
     }
-    function connect5G() {
-        disconnect(); // 기존 연결 끊기
-        eventSource = new EventSource("http://localhost:8080/api/data/current-prices/stream/002");
-        setupEventListeners('5G (002)');
-        addLog(':링크: 5G 데이터 스트림에 연결 시도 중...', 'info');
-    }
-    function setupEventListeners(subscriptionType) {
+
+    function setupEventListeners() {
         eventSource.onopen = () => {
-            updateStatus(true, subscriptionType);
-            addLog(`:흰색_확인_표시: ${subscriptionType} 연결 성공!`, 'info');
+            updateStatus(true, 'ALL_CHARTS');
+            console.log('✅ 차트 SSE 연결 성공');
+            addLog('✅ 모든 차트 데이터 연결 성공!', 'info');
         };
-        eventSource.addEventListener("initial-data", (event) => {
-            const data = JSON.parse(event.data);
-            addLog(`:포장: 초기 데이터 수신 (${data.length}개):`, 'initial');
-            // 모든 데이터 표시
-            const allData = data.map(item =>
-                `시간: ${item.aggregatedAt}, 가격: ${item.avgPrice}원, 코드: ${item.dataCode}`
-            ).join('<br>');
-            addLog(allData, 'initial');
+
+        // 초기 데이터 이벤트
+        eventSource.addEventListener("all-chart-initial-data", (event) => {
+            console.log('🔍 [차트 초기 데이터] Raw Data:', event.data);
+
+            const allChartData = JSON.parse(event.data);
+            console.log('🔍 [차트 초기 데이터] Parsed:', allChartData);
+
+            addLog(`📊 초기 차트 데이터 수신 (${allChartData.length}개 차트):`, 'initial');
+
+            allChartData.forEach(chart => {
+                const dataName = getDataCodeName(chart.dataCode);
+                const chartData = chart.chartData;
+
+                if (showDetailedData) {
+                    addLog(`${dataName} 차트 (${chartData.length}개 시점):`, 'initial');
+                    chartData.slice(0, 3).forEach((point, i) => {
+                        addLog(`  ${i+1}. ${point.aggregatedAt}: ${point.avgPrice}원`, 'initial');
+                    });
+                    if (chartData.length > 3) {
+                        addLog(`  ... 외 ${chartData.length - 3}개`, 'initial');
+                    }
+                } else {
+                    const latestPoint = chartData[chartData.length - 1];
+                    addLog(`${dataName}: ${chartData.length}개 시점, 최신가격 ${latestPoint?.avgPrice || 'N/A'}원`, 'initial');
+                }
+            });
         });
-        eventSource.addEventListener("hourly-update", (event) => {
-            const data = JSON.parse(event.data);
-            addLog(`:상승세인_차트: 실시간 업데이트 수신 (${data.length}개):`, 'update');
-            // 모든 업데이트 데이터 표시
-            const allUpdates = data.map(item =>
-                `시간: ${item.aggregatedAt}, 가격: ${item.avgPrice}원, 코드: ${item.dataCode}`
-            ).join('<br>');
-            addLog(allUpdates, 'update');
+
+        // 실시간 업데이트 이벤트
+        eventSource.addEventListener("all-chart-hourly-update", (event) => {
+            console.log('🔍 [차트 업데이트] Raw Data:', event.data);
+
+            const allChartData = JSON.parse(event.data);
+            console.log('🔍 [차트 업데이트] Parsed:', allChartData);
+
+            addLog(`📈 차트 업데이트 수신 (${allChartData.length}개 차트):`, 'update');
+
+            allChartData.forEach(chart => {
+                const dataName = getDataCodeName(chart.dataCode);
+                const chartData = chart.chartData;
+
+                if (showDetailedData) {
+                    addLog(`${dataName} 차트 (${chartData.length}개 시점):`, 'update');
+                    chartData.slice(-3).forEach((point, i) => {
+                        addLog(`  ${point.aggregatedAt}: ${point.avgPrice}원`, 'update');
+                    });
+                } else {
+                    const latestPoint = chartData[chartData.length - 1];
+                    addLog(`${dataName}: ${chartData.length}개 시점, 최신가격 ${latestPoint?.avgPrice || 'N/A'}원`, 'update');
+                }
+            });
         });
-        eventSource.addEventListener("datacode-update", (event) => {
-            const data = JSON.parse(event.data);
-            addLog(`:다트: 특정 코드 업데이트 수신:`, 'update');
-            addLog(`데이터: ${JSON.stringify(data)}`, 'update');
-        });
+
         eventSource.onerror = (e) => {
-            addLog(':x: SSE 연결 오류 발생', 'error');
+            console.error('❌ 차트 SSE 오류:', e);
+            addLog('❌ SSE 연결 오류 발생', 'error');
             updateStatus(false);
+
             // 연결 상태 확인
             if (eventSource.readyState === EventSource.CLOSED) {
-                addLog(':전기_플러그: 연결이 서버에 의해 닫혔습니다', 'error');
+                addLog('🔌 연결이 서버에 의해 닫혔습니다', 'error');
             } else if (eventSource.readyState === EventSource.CONNECTING) {
-                addLog(':시계_반대_방향_화살표: 재연결 시도 중...', 'info');
+                addLog('🔄 재연결 시도 중...', 'info');
             }
         };
     }
+
     function disconnect() {
         if (eventSource) {
             eventSource.close();
             eventSource = null;
             updateStatus(false);
-            addLog(':전기_플러그: 연결을 끊었습니다', 'info');
+            console.log('🔌 차트 SSE 연결 해제됨');
+            addLog('🔌 연결을 끊었습니다', 'info');
         }
     }
+
     function clearLog() {
         log.innerHTML = '<p>로그가 지워졌습니다.</p>';
+        console.clear();
+        console.log('🧹 로그 및 콘솔이 지워졌습니다.');
     }
+
+    function getDataCodeName(dataCode) {
+        switch(dataCode) {
+            case '001': return 'LTE';
+            case '002': return '5G';
+            default: return `차트-${dataCode}`;
+        }
+    }
+
     // 페이지 종료 시 연결 정리
     window.addEventListener('beforeunload', () => {
         if (eventSource) {

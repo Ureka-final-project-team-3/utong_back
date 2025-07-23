@@ -1,6 +1,8 @@
 package com.ureka.team3.utong_backend.datatrade.service.queue;
 
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
+import com.ureka.team3.utong_backend.common.entity.Code;
+import com.ureka.team3.utong_backend.datatrade.config.DataTradePolicy;
 import com.ureka.team3.utong_backend.datatrade.dto.*;
 import com.ureka.team3.utong_backend.datatrade.repository.ContractQueueRepository;
 import com.ureka.team3.utong_backend.datatrade.repository.OrderRepository;
@@ -8,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,8 +19,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class OrderQueueStatusServiceImpl implements OrderQueueStatusService {
+
     private final OrderRepository orderRepository;
     private final ContractQueueRepository contractQueueRepository;
+    private final DataTradePolicy dataTradePolicy;
 
     @Override
     public OrdersQueueDto getInitData(String dataCode) {
@@ -29,7 +34,32 @@ public class OrderQueueStatusServiceImpl implements OrderQueueStatusService {
                 .buyOrderQuantity(allBuyOrderNumbers)
                 .sellOrderQuantity(allSellOrderNumbers)
                 .recentContracts(recentContracts)
+                .dataCode(dataCode)
                 .build();
+    }
+
+    @Override
+    public List<OrdersQueueDto> getAllInitData() {
+        List<OrdersQueueDto> ordersQueueDtoList = new ArrayList<>();
+
+        for(Code code : dataTradePolicy.getDataTypeCodeList()) {
+            String dataCode = code.getCode();
+
+            Map<Long, Long> allBuyOrderNumbers = orderRepository.getAllBuyOrderNumbers(dataCode);
+            Map<Long, Long> allSellOrderNumbers = orderRepository.getAllSellOrderNumbers(dataCode);
+            List<ContractDto> recentContracts = contractQueueRepository.getAllCachedContracts(dataCode);
+
+            OrdersQueueDto ordersQueueDto = OrdersQueueDto.builder()
+                    .buyOrderQuantity(allBuyOrderNumbers)
+                    .sellOrderQuantity(allSellOrderNumbers)
+                    .recentContracts(recentContracts)
+                    .dataCode(dataCode)
+                    .build();
+
+            ordersQueueDtoList.add(ordersQueueDto);
+        }
+
+        return ordersQueueDtoList;
     }
 
     @Override
