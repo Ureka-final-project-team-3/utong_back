@@ -133,6 +133,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 .mileage(account.getMileage())
                 .password(account.getPassword())
                 .user(account.getUser())
+                .defaultLine(account.getDefaultLine())
+                .isMail(account.getIsMail())
                 .build();
         
         return accountRepository.save(updatedAccount);
@@ -147,7 +149,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 .provider(userInfo.getProvider())
                 .providerId(userInfo.getProviderId())
                 .mileage(account.getMileage())
+                .defaultLine(account.getDefaultLine())
                 .user(account.getUser())
+                .isMail(account.getIsMail())
                 .build();
         
         return accountRepository.save(linkedAccount);
@@ -165,6 +169,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 .provider(userInfo.getProvider())
                 .providerId(userInfo.getProviderId())
                 .mileage(0L)
+                .defaultLine(null)
+                .isMail(true)
                 .build();
         
         Account savedAccount = accountRepository.save(account);

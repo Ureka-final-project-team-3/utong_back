@@ -80,7 +80,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             Cookie refreshTokenCookie = createRefreshTokenCookie(refreshToken);
             response.addCookie(refreshTokenCookie);
             
-            // 프론트엔드 URL로 리다이렉트
             String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl)
                     .queryParam("accessToken", accessToken)
                     .queryParam("tokenType", "Bearer")
@@ -104,7 +103,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         return cookie;
     }
     
-    // 기존 createOrUpdateAccountFromOidcUser, createOrUpdateAccountFromOAuth2User 메서드들은 그대로 유지
     private Account createOrUpdateAccountFromOidcUser(org.springframework.security.oauth2.core.oidc.user.OidcUser oidcUser) {
         String email = oidcUser.getEmail();
         String providerId = oidcUser.getSubject();
@@ -124,6 +122,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                     .password(emailAccount.getPassword())
                     .provider("google")
                     .providerId(providerId)
+                    .defaultLine(emailAccount.getDefaultLine())
                     .mileage(emailAccount.getMileage())
                     .user(emailAccount.getUser())
                     .build();
@@ -181,6 +180,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                     .providerId(userInfo.getProviderId())
                     .mileage(emailAccount.getMileage())
                     .isMail(emailAccount.getIsMail())
+                    .defaultLine(emailAccount.getDefaultLine())
                     .user(emailAccount.getUser())
                     .build();
             
