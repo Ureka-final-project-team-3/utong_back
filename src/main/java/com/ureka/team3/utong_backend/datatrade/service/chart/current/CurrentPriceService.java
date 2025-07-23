@@ -1,8 +1,6 @@
-package com.ureka.team3.utong_backend.datatrade.service.chart;
+package com.ureka.team3.utong_backend.datatrade.service.chart.current;
 
-import com.ureka.team3.utong_backend.datatrade.dto.AvgPerHour;
 import com.ureka.team3.utong_backend.datatrade.dto.ChartDataDto;
-import org.apache.kafka.common.metrics.stats.Avg;
 
 import java.util.List;
 
