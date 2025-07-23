@@ -244,7 +244,6 @@ public class AuthService {
     private Cookie createRefreshTokenCookie(String name, String value) {
         Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(true);
-
         cookie.setSecure(false);
         cookie.setAttribute("SameSite", "Lax");
         cookie.setPath("/");
