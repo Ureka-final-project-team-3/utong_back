@@ -8,6 +8,7 @@ import com.ureka.team3.utong_backend.datatrade.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ public class OrderQueueStatusServiceImpl implements OrderQueueStatusService {
     private final ContractRepository contractRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public OrdersQueueDto getInitData(String dataCode) {
         Map<Long, Long> allBuyOrderNumbers = orderRepository.getAllBuyOrderNumbers(dataCode);
         Map<Long, Long> allSellOrderNumbers = orderRepository.getAllSellOrderNumbers(dataCode);
@@ -29,6 +31,7 @@ public class OrderQueueStatusServiceImpl implements OrderQueueStatusService {
                 .stream()
                 .map(contract -> ContractDto.of(contract, dataCode))
                 .toList();
+//        List<ContractDto> recentContracts = null;
 
         return OrdersQueueDto.builder()
                 .buyOrderQuantity(allBuyOrderNumbers)
