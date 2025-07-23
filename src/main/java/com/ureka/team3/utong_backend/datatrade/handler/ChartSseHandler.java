@@ -1,12 +1,9 @@
 package com.ureka.team3.utong_backend.datatrade.handler;
 
-import com.ureka.team3.utong_backend.datatrade.dto.AvgPerHour;
 import com.ureka.team3.utong_backend.datatrade.dto.ChartDataDto;
-import com.ureka.team3.utong_backend.datatrade.dto.OrdersQueueDto;
-import com.ureka.team3.utong_backend.datatrade.service.chart.CurrentPriceService;
+import com.ureka.team3.utong_backend.datatrade.service.chart.current.CurrentPriceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.metrics.stats.Avg;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
