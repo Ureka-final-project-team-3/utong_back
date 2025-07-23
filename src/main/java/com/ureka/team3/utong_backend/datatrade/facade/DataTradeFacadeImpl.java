@@ -27,6 +27,8 @@ import com.ureka.team3.utong_backend.datatrade.service.trade.sale.SaleDataReques
 import com.ureka.team3.utong_backend.datatrade.utils.TradeCalculator;
 import com.ureka.team3.utong_backend.datatrade.utils.TradeResponseFactory;
 import com.ureka.team3.utong_backend.datatrade.validator.TradeValidator;
+import com.ureka.team3.utong_backend.line.entity.Line;
+import com.ureka.team3.utong_backend.line.entity.LineData;
 import com.ureka.team3.utong_backend.line.service.LineService;
 import com.ureka.team3.utong_backend.point.service.PointService;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+
+import java.time.LocalDate;
 
 import static com.ureka.team3.utong_backend.datatrade.enums.SaleOrderResult.*;
 
@@ -126,6 +130,17 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
     public ApiResponse cancelSaleWaiting(Account account, DataTradeDto.CancelWaitingTradeRequestDto requestDto) {
         // 1. 본인의 orderId가 맞는지 확인
         SaleDataRequest saleOrderById = saleDataRequestService.findSaleOrderById(requestDto.getOrderId());
+        validateSaleWaitingCancel(account, saleOrderById);
+        // 3. mysql에서 004로 변경
+        saleDataRequestService.changeStatus(saleOrderById, SaleOrderResult.CANCEL);
+        // 4. 데이터 복구
+        recoverData(saleOrderById);
+        // 5. 레디스에서 제거
+        tradeOrderQueueService.removeFromSaleQueue(saleOrderById);
+        return ApiResponse.success("판매 대기 취소 완료",null);
+    }
+
+    private void validateSaleWaitingCancel(Account account, SaleDataRequest saleOrderById) {
         if(!saleOrderById.isOwner(account.getId()))
             throw new NotMyOrderException();
         // 2. AllComplete가 아닌지 확인
@@ -137,10 +152,11 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
         if(saleOrderById.isStatus(cancelStatusCode.getCode())){
             throw new AlreadyCancelOrderException();
         }
-        // 3. mysql에서 004로 변경
-        saleDataRequestService.changeStatus(saleOrderById, SaleOrderResult.CANCEL);
-        // 4. 레디스에서 제거
-        tradeOrderQueueService.removeFromSaleQueue(saleOrderById);
-        return ApiResponse.success("판매 대기 취소 완료",null);
+    }
+
+    private void recoverData(SaleDataRequest saleOrderById) {
+        Line line = lineService.findById(saleOrderById.getLineId());
+        LineData lineData = lineService.getLineDataByLineAndDate(line, LocalDate.now());
+        lineData.recoverData(saleOrderById.getRemaining());
     }
 }

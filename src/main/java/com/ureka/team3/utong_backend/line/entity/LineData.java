@@ -53,6 +53,13 @@ public class LineData {
         this.remaining -= amount;
         this.sell += amount;
     }
+
+    public void recoverData(Long amount){
+        if(sell<amount)
+            throw new InsufficientDataException();
+        this.remaining += amount;
+        this.sell -= amount;
+    }
 }
 
 
