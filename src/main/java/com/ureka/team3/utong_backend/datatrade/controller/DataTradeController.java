@@ -3,6 +3,7 @@ package com.ureka.team3.utong_backend.datatrade.controller;
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
 import com.ureka.team3.utong_backend.datatrade.dto.TradeHistoryRequestDto;
+import com.ureka.team3.utong_backend.datatrade.facade.DataTradeCancelFacade;
 import com.ureka.team3.utong_backend.datatrade.facade.DataTradeFacade;
 import com.ureka.team3.utong_backend.datatrade.handler.SseHandler;
 import com.ureka.team3.utong_backend.datatrade.service.query.TradeQueryService;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class DataTradeController {
 
     private final DataTradeFacade dataTradeFacade;
+    private final DataTradeCancelFacade dataTradeCancelFacade;
     private final TradeQueryService tradeQueryService;
 
     @GetMapping("/purchase")
@@ -34,7 +36,7 @@ public class DataTradeController {
 
     @DeleteMapping("/purchase")
     public ResponseEntity cancelBuyWaiting(@AuthenticationPrincipal Account account, @RequestBody DataTradeDto.CancelWaitingTradeRequestDto requestDto) {
-        return ResponseEntity.ok(dataTradeFacade.cancelBuyWaiting(account, requestDto));
+        return ResponseEntity.ok(dataTradeCancelFacade.cancelBuyWaiting(account, requestDto));
     }
 
     @GetMapping("/sale")
@@ -52,6 +54,6 @@ public class DataTradeController {
     @DeleteMapping("/sale")
     public ResponseEntity cancelSaleWaiting(@AuthenticationPrincipal Account account, @RequestBody DataTradeDto.CancelWaitingTradeRequestDto requestDto) {
         log.info("로그인한 id : {}", account.getId());
-        return ResponseEntity.ok(dataTradeFacade.cancelSaleWaiting(account, requestDto));
+        return ResponseEntity.ok(dataTradeCancelFacade.cancelSaleWaiting(account, requestDto));
     }
 }
