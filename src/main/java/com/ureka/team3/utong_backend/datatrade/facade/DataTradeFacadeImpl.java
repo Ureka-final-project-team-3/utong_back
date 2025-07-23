@@ -98,6 +98,7 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
     @Transactional
     public ApiResponse cancelBuyWaiting(Account account, DataTradeDto.CancelWaitingTradeRequestDto requestDto) {
         // 1. 본인의 orderId가 맞는지 확인
+        account = accountService.findById(account.getId());
         BuyDataRequest buyOrderById = buyDataRequestService.findBuyOrderById(requestDto.getOrderId());
         if(!buyOrderById.isOwner(account.getId()))
             throw new NotMyOrderException();
@@ -113,7 +114,9 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
         }
         // 3. mysql에서 004로 변경
         buyDataRequestService.changeStatus(buyOrderById,BuyOrderResult.CANCEL);
-        // 4. 레디스에서 제거
+        // 4. 포인트 반환
+        account.increasePoint(tradeCalculator.calculatePayPoint(buyOrderById.getRemaining(), buyOrderById.getPrice()));
+        // 5. 레디스에서 제거
         tradeOrderQueueService.removeFromBuyQueue(buyOrderById);
         return ApiResponse.success("구매 대기 취소 완료",null);
     }

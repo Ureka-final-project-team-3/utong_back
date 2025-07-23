@@ -51,6 +51,10 @@ public class TradeCalculator {
         return Math.min(remaining, canSale - alreadySold);
     }
 
+    public Long calculatePayPoint(Long remaining, Long price) {
+        return remaining * price;
+    }
+
     /**
      * 수수료, 최소금액, 최소비율 초기값 설정
      */
@@ -66,4 +70,6 @@ public class TradeCalculator {
         this.minimumPrice = price.getMinimumPrice();
         this.minimumRate = price.getMinimumRate();   // float → double 자동 변환
     }
+
+
 }
