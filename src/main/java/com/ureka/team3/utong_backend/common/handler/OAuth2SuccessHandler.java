@@ -32,7 +32,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     
-    @Value("${app.frontend.url:http://localhost:5173}")
+    @Value("${app.frontend.url:https://d2rykyv7hqvhku.cloudfront.net}")
     private String frontendUrl;
     
     public OAuth2SuccessHandler(JwtUtil jwtUtil, 
