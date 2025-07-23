@@ -101,6 +101,9 @@ public class SecurityConfig {
             )
             .oauth2Login(oauth2 -> oauth2
                 .loginPage("/")
+                .authorizationEndpoint(endpoint -> 
+	                endpoint.baseUri("/api/oauth2/authorization")
+	            )
                 .defaultSuccessUrl("/api/oauth2/success", true)
                 .userInfoEndpoint(userInfo -> userInfo
                     .userService(customOAuth2UserService)
