@@ -101,12 +101,15 @@ public class SecurityConfig {
             )
             .oauth2Login(oauth2 -> oauth2
                 .loginPage("/")
-                .defaultSuccessUrl("/oauth2/success", true)
+                .defaultSuccessUrl("/api/oauth2/success", true)
                 .userInfoEndpoint(userInfo -> userInfo
                     .userService(customOAuth2UserService)
                 )
+                .redirectionEndpoint(redirection -> redirection
+                        .baseUri("/api/login/oauth2/code/*") 
+                    )
                 .successHandler(oAuth2SuccessHandler)
-                .failureUrl("/?error=oauth2_failed")
+                .failureUrl("/api/?error=oauth2_failed")
             )
             .exceptionHandling(exceptions -> exceptions
                 .authenticationEntryPoint(new Http403ForbiddenEntryPoint())
