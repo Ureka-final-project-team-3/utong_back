@@ -1,9 +1,6 @@
 package com.ureka.team3.utong_backend.datatrade.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 import java.util.Map;
@@ -13,6 +10,8 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrdersQueueDto {
+    @Setter
+    private String dataCode;
     private Map<Long,Long> buyOrderQuantity;
     private Map<Long,Long> sellOrderQuantity;
     private List<ContractDto> recentContracts;
