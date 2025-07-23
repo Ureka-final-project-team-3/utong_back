@@ -22,7 +22,8 @@ public class EmailService {
     
     @Value("${app.frontend.url:https://d2rykyv7hqvhku.cloudfront.net}")
     private String frontendUrl;
-    
+//    @Value("${app.frontend.url:http://localhost:5173}")
+//    private String frontendUrl;
     @Value("${mail.enabled:true}")
     private boolean mailEnabled;
     
@@ -31,7 +32,7 @@ public class EmailService {
     }
     
     public void sendPasswordResetEmail(String toEmail, String token) {
-        String resetUrl = frontendUrl + "/api/auth/reset-password?token=" + token;
+        String resetUrl = frontendUrl + "/reset-password?token=" + token;
         String emailContent = createPasswordResetEmailContent(resetUrl);
         
         if (!mailEnabled) {
