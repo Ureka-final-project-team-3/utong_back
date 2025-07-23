@@ -1,14 +1,12 @@
 package com.ureka.team3.utong_backend.datatrade.service.queue;
 
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
-import com.ureka.team3.utong_backend.datatrade.config.DataTradePolicy;
 import com.ureka.team3.utong_backend.datatrade.dto.*;
-import com.ureka.team3.utong_backend.datatrade.repository.ContractRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.ContractQueueRepository;
 import com.ureka.team3.utong_backend.datatrade.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -19,19 +17,13 @@ import java.util.stream.Collectors;
 @Slf4j
 public class OrderQueueStatusServiceImpl implements OrderQueueStatusService {
     private final OrderRepository orderRepository;
-    private final ContractRepository contractRepository;
+    private final ContractQueueRepository contractQueueRepository;
 
     @Override
-    @Transactional(readOnly = true)
     public OrdersQueueDto getInitData(String dataCode) {
         Map<Long, Long> allBuyOrderNumbers = orderRepository.getAllBuyOrderNumbers(dataCode);
         Map<Long, Long> allSellOrderNumbers = orderRepository.getAllSellOrderNumbers(dataCode);
-        List<ContractDto> recentContracts
-                = contractRepository.findLatestContractByDataCode(dataCode, DataTradePolicy.CONTRACT_LIST_SIZE)
-                .stream()
-                .map(contract -> ContractDto.of(contract, dataCode))
-                .toList();
-//        List<ContractDto> recentContracts = null;
+        List<ContractDto> recentContracts = contractQueueRepository.getAllCachedContracts(dataCode);
 
         return OrdersQueueDto.builder()
                 .buyOrderQuantity(allBuyOrderNumbers)
