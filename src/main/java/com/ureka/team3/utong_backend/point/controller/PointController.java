@@ -7,11 +7,13 @@ import com.ureka.team3.utong_backend.point.dto.PointChargeRequestDto;
 import com.ureka.team3.utong_backend.point.dto.PointChargeResponseDto;
 import com.ureka.team3.utong_backend.point.service.PointService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "포인트 조회 API", description = "본인 포인트 조회 API 입니다.")
 @RestController
 @RequestMapping("/api/user/points")
 @RequiredArgsConstructor
