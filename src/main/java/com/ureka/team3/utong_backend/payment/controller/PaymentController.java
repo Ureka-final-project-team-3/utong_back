@@ -2,10 +2,11 @@ package com.ureka.team3.utong_backend.payment.controller;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
-import com.ureka.team3.utong_backend.point.dto.PointChargeResponseDto;
 import com.ureka.team3.utong_backend.payment.dto.PaymentConfirmRequestDto;
 import com.ureka.team3.utong_backend.payment.service.PaymentService;
+import com.ureka.team3.utong_backend.point.dto.PointChargeResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "포인트 충전 API", description = "포인트 충전 시 결제 API 연동으로 가능한 API 입니다.")
 @RestController
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor

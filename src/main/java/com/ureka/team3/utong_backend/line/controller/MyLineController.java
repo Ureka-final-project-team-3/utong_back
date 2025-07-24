@@ -6,6 +6,7 @@ import com.ureka.team3.utong_backend.line.dto.MyLineRequestDto;
 import com.ureka.team3.utong_backend.line.dto.MyLineResponseDto;
 import com.ureka.team3.utong_backend.line.service.MyLineService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "회선 조회 및 설정 API", description = "본인 보유 전화번호/기본 설정 전화번호 조회 및 설정 가능한 API 입니다.")
 @RestController
 @RequestMapping("/api/lines")
 @RequiredArgsConstructor

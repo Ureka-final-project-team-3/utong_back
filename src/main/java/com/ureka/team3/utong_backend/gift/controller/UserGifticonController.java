@@ -7,6 +7,7 @@ import com.ureka.team3.utong_backend.gift.dto.UserGifticonDetailResponseDto;
 import com.ureka.team3.utong_backend.gift.dto.UserGifticonResponseDto;
 import com.ureka.team3.utong_backend.gift.service.UserGifticonService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,10 +15,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "마이페이지 - 기프티콘 API", description = "마이페이지에서 내 기프티콘 목록을 조회하는 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user/gifticons")
-//@Tag(name = "마이페이지 - 기프티콘", description = "마이페이지에서 내 기프티콘 목록을 조회하는 API")
 public class UserGifticonController {
 
     private final UserGifticonService userGifticonService;
