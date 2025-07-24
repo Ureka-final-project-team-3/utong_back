@@ -7,6 +7,7 @@ import com.ureka.team3.utong_backend.coupon.dto.CouponUseResponseDto;
 import com.ureka.team3.utong_backend.coupon.dto.MyCouponResponseDto;
 import com.ureka.team3.utong_backend.coupon.service.MyCouponService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "마이페이지 - 쿠폰 API", description = "마이페이지에서 내 쿠폰 목록 조회/데이터 쿠폰 사용하는 API 입니다.")
 @RestController
 @RequestMapping("/api/user/coupons")
 @RequiredArgsConstructor

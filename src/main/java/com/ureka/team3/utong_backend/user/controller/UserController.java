@@ -5,6 +5,7 @@ import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.user.dto.MyInfoResponseDto;
 import com.ureka.team3.utong_backend.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "본인 정보 조회 API", description = "본인 정보 조회하는 API 입니다.")
 @Slf4j
 @RestController
 @RequestMapping("/api/user")
