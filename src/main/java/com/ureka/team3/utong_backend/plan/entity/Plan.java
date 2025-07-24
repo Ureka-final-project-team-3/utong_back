@@ -36,4 +36,8 @@ public class Plan {
         }
         return Math.round((data * availableTradeRate) / 100.0);
     }
+
+    public boolean isUnlimited() {
+        return data == -1;
+    }
 }

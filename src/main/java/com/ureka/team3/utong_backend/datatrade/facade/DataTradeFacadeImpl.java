@@ -3,32 +3,21 @@ package com.ureka.team3.utong_backend.datatrade.facade;
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.auth.service.AccountService;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
-import com.ureka.team3.utong_backend.common.entity.Code;
-import com.ureka.team3.utong_backend.common.exception.business.AlreadyCancelOrderException;
-import com.ureka.team3.utong_backend.common.exception.business.CannotCancelCompletedOrderException;
 import com.ureka.team3.utong_backend.common.exception.business.InsufficientPointException;
-import com.ureka.team3.utong_backend.common.exception.business.NotMyOrderException;
-import com.ureka.team3.utong_backend.datatrade.config.DataTradePolicy;
 import com.ureka.team3.utong_backend.datatrade.dto.BuyMatchingResult;
 import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
 import com.ureka.team3.utong_backend.datatrade.dto.SaleMatchingResult;
 import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
-import com.ureka.team3.utong_backend.datatrade.enums.BuyOrderResult;
-import com.ureka.team3.utong_backend.datatrade.enums.SaleOrderResult;
 import com.ureka.team3.utong_backend.datatrade.handler.BuyMatchingResultHandler;
 import com.ureka.team3.utong_backend.datatrade.handler.SaleMatchingResultHandler;
 import com.ureka.team3.utong_backend.datatrade.processor.BuyMatchingProcessor;
 import com.ureka.team3.utong_backend.datatrade.processor.SaleMatchingProcessor;
-import com.ureka.team3.utong_backend.datatrade.service.query.TradeQueryService;
 import com.ureka.team3.utong_backend.datatrade.service.trade.purchase.BuyDataRequestService;
-import com.ureka.team3.utong_backend.datatrade.service.trade.queue.TradeOrderQueueService;
 import com.ureka.team3.utong_backend.datatrade.service.trade.sale.SaleDataRequestService;
 import com.ureka.team3.utong_backend.datatrade.utils.TradeCalculator;
 import com.ureka.team3.utong_backend.datatrade.utils.TradeResponseFactory;
 import com.ureka.team3.utong_backend.datatrade.validator.TradeValidator;
-import com.ureka.team3.utong_backend.line.entity.Line;
-import com.ureka.team3.utong_backend.line.entity.LineData;
 import com.ureka.team3.utong_backend.line.service.LineService;
 import com.ureka.team3.utong_backend.point.service.PointService;
 import lombok.RequiredArgsConstructor;
@@ -36,10 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
-
-import java.time.LocalDate;
-
-import static com.ureka.team3.utong_backend.datatrade.enums.SaleOrderResult.*;
 
 @Slf4j
 @Service
@@ -64,8 +49,7 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
         account = accountService.findById(account.getId());
         // 1. 검증
         String defaultLineId = account.getDefaultLine();
-        ApiResponse validationResult = tradeValidator.validatePurchase(defaultLineId);
-        if (validationResult != null) return validationResult;
+        tradeValidator.validatePurchase(defaultLineId, dto);
         // 2. 포인트 결제
         try {
             Long purchaseCoast = tradeCalculator.calculateTotalCoastForConsumer(dto);
@@ -87,8 +71,7 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
     public ApiResponse requestSale(Account account, DataTradeDto.SaleDataRequestDto dto) {
         // 1. 기본 회선 조회
         String defaultLineId = account.getDefaultLine();
-        ApiResponse validationResult = tradeValidator.validateSale(defaultLineId, dto);
-        if (validationResult != null) return validationResult;
+        tradeValidator.validateSale(defaultLineId, dto);
 
         SaleDataRequest savedOrder = saleDataRequestService.save(account, dto);
         lineService.saleData(savedOrder.getLineId(), dto.getDataAmount());  // 데이터 차감

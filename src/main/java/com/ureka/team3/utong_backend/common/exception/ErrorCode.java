@@ -60,7 +60,8 @@ public enum ErrorCode {
     EXCEED_SALE_LIMIT(HttpStatus.BAD_REQUEST, "EXCEED_SALE_LIMIT","판매 요청한 데이터가 판매 가능량을 초과했습니다"),
     NOT_MY_ORDER(HttpStatus.FORBIDDEN,"NOT_MY_ORDER", "사용자의 주문이 아닙니다"),
     CANNOT_CANCEL_COMPLETE_ORDER(HttpStatus.BAD_REQUEST,"CANNOT_CANCEL_COMPLETE_ORDER" ,"이미 거래가 체결된 주문입니다" ),
-    ALREADY_CANCELED(HttpStatus.BAD_REQUEST,"ALREADY_CANCELED" , "이미 거래가 취소된 주문입니다" );
+    ALREADY_CANCELED(HttpStatus.BAD_REQUEST,"ALREADY_CANCELED" , "이미 거래가 취소된 주문입니다" ),
+    UNIT_ERROR(HttpStatus.BAD_REQUEST,"UNIT_ERROR" ,"100원 단위로만 거래 가능" );
 
     private final HttpStatus status;
     private final String code;
