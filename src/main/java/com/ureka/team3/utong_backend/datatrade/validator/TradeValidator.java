@@ -1,11 +1,10 @@
 package com.ureka.team3.utong_backend.datatrade.validator;
 
-import com.ureka.team3.utong_backend.common.dto.ApiResponse;
+import com.ureka.team3.utong_backend.common.exception.business.*;
 import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
 import com.ureka.team3.utong_backend.datatrade.repository.BuyDataRequestRepository;
 import com.ureka.team3.utong_backend.datatrade.repository.SaleDataRequestRepository;
 import com.ureka.team3.utong_backend.datatrade.utils.TradeCalculator;
-import com.ureka.team3.utong_backend.datatrade.utils.TradeResponseFactory;
 import com.ureka.team3.utong_backend.line.entity.Line;
 import com.ureka.team3.utong_backend.line.entity.LineData;
 import com.ureka.team3.utong_backend.line.service.LineService;
@@ -23,42 +22,45 @@ public class TradeValidator {
     private final TradeCalculator tradeCalculator;
     private final BuyDataRequestRepository buyDataRequestRepository;
 
-    public ApiResponse validatePurchase(String defaultLineId) {
+    public void validatePurchase(String defaultLineId, DataTradeDto.BuyDataRequestDto dto) {
         if (defaultLineId == null)
-            return TradeResponseFactory.needDefaultLine();
+            throw new NotExistDefaultLineException();
 
         Line defaultLine = lineService.findById(defaultLineId);
-        if (defaultLine.getPlan().getData() == -1)
-            return TradeResponseFactory.unlimitedTradeNotAllowed();
+        if (defaultLine.getPlan().isUnlimited())
+            throw new UnlimitedPlanForbiddenTradeException();
+
+        if (!tradeCalculator.isHundredUnit(dto.getPrice()))
+            throw new PriceUnitException();
 
 //        if (saleDataRequestRepository.existsWaitingRequestByLineId(defaultLine.getId()))
-//            return TradeResponseFactory.existSaleRequest();
+//            throw new ExistWaitingSaleRequestException();
 
-        return null;
     }
 
-    public ApiResponse validateSale(String defaultLineId, DataTradeDto.SaleDataRequestDto dto) {
+    public void validateSale(String defaultLineId, DataTradeDto.SaleDataRequestDto dto) {
         if (defaultLineId == null) {
-            return TradeResponseFactory.needDefaultLine();
+            throw new NotExistDefaultLineException();
         }
 
         Line defaultLine = lineService.findById(defaultLineId);
         Plan plan = defaultLine.getPlan();
-        Long planData = plan.getData();
 
-        if (planData == -1)
-            return TradeResponseFactory.unlimitedTradeNotAllowed();
+
+        if (defaultLine.getPlan().isUnlimited())
+            throw new UnlimitedPlanForbiddenTradeException();
 
         LineData lineData = lineService.getLineDataByLineAndDate(defaultLine, LocalDate.now());
-        Long canSell = tradeCalculator.calculateCanSellAmount(lineData.getRemaining(),plan.canSell(), lineData.getSell() );
-        if (dto.getDataAmount() > canSell ) {
-            return TradeResponseFactory.exceedSaleLimit();
+        Long canSell = tradeCalculator.calculateCanSellAmount(lineData.getRemaining(), plan.canSell(), lineData.getSell());
+        if (dto.getDataAmount() > canSell) {
+            throw new ExceedSaleLimitException();
         }
 
+        if (!tradeCalculator.isHundredUnit(dto.getPrice()))
+            throw new PriceUnitException();
 //        if (buyDataRequestRepository.existsWaitingRequestByLineId(defaultLine.getId())) {
-//            return TradeResponseFactory.existBuyRequest();
+//            throw new ExistWaitingPurchaseRequestException();
 //        }
-
-        return null;
     }
 }
+

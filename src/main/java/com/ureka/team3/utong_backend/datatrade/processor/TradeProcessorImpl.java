@@ -49,7 +49,7 @@ public class TradeProcessorImpl implements TradeProcessor {
         // 체결 내용 contract에 저장
         Contract contract = contractService.save(tradeExecutionDto);
 
-        Account account = contract.getBuyDataRequest().getAccount();
+        Account account = contract.getSaleDataRequest().getAccount();
         Long totalIncomeForSeller = tradeCalculator.calculateTotalIncomeForSeller(contract.getPrice(), contract.getAmount());
 
         // 판매자에게 포인트 지급

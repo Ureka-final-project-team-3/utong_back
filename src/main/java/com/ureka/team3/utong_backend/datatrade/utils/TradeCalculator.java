@@ -55,6 +55,10 @@ public class TradeCalculator {
         return remaining * price;
     }
 
+    public boolean isHundredUnit(Long price){
+        return price%100==0;
+    }
+
     /**
      * 수수료, 최소금액, 최소비율 초기값 설정
      */
