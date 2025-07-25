@@ -22,7 +22,7 @@ public class TradeCalculator {
     /**
      * 소비자 기준 총 비용 (단가 * 수량)
      */
-    public Long calculateTotalCoastForConsumer(DataTradeDto.BuyDataRequestDto dto) {
+    public Long calculateTotalCoastForConsumer(DataTradeDto.DataTradeRequestDto dto) {
         return dto.getPrice() * dto.getDataAmount();
     }
 

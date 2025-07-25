@@ -8,21 +8,31 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 public class DataTradeDto {
-    @Getter
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class BuyDataRequestDto {
-        private long dataAmount;
-        private long price;
-        private String dataCode;
-    }
+//    @Getter
+//    @Builder
+//    @NoArgsConstructor
+//    @AllArgsConstructor
+//    public static class BuyDataRequestDto {
+//        private long dataAmount;
+//        private long price;
+//        private String dataCode;
+//    }
+//
+//    @Getter
+//    @Builder
+//    @NoArgsConstructor
+//    @AllArgsConstructor
+//    public static class SaleDataRequestDto {
+//        private long dataAmount;
+//        private long price;
+//        private String dataCode;
+//    }
 
     @Getter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class SaleDataRequestDto {
+    public static class DataTradeRequestDto {
         private long dataAmount;
         private long price;
         private String dataCode;

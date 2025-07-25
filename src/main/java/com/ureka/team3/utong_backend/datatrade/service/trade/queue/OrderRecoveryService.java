@@ -15,37 +15,39 @@ public class OrderRecoveryService {
     private final TradeOrderQueueService tradeOrderQueueService;
     private final OrderRepository orderRepository;
 
-    public void restoreSellOrdersOnFailure(List<PurchaseMatch> matchList, BuyMatchingResult result) {
+    public void restoreSellOrdersOnFailure(BuyMatchingResult result) {
+        List<TradeMatch> matchList = result.getMatchList();
         Collections.reverse(matchList);
 
         for (int i = 0; i < matchList.size(); i++) {
-            PurchaseMatch purchaseMatch = matchList.get(i);
-            OrderDto original = purchaseMatch.getMatchedOrder();
+            TradeMatch tradeMatch = matchList.get(i);
+            OrderDto original = tradeMatch.getMatchedOrder();
 
             if (i == 0 && !result.getBuyMatchingStatus().isWaitingOnly()) {
-                restoreFirstPoppedOrder(purchaseMatch, original);
+                restoreFirstPoppedOrder(tradeMatch, original);
             } else {
                 restoreSingleOrder(original);
             }
         }
     }
 
-    public void restoreBuyOrdersOnFailure(List<SaleMatch> matchList, SaleMatchingResult result) {
+    public void restoreBuyOrdersOnFailure(SaleMatchingResult result) {
+        List<TradeMatch> matchList = result.getMatchList();
         Collections.reverse(matchList);
 
         for (int i = 0; i < matchList.size(); i++) {
-            SaleMatch saleMatch = matchList.get(i);
-            OrderDto original = saleMatch.getMatchedOrder();
+            TradeMatch tradeMatch = matchList.get(i);
+            OrderDto original = tradeMatch.getMatchedOrder();
 
             if (i == 0 && !result.getSaleMatchingStatus().isWaitingOnly()) {
-                restoreFirstPoppedBuyOrder(saleMatch, original);
+                restoreFirstPoppedBuyOrder(tradeMatch, original);
             } else {
                 restoreSingleBuyOrder(original);
             }
         }
     }
 
-    private void restoreFirstPoppedBuyOrder(SaleMatch saleMatch, OrderDto original) {
+    private void restoreFirstPoppedBuyOrder(TradeMatch tradeMatch, OrderDto original) {
         OrderDto toFix = orderRepository.popFirstBuyOrderFromList(original.getDataCode(), original.getPrice());
 
         if (toFix != null) {
@@ -53,7 +55,7 @@ public class OrderRecoveryService {
                 tradeOrderQueueService.requeuePartialBuyOrder(toFix);
                 tradeOrderQueueService.requeuePartialBuyOrder(original);
             } else {
-                original.setQuantity(original.getQuantity() + saleMatch.getAmount());
+                original.setQuantity(original.getQuantity() + tradeMatch.getAmount());
                 tradeOrderQueueService.requeuePartialBuyOrder(original);
             }
         }
@@ -64,7 +66,7 @@ public class OrderRecoveryService {
     }
 
 
-    private void restoreFirstPoppedOrder(PurchaseMatch purchaseMatch, OrderDto original) {
+    private void restoreFirstPoppedOrder(TradeMatch tradeMatch, OrderDto original) {
         OrderDto toFix = orderRepository.popFirstSellOrderFromList(original.getDataCode(), original.getPrice());
 
         if (toFix != null) {
@@ -72,7 +74,7 @@ public class OrderRecoveryService {
                 tradeOrderQueueService.requeuePartialSellOrder(toFix);
                 tradeOrderQueueService.requeuePartialSellOrder(original);
             } else {
-                original.setQuantity(original.getQuantity() + purchaseMatch.getAmount());
+                original.setQuantity(original.getQuantity() + tradeMatch.getAmount());
                 tradeOrderQueueService.requeuePartialSellOrder(original);
             }
         }

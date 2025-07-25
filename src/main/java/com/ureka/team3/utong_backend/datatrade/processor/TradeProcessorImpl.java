@@ -1,14 +1,14 @@
 package com.ureka.team3.utong_backend.datatrade.processor;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
-import com.ureka.team3.utong_backend.datatrade.dto.PurchaseMatch;
-import com.ureka.team3.utong_backend.datatrade.dto.SaleMatch;
+import com.ureka.team3.utong_backend.datatrade.dto.ContractDto;
 import com.ureka.team3.utong_backend.datatrade.dto.TradeExecutionDto;
+import com.ureka.team3.utong_backend.datatrade.dto.TradeMatch;
 import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.entity.Contract;
 import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
-import com.ureka.team3.utong_backend.datatrade.service.trade.purchase.BuyDataRequestServiceImpl;
 import com.ureka.team3.utong_backend.datatrade.service.trade.contract.ContractService;
+import com.ureka.team3.utong_backend.datatrade.service.trade.purchase.BuyDataRequestServiceImpl;
 import com.ureka.team3.utong_backend.datatrade.service.trade.sale.SaleDataRequestService;
 import com.ureka.team3.utong_backend.datatrade.utils.TradeCalculator;
 import com.ureka.team3.utong_backend.line.service.LineService;
@@ -29,23 +29,23 @@ public class TradeProcessorImpl implements TradeProcessor {
 
     @Override
     @Transactional
-    public void processBuyMatches(BuyDataRequest buyDataRequest, PurchaseMatch matchOrder) {
+    public ContractDto processBuyMatches(BuyDataRequest buyDataRequest, TradeMatch matchOrder) {
         SaleDataRequest saleDataRequest = saleDataRequestService.findSaleOrderById(matchOrder.getMatchedOrder().getOrderId());
         saleDataRequestService.subtractSell(saleDataRequest, matchOrder.getAmount());
         TradeExecutionDto tradeExecutionDto = new TradeExecutionDto(buyDataRequest, saleDataRequest, matchOrder.getAmount(), matchOrder.getPricePerUnit());
-        processTrade(tradeExecutionDto);
+        return processTrade(tradeExecutionDto);
     }
 
     @Override
     @Transactional
-    public void processSaleMatches(SaleDataRequest request, SaleMatch match) {
+    public ContractDto processSaleMatches(SaleDataRequest request, TradeMatch match) {
         BuyDataRequest buyOrderRequest = buyDataRequestService.findBuyOrderById(match.getMatchedOrder().getOrderId());
-        buyDataRequestService.subtractPurchased(buyOrderRequest,match.getAmount());
+        buyDataRequestService.subtractPurchased(buyOrderRequest, match.getAmount());
         TradeExecutionDto tradeExecutionDto = new TradeExecutionDto(buyOrderRequest, request, match.getAmount(), match.getPricePerUnit());
-        processTrade(tradeExecutionDto);
+        return processTrade(tradeExecutionDto);
     }
 
-    private void processTrade(TradeExecutionDto tradeExecutionDto) {
+    private ContractDto processTrade(TradeExecutionDto tradeExecutionDto) {
         // 체결 내용 contract에 저장
         Contract contract = contractService.save(tradeExecutionDto);
 
@@ -58,6 +58,8 @@ public class TradeProcessorImpl implements TradeProcessor {
         String targetLineId = contract.getBuyDataRequest().getLineId();
         // 구매자에게 데이터 지급
         lineService.giveData(targetLineId, contract.getAmount());
+        return ContractDto.of(contract);
+
     }
 
 }

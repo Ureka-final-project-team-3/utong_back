@@ -49,7 +49,7 @@ class DataTradeFacadeImplTest {
     void requestBuy_정상동작() {
         // given
         String username = "test-user";
-        DataTradeDto.BuyDataRequestDto dto = DataTradeDto.BuyDataRequestDto.builder()
+        DataTradeDto.DataTradeRequestDto dto = DataTradeDto.DataTradeRequestDto.builder()
                 .price(2000L)
                 .dataAmount(3L)
                 .dataCode("XYZ")
@@ -85,7 +85,7 @@ class DataTradeFacadeImplTest {
     void requestSale_정상동작() {
         // given
         String username = "test-user";
-        DataTradeDto.SaleDataRequestDto dto = DataTradeDto.SaleDataRequestDto.builder()
+        DataTradeDto.DataTradeRequestDto dto = DataTradeDto.DataTradeRequestDto.builder()
                 .price(1000L)
                 .dataAmount(5L)
                 .dataCode("001")

@@ -1,6 +1,6 @@
 package com.ureka.team3.utong_backend.datatrade.enums;
 
-public enum BuyMatchingStatus {
+public enum BuyMatchingStatus implements MatchingStatus {
     UNDER_MINIMUM_SALE_PRICE,
     ALL_MATCHED,
     PART_MATCHED;

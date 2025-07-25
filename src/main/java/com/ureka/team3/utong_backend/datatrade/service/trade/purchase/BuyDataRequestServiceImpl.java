@@ -17,7 +17,7 @@ public class BuyDataRequestServiceImpl implements BuyDataRequestService {
     private final DataTradePolicy dataTradePolicy;
 
     @Override
-    public BuyDataRequest save(Account account, DataTradeDto.BuyDataRequestDto dto) {
+    public BuyDataRequest save(Account account, DataTradeDto.DataTradeRequestDto dto) {
         return buyDataRequestRepository.save(BuyDataRequest.builder()
                 .price(dto.getPrice())
                 .account(account)

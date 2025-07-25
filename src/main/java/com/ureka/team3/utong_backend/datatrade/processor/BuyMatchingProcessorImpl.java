@@ -1,9 +1,6 @@
 package com.ureka.team3.utong_backend.datatrade.processor;
 
-import com.ureka.team3.utong_backend.datatrade.dto.BuyMatchingResult;
-import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
-import com.ureka.team3.utong_backend.datatrade.dto.OrderDto;
-import com.ureka.team3.utong_backend.datatrade.dto.PurchaseMatch;
+import com.ureka.team3.utong_backend.datatrade.dto.*;
 import com.ureka.team3.utong_backend.datatrade.service.trade.queue.TradeOrderQueueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,23 +14,20 @@ public class BuyMatchingProcessorImpl implements BuyMatchingProcessor {
     private final TradeOrderQueueService tradeOrderQueueService;
 
     @Override
-    public BuyMatchingResult handle(DataTradeDto.BuyDataRequestDto buyRequest) {
+    public BuyMatchingResult handle(DataTradeDto.DataTradeRequestDto buyRequest) {
         Long lowestPrice = tradeOrderQueueService.getLoweSellPriceByDataCode(buyRequest.getDataCode());
         long remain = buyRequest.getDataAmount();
         if (lowestPrice == null || buyRequest.getPrice() < lowestPrice) {
-            return BuyMatchingResult.underMinimumPrice(remain);
+            return BuyMatchingResult.underMinimumPrice(buyRequest);
         }
 
-        List<PurchaseMatch> matches = matchOrders(buyRequest, lowestPrice);
+        List<TradeMatch> matches = matchOrders(buyRequest, lowestPrice);
 
-        long matchedAmount = matches.stream().mapToLong(PurchaseMatch::getAmount).sum();
-
-        remain -= matchedAmount;
-        return BuyMatchingResult.of(matches, remain);
+        return BuyMatchingResult.of(matches, buyRequest);
     }
 
-    private List<PurchaseMatch> matchOrders(DataTradeDto.BuyDataRequestDto buyRequest, Long priceLimit) {
-        List<PurchaseMatch> matches = new ArrayList<>();
+    private List<TradeMatch> matchOrders(DataTradeDto.DataTradeRequestDto buyRequest, Long priceLimit) {
+        List<TradeMatch> matches = new ArrayList<>();
         long remaining = buyRequest.getDataAmount();
 
         while (remaining > 0) {
@@ -43,7 +37,7 @@ public class BuyMatchingProcessorImpl implements BuyMatchingProcessor {
             long available = sellOrder.getQuantity();
             long used = Math.min(available, remaining);
 
-            matches.add(PurchaseMatch.of(sellOrder, used));
+            matches.add(TradeMatch.of(sellOrder, used));
             remaining -= used;
 
             if (available > used) {
