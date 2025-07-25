@@ -1,9 +1,6 @@
 package com.ureka.team3.utong_backend.datatrade.processor;
 
-import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
-import com.ureka.team3.utong_backend.datatrade.dto.OrderDto;
-import com.ureka.team3.utong_backend.datatrade.dto.SaleMatch;
-import com.ureka.team3.utong_backend.datatrade.dto.SaleMatchingResult;
+import com.ureka.team3.utong_backend.datatrade.dto.*;
 import com.ureka.team3.utong_backend.datatrade.service.trade.queue.TradeOrderQueueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,27 +14,21 @@ public class SaleMatchingProcessorImpl implements SaleMatchingProcessor {
     private final TradeOrderQueueService tradeOrderQueueService;
 
     @Override
-    public SaleMatchingResult handle(DataTradeDto.SaleDataRequestDto request) {
+    public SaleMatchingResult handle(DataTradeDto.DataTradeRequestDto request) {
         Long highestBuyPrice = tradeOrderQueueService.getHighestBuyPrice(request.getDataCode());
         long remaining = request.getDataAmount();
 
         if (highestBuyPrice == null || request.getPrice() > highestBuyPrice) {
-            return SaleMatchingResult.overMaxPurchasePrice(remaining);
+            return SaleMatchingResult.overMaxPurchasePrice(request);
         }
 
-        List<SaleMatch> matches = matchOrders(request, highestBuyPrice);
+        List<TradeMatch> matches = matchOrders(request, highestBuyPrice);
 
-        long matchedAmount = matches.stream()
-                .mapToLong(SaleMatch::getAmount)
-                .sum();
-
-        long remain = remaining - matchedAmount;
-
-        return SaleMatchingResult.of(matches, remain);
+        return SaleMatchingResult.of(matches, request);
     }
 
-    private List<SaleMatch> matchOrders(DataTradeDto.SaleDataRequestDto saleRequest, Long priceLimit) {
-        List<SaleMatch> matches = new ArrayList<>();
+    private List<TradeMatch> matchOrders(DataTradeDto.DataTradeRequestDto saleRequest, Long priceLimit) {
+        List<TradeMatch> matches = new ArrayList<>();
         long remaining = saleRequest.getDataAmount();
 
         while (remaining > 0) {
@@ -48,7 +39,7 @@ public class SaleMatchingProcessorImpl implements SaleMatchingProcessor {
             long available = buyOrder.getQuantity();
             long used = Math.min(available, remaining);
 
-            matches.add(SaleMatch.of(buyOrder, used));
+            matches.add(TradeMatch.of(buyOrder, used));
             remaining -= used;
 
             // 구매자가 원하는 양이 일부 남았다면 재삽입

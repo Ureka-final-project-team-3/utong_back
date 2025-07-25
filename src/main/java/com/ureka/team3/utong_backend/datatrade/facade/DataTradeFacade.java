@@ -6,7 +6,7 @@ import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
 
 public interface DataTradeFacade {
 
-    ApiResponse requestBuy(Account account, DataTradeDto.BuyDataRequestDto buyRequestDto);
+    ApiResponse requestBuy(Account account, DataTradeDto.DataTradeRequestDto buyRequestDto);
 
-    ApiResponse requestSale(Account account, DataTradeDto.SaleDataRequestDto saleRequestDto);
+    ApiResponse requestSale(Account account, DataTradeDto.DataTradeRequestDto saleRequestDto);
 }

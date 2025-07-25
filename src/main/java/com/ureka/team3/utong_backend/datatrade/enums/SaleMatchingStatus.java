@@ -1,6 +1,6 @@
 package com.ureka.team3.utong_backend.datatrade.enums;
 
-public enum SaleMatchingStatus {
+public enum SaleMatchingStatus implements MatchingStatus{
     OVER_MAX_PURCHASE_PRICE,
     ALL_MATCHED,
     PART_MATCHED;

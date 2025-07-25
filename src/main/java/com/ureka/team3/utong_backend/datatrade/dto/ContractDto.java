@@ -32,4 +32,14 @@ public class ContractDto {
 
         return contractDto;
     }
+
+    public static ContractDto of(Contract contract) {
+        ContractDto contractDto = new ContractDto();
+
+        contractDto.price = contract.getPrice();
+        contractDto.quantity = contract.getAmount();
+        contractDto.contractedAt = contract.getCreatedAt();
+
+        return contractDto;
+    }
 }

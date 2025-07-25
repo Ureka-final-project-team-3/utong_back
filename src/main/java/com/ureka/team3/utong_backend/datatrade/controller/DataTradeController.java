@@ -34,7 +34,7 @@ public class DataTradeController {
 
     @Operation(summary = "데이터 구매 요청", description = "지정한 데이터 코드와 수량으로 데이터 구매를 요청합니다.")
     @PostMapping("/purchase")
-    public ResponseEntity getPurchaseHistory(@AuthenticationPrincipal Account account, @RequestBody DataTradeDto.BuyDataRequestDto buyRequestDto) {
+    public ResponseEntity getPurchaseHistory(@AuthenticationPrincipal Account account, @RequestBody DataTradeDto.DataTradeRequestDto buyRequestDto) {
         return ResponseEntity.ok(dataTradeFacade.requestBuy(account, buyRequestDto));
     }
 
@@ -53,7 +53,7 @@ public class DataTradeController {
 
     @Operation(summary = "데이터 판매 요청", description = "지정한 데이터 코드와 수량으로 데이터를 판매 요청합니다.")
     @PostMapping("/sale")
-    public ResponseEntity requestSale(@AuthenticationPrincipal Account account, @RequestBody DataTradeDto.SaleDataRequestDto saleRequestDto) {
+    public ResponseEntity requestSale(@AuthenticationPrincipal Account account, @RequestBody DataTradeDto.DataTradeRequestDto saleRequestDto) {
         log.info("로그인한 id : {}", account.getId());
         return ResponseEntity.ok(dataTradeFacade.requestSale(account, saleRequestDto));
     }

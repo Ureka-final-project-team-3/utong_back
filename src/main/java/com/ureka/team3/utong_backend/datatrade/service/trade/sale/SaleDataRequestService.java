@@ -6,7 +6,7 @@ import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
 import com.ureka.team3.utong_backend.datatrade.enums.SaleOrderResult;
 
 public interface SaleDataRequestService {
-    SaleDataRequest save(Account account, DataTradeDto.SaleDataRequestDto dto);
+    SaleDataRequest save(Account account, DataTradeDto.DataTradeRequestDto dto);
 
     SaleDataRequest findSaleOrderById(String saleOrderId);
 

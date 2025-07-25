@@ -18,7 +18,7 @@ public class SaleDataRequestServiceImpl implements SaleDataRequestService {
     private final DataTradePolicy dataTradePolicy;
 
     @Override
-    public SaleDataRequest save(Account account, DataTradeDto.SaleDataRequestDto dto) {
+    public SaleDataRequest save(Account account, DataTradeDto.DataTradeRequestDto dto) {
         return saleDataRequestRepository.save(SaleDataRequest.builder()
                 .price(dto.getPrice())
                 .account(account)

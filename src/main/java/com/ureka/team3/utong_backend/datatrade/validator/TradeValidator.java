@@ -1,6 +1,9 @@
 package com.ureka.team3.utong_backend.datatrade.validator;
 
-import com.ureka.team3.utong_backend.common.exception.business.*;
+import com.ureka.team3.utong_backend.common.exception.business.ExceedSaleLimitException;
+import com.ureka.team3.utong_backend.common.exception.business.NotExistDefaultLineException;
+import com.ureka.team3.utong_backend.common.exception.business.PriceUnitException;
+import com.ureka.team3.utong_backend.common.exception.business.UnlimitedPlanForbiddenTradeException;
 import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
 import com.ureka.team3.utong_backend.datatrade.repository.BuyDataRequestRepository;
 import com.ureka.team3.utong_backend.datatrade.repository.SaleDataRequestRepository;
@@ -22,7 +25,7 @@ public class TradeValidator {
     private final TradeCalculator tradeCalculator;
     private final BuyDataRequestRepository buyDataRequestRepository;
 
-    public void validatePurchase(String defaultLineId, DataTradeDto.BuyDataRequestDto dto) {
+    public void validatePurchase(String defaultLineId, DataTradeDto.DataTradeRequestDto dto) {
         if (defaultLineId == null)
             throw new NotExistDefaultLineException();
 
@@ -38,7 +41,7 @@ public class TradeValidator {
 
     }
 
-    public void validateSale(String defaultLineId, DataTradeDto.SaleDataRequestDto dto) {
+    public void validateSale(String defaultLineId, DataTradeDto.DataTradeRequestDto dto) {
         if (defaultLineId == null) {
             throw new NotExistDefaultLineException();
         }

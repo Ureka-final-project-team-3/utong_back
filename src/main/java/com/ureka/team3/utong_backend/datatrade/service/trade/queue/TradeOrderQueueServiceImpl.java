@@ -31,26 +31,28 @@ public class TradeOrderQueueServiceImpl implements TradeOrderQueueService {
 
     @Override
     public void addToBuyOrderQueue(BuyDataRequest order, long remain) {
-        orderRepository.savePurchaseOrder(OrderDto.builder()
+        OrderDto orderDto = OrderDto.builder()
                 .orderId(order.getId())
                 .createdAt(toEpochMillis(order.getCreatedAt()))
                 .expiredAt(toEpochMillis(order.getExpiredAt()))
                 .quantity(remain)
                 .dataCode(order.getDataCode())
                 .price(order.getPrice())
-                .build());
+                .build();
+        orderRepository.savePurchaseOrder(orderDto);
     }
 
     @Override
     public void addToSaleOrderQueue(SaleDataRequest order, long remain) {
-        orderRepository.saveSellOrder(OrderDto.builder()
+        OrderDto orderDto = OrderDto.builder()
                 .orderId(order.getId())
                 .createdAt(toEpochMillis(order.getCreatedAt()))
                 .expiredAt(toEpochMillis(order.getExpiredAt()))
                 .quantity(remain)
                 .dataCode(order.getDataCode())
                 .price(order.getPrice())
-                .build());
+                .build();
+        orderRepository.saveSellOrder(orderDto);
     }
 
     @Override
