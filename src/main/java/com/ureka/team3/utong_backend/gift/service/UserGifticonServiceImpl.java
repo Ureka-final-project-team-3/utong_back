@@ -1,9 +1,11 @@
 package com.ureka.team3.utong_backend.gift.service;
 
 import com.ureka.team3.utong_backend.common.exception.business.GifticonNotFoundException;
+import com.ureka.team3.utong_backend.gift.config.GifticonPolicy;
 import com.ureka.team3.utong_backend.gift.dto.UserGifticonDetailResponseDto;
 import com.ureka.team3.utong_backend.gift.dto.UserGifticonResponseDto;
 import com.ureka.team3.utong_backend.gift.entity.UserGifticon;
+import com.ureka.team3.utong_backend.gift.enums.GifticonStatus;
 import com.ureka.team3.utong_backend.gift.repository.UserGifticonRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,7 @@ import static java.util.stream.Collectors.toList;
 public class UserGifticonServiceImpl implements UserGifticonService {
 
     private final UserGifticonRepository myGifticonRepository;
+    private final GifticonPolicy gifticonPolicy;
 
     @Override
     public List<UserGifticonResponseDto> getMyGifticons(String userId) {
@@ -28,7 +31,7 @@ public class UserGifticonServiceImpl implements UserGifticonService {
         return gifticons.stream()
                 .map(gifticon -> {
                     long daysRemaining = ChronoUnit.DAYS.between(LocalDate.now(), gifticon.getExpiredAt());
-                    String status = (daysRemaining < 0) ? "유효기간 만료" : "사용 가능";
+                    GifticonStatus status = (daysRemaining < 0 ) ? GifticonStatus.EXPIRED : GifticonStatus.AVAILABLE;
 
                     return UserGifticonResponseDto.builder()
                             .id(UUID.fromString(gifticon.getId()))
@@ -37,7 +40,7 @@ public class UserGifticonServiceImpl implements UserGifticonService {
                             .price(gifticon.getGifticon().getPrice())
                             .imageUrl(gifticon.getGifticon().getImageUrl())
                             .daysRemaining(daysRemaining)
-                            .status(status)
+                            .status(gifticonPolicy.getStatusCodeByName(status.name()).getCodeNameBrief())
                             .build();
                 })
                 .collect(toList());
@@ -50,8 +53,7 @@ public class UserGifticonServiceImpl implements UserGifticonService {
 
 
         long daysRemaining = ChronoUnit.DAYS.between(LocalDate.now(), gifticon.getExpiredAt());
-//        Boolean active = gifticon.getIsActive();
-        String status = (daysRemaining < 0) ? "유효기간 만료" : "사용 가능";
+        GifticonStatus status = (daysRemaining < 0 ) ? GifticonStatus.EXPIRED : GifticonStatus.AVAILABLE;
 
         return UserGifticonDetailResponseDto.builder()
                 .id(gifticon.getId())
@@ -60,7 +62,7 @@ public class UserGifticonServiceImpl implements UserGifticonService {
                 .price(gifticon.getGifticon().getPrice())
                 .imageUrl(gifticon.getGifticon().getImageUrl())
                 .daysRemaining(daysRemaining)
-                .status(status)
+                .status(gifticonPolicy.getStatusCodeByName(status.name()).getCodeNameBrief())
                 .createdAt(gifticon.getCreatedAt().toString())
                 .expiredAt(gifticon.getExpiredAt().toString())
                 .build();
