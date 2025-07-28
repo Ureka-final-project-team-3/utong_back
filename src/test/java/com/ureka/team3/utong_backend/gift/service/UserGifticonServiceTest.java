@@ -1,10 +1,13 @@
 package com.ureka.team3.utong_backend.gift.service;
 
-
+import com.ureka.team3.utong_backend.common.entity.Code;
+import com.ureka.team3.utong_backend.gift.config.GifticonPolicy;
 import com.ureka.team3.utong_backend.gift.dto.UserGifticonDetailResponseDto;
 import com.ureka.team3.utong_backend.gift.entity.Gifticon;
 import com.ureka.team3.utong_backend.gift.entity.UserGifticon;
+import com.ureka.team3.utong_backend.gift.enums.GifticonStatus;
 import com.ureka.team3.utong_backend.gift.repository.UserGifticonRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -17,12 +20,26 @@ import static org.mockito.Mockito.*;
 
 class UserGifticonServiceTest {
 
-    private final UserGifticonRepository myGifticonRepository = mock(UserGifticonRepository.class);
-    private final UserGifticonServiceImpl service = new UserGifticonServiceImpl(myGifticonRepository);
+    private UserGifticonRepository myGifticonRepository;
+    private GifticonPolicy gifticonPolicy;
+    private UserGifticonServiceImpl service;
+
+    @BeforeEach
+    void setup() {
+        myGifticonRepository = mock(UserGifticonRepository.class);
+        gifticonPolicy = mock(GifticonPolicy.class);
+        service = new UserGifticonServiceImpl(myGifticonRepository, gifticonPolicy);
+    }
+
+    private Code createCode(String code, String briefName) {
+        Code c = new Code();
+        c.setCode(code);
+        c.setCodeNameBrief(briefName);
+        return c;
+    }
 
     @Test
     void getMyGifticons_정상_리턴() {
-        // ✅ 유효한 UUID 형식의 문자열 사용
         String uuid = UUID.randomUUID().toString();
 
         UserGifticon mockGifticon = UserGifticon.builder()
@@ -39,9 +56,11 @@ class UserGifticonServiceTest {
         when(myGifticonRepository.findByUser_Id("user-1"))
                 .thenReturn(Collections.singletonList(mockGifticon));
 
+        when(gifticonPolicy.getStatusCodeByName(GifticonStatus.AVAILABLE.name()))
+                .thenReturn(createCode("001", "사용 가능"));
+
         var result = service.getMyGifticons("user-1");
 
-        // ✅ 결과 검증
         assertEquals(1, result.size());
         assertEquals("스타벅스", result.get(0).getName());
         assertEquals("사용 가능", result.get(0).getStatus());
@@ -67,6 +86,9 @@ class UserGifticonServiceTest {
 
         when(myGifticonRepository.findByIdAndUser_Id(uuid, "user-1"))
                 .thenReturn(Optional.of(mockGifticon));
+
+        when(gifticonPolicy.getStatusCodeByName(GifticonStatus.AVAILABLE.name()))
+                .thenReturn(createCode("002", "사용 가능"));
 
         UserGifticonDetailResponseDto result = service.getGifticonDetail(uuid, "user-1");
 
