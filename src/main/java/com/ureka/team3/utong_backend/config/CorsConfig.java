@@ -25,7 +25,7 @@ public class CorsConfig {
         List<String> origins = List.of(allowedOrigins.split(","));
         config.setAllowedOriginPatterns(origins);
 
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(allowCredentials);
 
