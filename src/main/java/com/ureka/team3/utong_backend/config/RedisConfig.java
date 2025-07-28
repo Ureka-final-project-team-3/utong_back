@@ -1,5 +1,6 @@
 package com.ureka.team3.utong_backend.config;
 
+import com.ureka.team3.utong_backend.subscriber.AlertSubscriber;
 import com.ureka.team3.utong_backend.subscriber.ChartStatusSubscriber;
 import com.ureka.team3.utong_backend.subscriber.OrderQueueStatusSubscriber;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +16,13 @@ public class RedisConfig {
 
     private final ChartStatusSubscriber chartStatusSubscriber;
     private final OrderQueueStatusSubscriber orderQueueStatusSubscriber;
+    private final AlertSubscriber alertSubscriber;
+
     private static final String CONTRACT_AGGREGATION_STATUS_CHANNEL = "contract:aggregation:status";
     private static final String QUEUE_AGGREGATION_STATUS_CHANNEL = "queue:aggregation:status";
+    private static final String CONTRACT_ALERT_CHANNEL = "contract:alert";
+
+
     @Bean
     public RedisMessageListenerContainer redisMessageListenerContainer(
             RedisConnectionFactory connectionFactory
@@ -32,6 +38,11 @@ public class RedisConfig {
         container.addMessageListener(
                 orderQueueStatusSubscriber,
                 new ChannelTopic(QUEUE_AGGREGATION_STATUS_CHANNEL)
+        );
+
+        container.addMessageListener(
+            alertSubscriber,
+                new ChannelTopic(CONTRACT_ALERT_CHANNEL)
         );
 
         return container;

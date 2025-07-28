@@ -117,7 +117,7 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
     private TradeExecutedMessage buildPurchaseExecutedMessage(BuyMatchingResult buyMatchingResult, List<ContractDto> contractDtoList) {
         long used = buyMatchingResult.getUsed() != null ? buyMatchingResult.getUsed() : 0L;
         long remain = buyMatchingResult.getRemain() != null ? buyMatchingResult.getRemain() : 0L;
-
+        String requestOrderId = contractDtoList.isEmpty()? null: contractDtoList.get(0).getPurchaseOrderId();
         return TradeExecutedMessage.builder()
                 .dataCode(buyMatchingResult.getDataCode()) // 반드시 null 아님 확인
                 .requestType(RequestType.PURCHASE)
@@ -126,6 +126,7 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
                 .saleDataChange(Math.negateExact(used))
                 .price(buyMatchingResult.getPrice())
                 .newContracts(contractDtoList)
+                .requestOrderId(requestOrderId)
                 .build();
     }
 
@@ -180,6 +181,7 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
     private TradeExecutedMessage buildSaleExecutedMessage(SaleMatchingResult saleMatchingResult, List<ContractDto> contractDtoList) {
         long used = saleMatchingResult.getUsed() != null ? saleMatchingResult.getUsed() : 0L;
         long remain = saleMatchingResult.getRemain() != null ? saleMatchingResult.getRemain() : 0L;
+        String requestOrderId = contractDtoList.isEmpty() ? null: contractDtoList.get(0).getSaleOrderId();
 
         return TradeExecutedMessage.builder()
                 .dataCode(saleMatchingResult.getDataCode())
@@ -188,6 +190,7 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
                 .purchaseDataChange(Math.negateExact(used))
                 .saleDataChange(remain)
                 .price(saleMatchingResult.getPrice())
+                .requestOrderId(requestOrderId)
                 .newContracts(contractDtoList)
                 .build();
     }
