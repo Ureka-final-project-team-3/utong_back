@@ -13,6 +13,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ContractDto {
+    private String purchaseOrderId;
+
+    private String saleOrderId;
+
+    private String purchaseAccountId;
+
+    private String saleAccountId;
 
     private Long price;
 
@@ -24,7 +31,10 @@ public class ContractDto {
 
     public static ContractDto of(Contract contract, String dataCode) {
         ContractDto contractDto = new ContractDto();
-
+        contractDto.purchaseOrderId = contract.getBuyDataRequest().getId();
+        contractDto.saleOrderId = contract.getSaleDataRequest().getId();
+        contractDto.purchaseAccountId = contract.getBuyDataRequest().getAccount().getId();
+        contractDto.saleAccountId = contract.getSaleDataRequest().getAccount().getId();
         contractDto.price = contract.getPrice();
         contractDto.quantity = contract.getAmount();
         contractDto.dataCode = dataCode;  // 파라미터로 받은 값 사용
@@ -36,6 +46,10 @@ public class ContractDto {
     public static ContractDto of(Contract contract) {
         ContractDto contractDto = new ContractDto();
 
+        contractDto.purchaseOrderId = contract.getBuyDataRequest().getId();
+        contractDto.saleOrderId = contract.getSaleDataRequest().getId();
+        contractDto.purchaseAccountId = contract.getBuyDataRequest().getAccount().getId();
+        contractDto.saleAccountId = contract.getSaleDataRequest().getAccount().getId();
         contractDto.price = contract.getPrice();
         contractDto.quantity = contract.getAmount();
         contractDto.contractedAt = contract.getCreatedAt();

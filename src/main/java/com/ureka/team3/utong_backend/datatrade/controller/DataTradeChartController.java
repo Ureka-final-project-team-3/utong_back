@@ -35,7 +35,7 @@ public class DataTradeChartController {
             summary = "전체 데이터 실시간 가격 스트리밍",
             description = "SSE(Server-Sent Events)를 통해 전체 데이터 코드의 실시간 가격 정보를 스트리밍합니다."
     )
-    @GetMapping(value = "/current-prices/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/current-prices/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE) // todo : /chart/hourly 로 변경
     public SseEmitter streamAllCurrentPrices() {
         return sseHandler.connect("ALL_DATA");
     }
@@ -44,7 +44,7 @@ public class DataTradeChartController {
             summary = "주간 데이터 가격 조회",
             description = "특정 데이터 코드에 대한 주간 가격 정보를 조회합니다."
     )
-    @GetMapping("/weekly-prices/{dataCode}")
+    @GetMapping("/weekly-prices/{dataCode}")    // todo : /chart/weekly로 변경
     public ResponseEntity<ApiResponse<WeeklyChartDto>> getWeeklyPrices(@PathVariable("dataCode") String dataCode) {
         return ResponseEntity.ok(weeklyPriceService.getWeeklyPrice(dataCode));
     }
