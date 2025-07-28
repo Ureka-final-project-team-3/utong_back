@@ -17,10 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ureka.team3.utong_backend.auth.dto.AuthDto;
 import com.ureka.team3.utong_backend.auth.entity.Account;
-import com.ureka.team3.utong_backend.user.entity.User;
 import com.ureka.team3.utong_backend.auth.repository.AccountRepository;
-import com.ureka.team3.utong_backend.line.repository.LineRepository;
-import com.ureka.team3.utong_backend.user.repository.UserRepository;
 import com.ureka.team3.utong_backend.auth.util.JwtProperties;
 import com.ureka.team3.utong_backend.auth.util.JwtUtil;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
@@ -28,6 +25,10 @@ import com.ureka.team3.utong_backend.common.exception.business.EmailAlreadyExist
 import com.ureka.team3.utong_backend.common.exception.business.InvalidPasswordException;
 import com.ureka.team3.utong_backend.common.exception.business.InvalidTokenException;
 import com.ureka.team3.utong_backend.common.exception.business.UserNotFoundException;
+import com.ureka.team3.utong_backend.line.entity.Line;
+import com.ureka.team3.utong_backend.line.repository.LineRepository;
+import com.ureka.team3.utong_backend.user.entity.User;
+import com.ureka.team3.utong_backend.user.repository.UserRepository;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -68,6 +69,7 @@ public class AuthService {
         if (accountRepository.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyExistsException("이미 존재하는 이메일입니다");
         }
+        Optional<Line> line = lineRepository.findByPhoneNumber(request.getPhoneNumber());
         
         String accountId = UUID.randomUUID().toString();
         
@@ -78,6 +80,7 @@ public class AuthService {
                 .nickname(request.getNickname())
                 .mileage(0L)
                 .isMail(true)
+                .defaultLine(line.get().getId())
                 .build();
         
         accountRepository.save(account);
