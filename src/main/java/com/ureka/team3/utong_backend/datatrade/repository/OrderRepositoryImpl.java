@@ -356,7 +356,9 @@ public class OrderRepositoryImpl implements OrderRepository {
             try {
                 Long price = Long.parseLong(entry.getKey().toString());
                 Long quantity = Long.parseLong(entry.getValue().toString());
-                result.put(price, quantity);
+                if(quantity>0L){
+                    result.put(price, quantity);
+                }
             } catch (NumberFormatException e) {
                 log.warn("Redis 값 파싱 오류: key={}, value={}", entry.getKey(), entry.getValue());
             }
