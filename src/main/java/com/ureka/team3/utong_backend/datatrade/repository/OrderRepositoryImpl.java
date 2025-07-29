@@ -94,27 +94,47 @@ public class OrderRepositoryImpl implements OrderRepository {
 
 
     @Override
-    public OrderDto popValidSellOrder(String dataCode, long price) {
-        String listKey = buildSellListKey(dataCode, price);
-        String zsetKey = buildSellZSetKey(dataCode);
+    public OrderDto popValidSellOrder(String dataCode, long priceLimit) {
+        String zsetKey = buildSellZSetKey(dataCode); // 예: sell:zset:002
 
-        while (true) {
-            String rawOrder = stringRedisTemplate.opsForList().leftPop(listKey);
-            if (rawOrder == null) {
-                // 리스트 완전히 비었으면 ZSet에서도 제거
-                stringRedisTemplate.opsForZSet().remove(zsetKey, listKey);
-                return null;
-            }
+        // 가격 오름차순: 0 ~ priceLimit 범위 조회
+        Set<String> queueKeys = stringRedisTemplate.opsForZSet()
+                .rangeByScore(zsetKey, 0, priceLimit);
 
-            try {
-                OrderDto order = objectMapper.readValue(rawOrder, OrderDto.class);
-                if (order.getExpiredAt() >= System.currentTimeMillis()) {
-                    // 유효한 주문이면 반환
+        if (queueKeys == null || queueKeys.isEmpty()) return null;
+
+        for (String queueKey : queueKeys) {
+            // 예: "order_queue:sell:002:5200" → 여기서 price 추출
+            String[] parts = queueKey.split(":");
+            if (parts.length < 4) continue;
+
+            Long price = Long.parseLong(parts[3]); // 5200
+
+            // 주문 꺼내기
+            String json = stringRedisTemplate.opsForList().leftPop(queueKey);
+
+            if (json != null) {
+                try {
+                    OrderDto order = objectMapper.readValue(json, OrderDto.class);
+                    order.setPrice(price); // 필드가 있다면 설정
+
+                    // 리스트가 비면 ZSet에서 해당 key 제거
+                    Long size = stringRedisTemplate.opsForList().size(queueKey);
+                    if (size == null || size == 0) {
+                        stringRedisTemplate.opsForZSet().remove(zsetKey, queueKey);
+                    }
+
                     return order;
+                } catch (JsonProcessingException e) {
+                    log.error("Redis 주문 역직렬화 실패 - key: {}, json: {}", queueKey, json, e);
                 }
-            } catch (JsonProcessingException e) {
+            } else {
+                // 리스트 비었을 경우 ZSet에서 정리
+                stringRedisTemplate.opsForZSet().remove(zsetKey, queueKey);
             }
         }
+
+        return null;
     }
 
 
@@ -164,29 +184,47 @@ public class OrderRepositoryImpl implements OrderRepository {
 
 
     @Override
-    public OrderDto popValidBuyOrder(String dataCode, Long highestBuyPrice) {
-        String listKey = buildBuyListKey(dataCode, highestBuyPrice);
-        String zsetKey = buildBuyZSetKey(dataCode);
+    public OrderDto popValidBuyOrder(String dataCode, Long priceLimit) {
+        String zsetKey = buildBuyZSetKey(dataCode); // e.g. "order_book:buy:002"
 
-        while (true) {
-            String rawOrder = stringRedisTemplate.opsForList().leftPop(listKey);
-            if (rawOrder == null) {
-                // 리스트 완전히 비었으면 ZSet에서도 제거
-                stringRedisTemplate.opsForZSet().remove(zsetKey, listKey);
-                return null;
-            }
+        // 내림차순으로 priceLimit 이상만 가져오기 (score: max → priceLimit)
+        Set<String> queueKeys = stringRedisTemplate.opsForZSet()
+                .reverseRangeByScore(zsetKey, priceLimit, Double.MAX_VALUE);
 
-            try {
-                OrderDto order = objectMapper.readValue(rawOrder, OrderDto.class);
-                if (order.getExpiredAt() >= System.currentTimeMillis()) {
-                    // 유효한 주문이면 반환
+        if (queueKeys == null || queueKeys.isEmpty()) return null;
+
+        for (String queueKey : queueKeys) {
+            // "order_queue:buy:{dataCode}:{price}" → 가격 추출
+            String[] parts = queueKey.split(":");
+            if (parts.length < 4) continue;
+
+            Long price = Long.parseLong(parts[3]);
+
+            String json = stringRedisTemplate.opsForList().leftPop(queueKey);
+            if (json != null) {
+                try {
+                    OrderDto order = objectMapper.readValue(json, OrderDto.class);
+                    order.setPrice(price); // 필드가 있다면 설정
+
+                    // 리스트가 비면 ZSet에서도 제거
+                    Long size = stringRedisTemplate.opsForList().size(queueKey);
+                    if (size == null || size == 0) {
+                        stringRedisTemplate.opsForZSet().remove(zsetKey, queueKey);
+                    }
+
                     return order;
+                } catch (JsonProcessingException e) {
+                    log.error("구매 주문 역직렬화 실패 - key: {}, json: {}", queueKey, json, e);
                 }
-            } catch (JsonProcessingException e) {
-                log.error("JSON 파싱 실패: {}", rawOrder, e);
+            } else {
+                // 리스트 비었으면 ZSet에서도 정리
+                stringRedisTemplate.opsForZSet().remove(zsetKey, queueKey);
             }
         }
+
+        return null;
     }
+
 
     @Override
     public void requeuePartialBuyOrder(OrderDto buyOrder) {

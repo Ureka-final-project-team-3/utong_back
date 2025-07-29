@@ -8,4 +8,5 @@ public interface ContractQueueRepository {
 
     List<ContractDto> getAllCachedContracts(String dataCode);
 
+    ContractDto getRecentContract(String dataCode);
 }

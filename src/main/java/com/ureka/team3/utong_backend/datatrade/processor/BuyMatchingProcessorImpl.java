@@ -31,7 +31,7 @@ public class BuyMatchingProcessorImpl implements BuyMatchingProcessor {
         long remaining = buyRequest.getDataAmount();
 
         while (remaining > 0) {
-            OrderDto sellOrder = tradeOrderQueueService.popValidSellOrder(buyRequest.getDataCode(), priceLimit);
+            OrderDto sellOrder = tradeOrderQueueService.popValidSellOrder(buyRequest.getDataCode(), buyRequest.getPrice());
             if (sellOrder == null) break;
 
             long available = sellOrder.getQuantity();

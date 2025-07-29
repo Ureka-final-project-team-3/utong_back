@@ -61,7 +61,8 @@ public enum ErrorCode {
     NOT_MY_ORDER(HttpStatus.FORBIDDEN,"NOT_MY_ORDER", "사용자의 주문이 아닙니다"),
     CANNOT_CANCEL_COMPLETE_ORDER(HttpStatus.BAD_REQUEST,"CANNOT_CANCEL_COMPLETE_ORDER" ,"이미 거래가 체결된 주문입니다" ),
     ALREADY_CANCELED(HttpStatus.BAD_REQUEST,"ALREADY_CANCELED" , "이미 거래가 취소된 주문입니다" ),
-    UNIT_ERROR(HttpStatus.BAD_REQUEST,"UNIT_ERROR" ,"100원 단위로만 거래 가능" );
+    UNIT_ERROR(HttpStatus.BAD_REQUEST,"UNIT_ERROR" ,"100원 단위로만 거래 가능" ),
+    ILLEGAL_INPUT_PRICE(HttpStatus.BAD_REQUEST,"ILLEGAL_INPUT_PRICE" , "최근거래가의 +-30%만 입력가능" );
 
     private final HttpStatus status;
     private final String code;
