@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Queue SSE 테스트</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        .controls, .status, .log-container { margin-bottom: 20px; }
+        button { margin-right: 10px; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; }
+        .connect { background-color: #4CAF50; color: white; }
+        .disconnect { background-color: #f44336; color: white; }
+        .clear { background-color: #2196F3; color: white; }
+        .log-container { height: 400px; overflow-y: scroll; padding: 10px; border: 1px solid #ccc; background: #f9f9f9; }
+        .log-entry { margin: 5px 0; padding: 5px; border-left: 4px solid #ccc; }
+        .initial { border-left-color: #4CAF50; background-color: #eafbea; }
+        .update { border-left-color: #2196F3; background-color: #eaf2fb; }
+        .error { border-left-color: #f44336; background-color: #fdeaea; color: #d32f2f; }
+        .connected { color: green; }
+        .disconnected { color: red; }
+        .data-item { margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 4px; }
+        .data-code { font-weight: bold; color: #333; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Order Queue SSE 테스트 (통합 API)</h1>
+
+    <div class="controls">
+        <button class="connect" onclick="connectAllData()">모든 데이터 구독</button>
+        <button class="connect" onclick="showDetailedData = !showDetailedData; addLog(`상세 모드: ${showDetailedData ? 'ON' : 'OFF'}`)">상세 모드 토글</button>
+        <button class="disconnect" onclick="disconnect()">연결 끊기</button>
+        <button class="clear" onclick="clearLog()">로그 지우기</button>
+    </div>
+
+    <div class="status">
+        연결 상태: <span id="status" class="disconnected">끊어짐</span> |
+        현재 구독: <span id="current">없음</span>
+    </div>
+
+    <div class="log-container" id="log">
+        <p>로그가 여기에 표시됩니다.</p>
+    </div>
+</div>
+
+<script>
+    let eventSource = null;
+    let showDetailedData = false; // 상세 데이터 표시 여부
+    const log = document.getElementById('log');
+    const status = document.getElementById('status');
+    const current = document.getElementById('current');
+
+    function connectAllData() {
+        disconnect();
+
+        const url = `http://localhost:8080/api/data/order-queue/stream`;
+        eventSource = new EventSource(url);
+
+        eventSource.onopen = () => {
+            updateStatus(true, 'ALL_DATA');
+            console.log('✅ SSE 연결 성공');
+            addLog(`✅ 통합 SSE 연결 성공`);
+        };
+
+        // 초기 데이터 이벤트 (모든 데이터)
+        eventSource.addEventListener("all-queue-initial-data", (e) => {
+            console.log('🔍 [초기 데이터] Raw Data:', e.data);
+
+            const allData = JSON.parse(e.data);
+            console.log('🔍 [초기 데이터] Parsed:', allData);
+
+            addLog(`📦 초기 데이터 수신 (${allData.length}개):`, 'initial');
+
+            allData.forEach(data => {
+                const dataName = getDataCodeName(data.dataCode);
+                const buyCount = Object.keys(data.buyOrderQuantity || {}).length;
+                const sellCount = Object.keys(data.sellOrderQuantity || {}).length;
+                const contractCount = (data.recentContracts || []).length;
+
+                addLog(`${dataName}: 구매 ${buyCount}건, 판매 ${sellCount}건, 계약 ${contractCount}건`, 'initial');
+            });
+        });
+
+        // 실시간 업데이트 이벤트
+        eventSource.addEventListener("all-queue-hourly-update", (e) => {
+            console.log('🔍 [업데이트] Raw Data:', e.data);
+
+            const allData = JSON.parse(e.data);
+            console.log('🔍 [업데이트] Parsed:', allData);
+
+            addLog(`📈 실시간 업데이트 (${allData.length}개):`, 'update');
+
+            allData.forEach(data => {
+                const dataName = getDataCodeName(data.dataCode);
+                const buyCount = Object.keys(data.buyOrderQuantity || {}).length;
+                const sellCount = Object.keys(data.sellOrderQuantity || {}).length;
+                const contractCount = (data.recentContracts || []).length;
+
+                addLog(`${dataName}: 구매 ${buyCount}건, 판매 ${sellCount}건, 계약 ${contractCount}건`, 'update');
+            });
+        });
+
+        eventSource.onerror = (e) => {
+            console.error('❌ SSE 오류:', e);
+            addLog(`❌ SSE 오류 발생`, 'error');
+            updateStatus(false);
+        };
+    }
+
+    function disconnect() {
+        if (eventSource) {
+            eventSource.close();
+            eventSource = null;
+            updateStatus(false);
+            console.log('🔌 SSE 연결 해제됨');
+            addLog('🔌 SSE 연결 해제됨');
+        }
+    }
+
+    function updateStatus(connected, code = '') {
+        status.textContent = connected ? '연결됨' : '끊어짐';
+        status.className = connected ? 'connected' : 'disconnected';
+        current.textContent = connected ? code : '없음';
+    }
+
+    function addLog(msg, type = '') {
+        const timestamp = new Date().toLocaleTimeString();
+        const div = document.createElement('div');
+        div.className = `log-entry ${type}`;
+        div.innerHTML = `<strong>[${timestamp}]</strong> ${msg}`;
+        log.appendChild(div);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function clearLog() {
+        log.innerHTML = '<p>로그가 지워졌습니다.</p>';
+        console.clear();
+        console.log('🧹 로그 및 콘솔이 지워졌습니다.');
+    }
+
+    function getDataCodeName(dataCode) {
+        switch(dataCode) {
+            case '001': return 'LTE';
+            case '002': return '5G';
+            default: return `데이터타입-${dataCode}`;
+        }
+    }
+
+    window.addEventListener('beforeunload', disconnect);
+</script>
+</body>
+</html>

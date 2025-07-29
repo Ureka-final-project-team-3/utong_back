@@ -25,13 +25,14 @@ public class CorsConfig {
         List<String> origins = List.of(allowedOrigins.split(","));
         config.setAllowedOriginPatterns(origins);
 
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(allowCredentials);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
-
+        config.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
+        config.setAllowCredentials(true);
         return new CorsFilter(source);
     }
 }

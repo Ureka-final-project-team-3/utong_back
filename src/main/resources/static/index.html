@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT 인증 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="email"], input[type="password"], input[type="text"], input[type="date"], input[type="tel"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .logout-btn {
+            background-color: #dc3545;
+        }
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+        .refresh-btn {
+            background-color: #28a745;
+        }
+        .refresh-btn:hover {
+            background-color: #218838;
+        }
+        .find-btn {
+            background-color: #17a2b8;
+        }
+        .find-btn:hover {
+            background-color: #138496;
+        }
+        .result {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .success {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        .error {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+        .token-display {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            word-break: break-all;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        .social-login-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .google-btn {
+            background-color: #4285f4;
+            color: white;
+        }
+        .naver-btn {
+            background-color: #03c75a;
+            color: white;
+        }
+        .kakao-btn {
+            background-color: #fee500;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <h1>JWT 인증 시스템 테스트</h1>
+    
+    <div class="container">
+        <h2>회원가입</h2>
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="signupEmail">이메일:</label>
+                <input type="email" id="signupEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="signupPassword">비밀번호:</label>
+                <input type="password" id="signupPassword" required minlength="8">
+            </div>
+            <div class="form-group">
+                <label for="signupNickname">닉네임:</label>
+                <input type="text" id="signupNickname" required maxlength="50">
+            </div>
+            <div class="form-group">
+                <label for="signupPhoneNumber">전화번호:</label>
+                <input type="tel" id="signupPhoneNumber" placeholder="010-1234-5678" required 
+                       pattern="010-\d{4}-\d{4}" title="010-0000-0000 형식으로 입력해주세요">
+            </div>
+            <button type="submit">회원가입</button>
+        </form>
+        <div id="signupResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="container">
+        <h2>로그인</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="loginEmail">이메일:</label>
+                <input type="email" id="loginEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">비밀번호:</label>
+                <input type="password" id="loginPassword" required>
+            </div>
+            <button type="submit">일반 로그인</button>
+        </form>
+        
+        <div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 20px;">
+            <h3>소셜 로그인</h3>
+            <a href="/oauth2/authorization/google" class="social-login-btn google-btn">
+                구글로 로그인
+            </a>
+            <a href="/oauth2/authorization/naver" class="social-login-btn naver-btn">
+                네이버로 로그인
+            </a>
+            <a href="/oauth2/authorization/kakao" class="social-login-btn kakao-btn">
+                카카오로 로그인
+            </a>
+        </div>
+        
+        <div id="loginResult" class="result" style="display: none;"></div>
+        <div id="tokenDisplay" class="token-display" style="display: none;"></div>
+    </div>
+
+    <div class="container">
+        <h2>아이디 찾기</h2>
+        <form id="findAccountForm">
+            <div class="form-group">
+                <label for="findPhoneNumber">전화번호:</label>
+                <input type="tel" id="findPhoneNumber" placeholder="010-1234-5678" required 
+                       pattern="010-\d{4}-\d{4}" title="010-0000-0000 형식으로 입력해주세요">
+            </div>
+            <button type="submit" class="find-btn">아이디 찾기</button>
+        </form>
+        <div id="findAccountResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="container">
+        <h2>비밀번호 찾기</h2>
+        <form id="forgotPasswordForm">
+            <div class="form-group">
+                <label for="forgotEmail">이메일:</label>
+                <input type="email" id="forgotEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="forgotPhoneNumber">전화번호:</label>
+                <input type="tel" id="forgotPhoneNumber" placeholder="010-1234-5678" required 
+                       pattern="010-\d{4}-\d{4}" title="010-0000-0000 형식으로 입력해주세요">
+            </div>
+            <button type="submit" class="find-btn">비밀번호 재설정 이메일 전송</button>
+        </form>
+        <div id="forgotPasswordResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="container">
+        <h2>프로필 완성</h2>
+        <button id="getProfileBtn">프로필 정보 조회</button>
+        <form id="profileForm" style="display: none; margin-top: 20px;">
+            <div class="form-group">
+                <label for="profileName">이름:</label>
+                <input type="text" id="profileName">
+            </div>
+            <div class="form-group">
+                <label for="profileBirthDate">생년월일:</label>
+                <input type="date" id="profileBirthDate">
+            </div>
+            <button type="submit">프로필 업데이트</button>
+        </form>
+        <div id="profileResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="container">
+        <h2>인증된 사용자 기능</h2>
+        <button id="getMeBtn">내 정보 조회</button>
+        <button id="refreshBtn" class="refresh-btn">토큰 갱신</button>
+        <button id="validateTokenBtn" style="background-color: #17a2b8;">토큰 검증</button>
+        <button id="logoutBtn" class="logout-btn">로그아웃</button>
+        <div id="userInfoResult" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="container">
+        <h2>테스트 요청</h2>
+        <button id="testProtectedBtn">보호된 엔드포인트 테스트</button>
+        <div id="testResult" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        let accessToken = localStorage.getItem('accessToken') || '';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (accessToken) {
+                showToken(accessToken);
+                showMessage('저장된 Access Token을 발견했습니다.');
+                validateStoredTokenSilently();
+            }
+            addDebugButtons();
+        });
+
+        async function validateStoredTokenSilently() {
+            if (!accessToken) return;
+            
+            try {
+                const result = await apiRequest('/auth/me');
+                if (!result.success && (result.status === 401 || result.status === 403)) {
+                    localStorage.removeItem('accessToken');
+                    accessToken = '';
+                    const tokenDisplay = document.getElementById('tokenDisplay');
+                    if (tokenDisplay) {
+                        tokenDisplay.style.display = 'none';
+                    }
+                    console.log('저장된 토큰이 만료되어 자동으로 정리했습니다.');
+                } else if (result.success) {
+                    console.log('토큰이 유효합니다.');
+                }
+            } catch (error) {
+                console.log('토큰 검증 중 오류:', error);
+            }
+        }
+
+        async function validateTokenWithMessage() {
+            if (!accessToken) {
+                showMessage('저장된 토큰이 없습니다.', 'error');
+                return;
+            }
+            
+            try {
+                const result = await apiRequest('/auth/me');
+                if (!result.success && (result.status === 401 || result.status === 403)) {
+                    showMessage('저장된 토큰이 만료되었습니다. 다시 로그인해주세요.', 'error');
+                    handleAuthError();
+                } else if (result.success) {
+                    showMessage('토큰이 유효합니다!', 'success');
+                }
+            } catch (error) {
+                showMessage('토큰 검증 중 오류가 발생했습니다.', 'error');
+            }
+        }
+
+        function showResult(elementId, data, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.textContent = JSON.stringify(data, null, 2);
+            element.style.display = 'block';
+            element.className = `result ${isSuccess ? 'success' : 'error'}`;
+        }
+
+        function showToken(token) {
+            const element = document.getElementById('tokenDisplay');
+            element.innerHTML = `
+                <strong>Access Token (localStorage에 저장됨):</strong><br>
+                <span style="word-break: break-all; font-size: 11px;">${token}</span><br><br>
+                <button onclick="clearToken()" style="background-color: #dc3545; color: white; padding: 5px 10px; border: none; border-radius: 3px; cursor: pointer;">
+                    토큰 삭제
+                </button>
+            `;
+            element.style.display = 'block';
+        }
+
+        function clearToken() {
+            localStorage.removeItem('accessToken');
+            accessToken = '';
+            document.getElementById('tokenDisplay').style.display = 'none';
+            showMessage('Access Token이 삭제되었습니다.');
+        }
+
+        function showMessage(message, type = 'success') {
+            const messageDiv = document.createElement('div');
+            const backgroundColor = type === 'error' ? '#dc3545' : '#28a745';
+            messageDiv.style.cssText = `
+                position: fixed; top: 20px; right: 20px; 
+                background: ${backgroundColor}; color: white; 
+                padding: 10px 20px; border-radius: 5px; 
+                z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            `;
+            messageDiv.textContent = message;
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                if (document.body.contains(messageDiv)) {
+                    document.body.removeChild(messageDiv);
+                }
+            }, 5000);
+        }
+
+        async function apiRequest(url, options = {}) {
+            try {
+                const headers = {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                };
+
+                if (accessToken) {
+                    headers['Authorization'] = `Bearer ${accessToken}`;
+                }
+
+                const response = await fetch(`${API_BASE}${url}`, {
+                    credentials: 'include',
+                    ...options,
+                    headers
+                });
+                
+                if (response.status === 401 || response.status === 403) {
+                    if (!url.includes('/auth/')) {
+                        handleAuthError();
+                        return { success: false, data: { error: '인증이 필요합니다' }, status: response.status };
+                    }
+                }
+                
+                const data = await response.json();
+                return { success: response.ok, data, status: response.status };
+            } catch (error) {
+                return { success: false, data: { error: error.message }, status: 0 };
+            }
+        }
+
+        function handleAuthError() {
+            localStorage.removeItem('accessToken');
+            accessToken = '';
+            
+            const tokenDisplay = document.getElementById('tokenDisplay');
+            if (tokenDisplay) {
+                tokenDisplay.style.display = 'none';
+            }
+            
+            document.getElementById('loginForm').scrollIntoView({ behavior: 'smooth' });
+            showMessage('세션이 만료되었습니다. 다시 로그인해주세요.', 'error');
+        }
+
+        async function testProtectedAPI() {
+            if (!accessToken) {
+                showMessage('먼저 로그인해주세요.', 'error');
+                handleAuthError();
+                return;
+            }
+
+            const result = await apiRequest('/test');
+            showResult('testResult', result.data, result.success);
+            
+            if (!result.success && (result.status === 401 || result.status === 403)) {
+                showMessage('인증이 만료되었습니다. 토큰을 갱신하거나 다시 로그인하세요.', 'error');
+            }
+        }
+
+        // 회원가입
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                email: document.getElementById('signupEmail').value,
+                password: document.getElementById('signupPassword').value,
+                nickname: document.getElementById('signupNickname').value,
+                phoneNumber: document.getElementById('signupPhoneNumber').value
+            };
+
+            const result = await apiRequest('/auth/signup', {
+                method: 'POST',
+                body: JSON.stringify(formData)
+            });
+
+            showResult('signupResult', result.data, result.success);
+            
+            if (result.success) {
+                showMessage('회원가입이 완료되었습니다!');
+                document.getElementById('signupForm').reset();
+                
+                // 회원가입 후 자동 로그인 처리
+                if (result.data && result.data.accessToken) {
+                    accessToken = result.data.accessToken;
+                    localStorage.setItem('accessToken', accessToken);
+                    showToken(accessToken);
+                    showMessage('자동 로그인되었습니다!');
+                }
+            }
+        });
+
+        // 로그인
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                email: document.getElementById('loginEmail').value,
+                password: document.getElementById('loginPassword').value
+            };
+
+            const result = await apiRequest('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify(formData)
+            });
+
+            console.log('로그인 응답:', result); // 디버깅용
+
+            showResult('loginResult', result.data, result.success);
+
+            if (result.success && result.data && result.data.data && result.data.data.accessToken) {
+                accessToken = result.data.data.accessToken;
+                localStorage.setItem('accessToken', accessToken);
+                showToken(accessToken);
+                showMessage('로그인 성공! Access Token이 저장되었습니다.');
+                console.log('Access Token 저장됨:', accessToken); // 디버깅용
+            } else if (result.success) {
+                console.log('로그인 성공했지만 accessToken이 없음:', result.data);
+                showMessage('로그인 성공했지만 토큰을 받지 못했습니다.', 'error');
+            }
+        });
+
+        // 비밀번호 찾기
+        document.getElementById('forgotPasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('forgotEmail').value;
+            const phoneNumber = document.getElementById('forgotPhoneNumber').value;
+            
+            const formData = {
+                email: email,
+                phoneNumber: phoneNumber
+            };
+
+            const result = await apiRequest('/auth/forgot-password', {
+                method: 'POST',
+                body: JSON.stringify(formData)
+            });
+
+            showResult('forgotPasswordResult', result.data, result.success);
+            
+            if (result.success) {
+                showMessage('비밀번호 재설정 이메일이 전송되었습니다!');
+                document.getElementById('forgotPasswordForm').reset();
+            } else {
+                showMessage('이메일과 전화번호가 일치하지 않거나 등록된 계정을 찾을 수 없습니다.', 'error');
+            }
+        });
+
+        // 아이디 찾기
+        document.getElementById('findAccountForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const phoneNumber = document.getElementById('findPhoneNumber').value;
+            
+            const formData = {
+                phoneNumber: phoneNumber
+            };
+
+            const result = await apiRequest('/auth/find-account', {
+                method: 'POST',
+                body: JSON.stringify(formData)
+            });
+
+            showResult('findAccountResult', result.data, result.success);
+            
+            if (result.success) {
+                showMessage('계정을 찾았습니다!');
+            } else {
+                showMessage('해당 전화번호로 등록된 계정을 찾을 수 없습니다.', 'error');
+            }
+        });
+
+        // 프로필 정보 조회
+        document.getElementById('getProfileBtn').addEventListener('click', async () => {
+            if (!accessToken) {
+                showMessage('먼저 로그인해주세요.', 'error');
+                return;
+            }
+
+            const result = await apiRequest('/auth/me');
+            
+            if (result.success) {
+                const userInfo = result.data;
+                document.getElementById('profileName').value = userInfo.name || '';
+                document.getElementById('profileBirthDate').value = userInfo.birthDate || '';
+                document.getElementById('profileForm').style.display = 'block';
+                showMessage('프로필 정보를 불러왔습니다.');
+            }
+            
+            showResult('profileResult', result.data, result.success);
+        });
+
+        // 프로필 업데이트
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!accessToken) {
+                showMessage('먼저 로그인해주세요.', 'error');
+                return;
+            }
+
+            const formData = {
+                name: document.getElementById('profileName').value,
+                birthDate: document.getElementById('profileBirthDate').value
+            };
+
+            const result = await apiRequest('/auth/profile', {
+                method: 'PUT',
+                body: JSON.stringify(formData)
+            });
+
+            showResult('profileResult', result.data, result.success);
+            
+            if (result.success) {
+                showMessage('프로필이 업데이트되었습니다!');
+            }
+        });
+
+        // 내 정보 조회
+        document.getElementById('getMeBtn').addEventListener('click', async () => {
+            if (!accessToken) {
+                showResult('userInfoResult', { error: '로그인이 필요합니다' }, false);
+                return;
+            }
+
+            const result = await apiRequest('/auth/me');
+            showResult('userInfoResult', result.data, result.success);
+            
+            if (result.status === 401) {
+                showMessage('토큰이 만료되었습니다. 토큰을 갱신하거나 다시 로그인하세요.');
+            }
+        });
+
+        // 토큰 갱신
+        document.getElementById('refreshBtn').addEventListener('click', async () => {
+            const result = await apiRequest('/auth/refresh', { method: 'POST' });
+            
+            if (result.success && result.data.accessToken) {
+                accessToken = result.data.accessToken;
+                localStorage.setItem('accessToken', accessToken);
+                showToken(accessToken);
+                showMessage('토큰이 갱신되었습니다!');
+            }
+            
+            showResult('userInfoResult', result.data, result.success);
+        });
+
+        // 토큰 검증
+        document.getElementById('validateTokenBtn').addEventListener('click', validateTokenWithMessage);
+
+        // 로그아웃
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            const result = await apiRequest('/auth/logout', { method: 'POST' });
+            
+            if (result.success) {
+                localStorage.removeItem('accessToken');
+                accessToken = '';
+                document.getElementById('tokenDisplay').style.display = 'none';
+                showMessage('로그아웃되었습니다.');
+            }
+            
+            showResult('userInfoResult', result.data, result.success);
+        });
+
+        // 보호된 엔드포인트 테스트
+        document.getElementById('testProtectedBtn').addEventListener('click', testProtectedAPI);
+
+        // 디버그 기능
+        function addDebugButtons() {
+            const debugContainer = document.createElement('div');
+            debugContainer.className = 'container';
+            debugContainer.innerHTML = `
+                <h2>디버그 기능</h2>
+                <button onclick="checkRedisTokens()">Redis 토큰 확인</button>
+                <button onclick="checkLocalStorage()">localStorage 확인</button>
+                <div id="debugResult" class="result" style="display: none;"></div>
+            `;
+            document.body.appendChild(debugContainer);
+        }
+
+        async function checkRedisTokens() {
+            const result = await apiRequest('/debug/redis/refresh-tokens');
+            showResult('debugResult', result.data, result.success);
+        }
+
+        function checkLocalStorage() {
+            const data = {
+                accessToken: localStorage.getItem('accessToken'),
+                allLocalStorageItems: Object.keys(localStorage).reduce((acc, key) => {
+                    acc[key] = localStorage.getItem(key);
+                    return acc;
+                }, {})
+            };
+            showResult('debugResult', data, true);
+        }
+    </script>
+</body>
+</html>

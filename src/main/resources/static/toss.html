@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>토스 결제 테스트</title>
+    <script src="https://js.tosspayments.com/v1/payment"></script>
+</head>
+<body>
+<h1>🧪 토스 테스트 결제</h1>
+<button id="payBtn">결제하기 (10000원)</button>
+
+<script>
+    const clientKey = 'test_ck_26DlbXAaV0K9nO22Nqkn3qY50Q9R'; // 너의 클라이언트 키
+    const tossPayments = TossPayments(clientKey);
+
+    document.getElementById('payBtn').addEventListener('click', function () {
+        tossPayments.requestPayment('카드', {
+            amount: 10000,
+            orderId: 'order_' + new Date().getTime(), // 고유값
+            orderName: '포인트 충전',
+            customerName: '홍길동',
+            successUrl: 'http://localhost:8080/success.html',  // 테스트 후 직접 파라미터 복사
+            failUrl: 'http://localhost:8080/fail.html'
+        }).catch(function (error) {
+            alert(error.message);
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+package com.ureka.team3.utong_backend.plan.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "plan")
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Plan {
+
+    @Id
+    @Column(name = "id", length = 36)
+    private String id;
+
+    @Column(name = "name", length = 100)
+    private String name;
+
+    @Column(name = "data")
+    private Long data;
+
+    @Column(name = "available_trade_rate")
+    private float availableTradeRate;
+
+    public Long canSell() {
+        if (data == null || data == -1L) {
+            return 0L; // 무제한 요금제 혹은 데이터 없음 → 판매 불가
+        }
+        return Math.round((data * availableTradeRate) / 100.0);
+    }
+
+    public boolean isUnlimited() {
+        return data == -1;
+    }
+}
