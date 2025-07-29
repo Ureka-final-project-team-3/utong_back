@@ -28,4 +28,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
   CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 #수정 예정
-ENTRYPOINT ["java", "-Dspring.profiles.active=dev", "-Duser.timezone=Asia/Seoul", "-jar", "app.jar"]
+# 수정 예정
+ENTRYPOINT ["java", "-XX:-UseContainerSupport", "-Dspring.profiles.active=dev", "-Duser.timezone=Asia/Seoul", "-jar", "app.jar"]
