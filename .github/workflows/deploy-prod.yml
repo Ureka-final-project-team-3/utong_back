@@ -152,31 +152,7 @@ jobs:
             exit 1
           fi
 
-      # 11. API 헬스체크 (선택사항)
-      - name: API Health check
-        run: |
-          ENV_URL=$(aws elasticbeanstalk describe-environments \
-            --environment-names ${{ env.EB_ENVIRONMENT_NAME }} \
-            --query 'Environments[0].CNAME' --output text)
-          
-          echo "🧪 Testing API endpoint: https://$ENV_URL/actuator/health"
-          
-          # API 헬스체크 (최대 3분 대기)
-          for i in {1..18}; do
-            if curl -f -s "https://$ENV_URL/actuator/health" > /dev/null; then
-              echo "✅ API health check passed!"
-              break
-            else
-              echo "⏳ API not ready yet, retrying... ($i/18)"
-              sleep 10
-            fi
-          
-            if [ $i -eq 18 ]; then
-              echo "⚠️ API health check timeout, but deployment may still be successful"
-            fi
-          done
-
-      # 12. 배포 완료 알림
+      # 11. 배포 완료 알림
       - name: Deployment summary
         run: |
           ENV_URL=$(aws elasticbeanstalk describe-environments \
