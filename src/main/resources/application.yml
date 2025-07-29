@@ -110,8 +110,8 @@ logging:
     com.eureka.ip.team1: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    com.zaxxer.hikari.HikariConfig: DEBUG      # ✅ Hikari 로그 추가
-    com.zaxxer.hikari: TRACE                   # ✅ Hikari 커넥션 로그 추적
+    com.zaxxer.hikari.HikariConfig: DEBUG
+    com.zaxxer.hikari: TRACE
 
 springdoc:
   api-docs:
