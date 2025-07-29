@@ -1,0 +1,188 @@
+name: Deploy to Production (Blue-Green)
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  DOCKER_IMAGE: wkdtmf357/utong-backend-prod
+  EB_APPLICATION_NAME: utong-backend-prod
+  EB_BLUE_ENVIRONMENT: utong-backend-prod-blue
+  EB_GREEN_ENVIRONMENT: utong-backend-prod-green
+  AWS_REGION: ap-northeast-2
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 1. Docker 이미지 빌드 및 푸시
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:latest
+            ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
+
+      # 2. AWS 자격 증명 설정
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # 3. 현재 활성 환경 확인 (Blue가 활성이면 Green에 배포, 반대도 마찬가지)
+      - name: Determine target environment
+        id: target-env
+        run: |
+          # Blue 환경 상태 확인
+          BLUE_STATUS=$(aws elasticbeanstalk describe-environments \
+            --application-name ${{ env.EB_APPLICATION_NAME }} \
+            --environment-names ${{ env.EB_BLUE_ENVIRONMENT }} \
+            --query 'Environments[0].Health' --output text)
+          
+          # Green 환경 상태 확인  
+          GREEN_STATUS=$(aws elasticbeanstalk describe-environments \
+            --application-name ${{ env.EB_APPLICATION_NAME }} \
+            --environment-names ${{ env.EB_GREEN_ENVIRONMENT }} \
+            --query 'Environments[0].Health' --output text)
+          
+          echo "Blue Status: $BLUE_STATUS"
+          echo "Green Status: $GREEN_STATUS"
+          
+          # Blue가 Ok/Ready면 Green에 배포, 아니면 Blue에 배포
+          if [ "$BLUE_STATUS" = "Ok" ] || [ "$BLUE_STATUS" = "Ready" ]; then
+            echo "target=${{ env.EB_GREEN_ENVIRONMENT }}" >> $GITHUB_OUTPUT
+            echo "standby=${{ env.EB_BLUE_ENVIRONMENT }}" >> $GITHUB_OUTPUT
+            echo "Deploying to GREEN environment"
+          else
+            echo "target=${{ env.EB_BLUE_ENVIRONMENT }}" >> $GITHUB_OUTPUT  
+            echo "standby=${{ env.EB_GREEN_ENVIRONMENT }}" >> $GITHUB_OUTPUT
+            echo "Deploying to BLUE environment"
+          fi
+
+      # 4. Dockerrun.aws.json 생성
+      - name: Create Dockerrun.aws.json
+        run: |
+          cat > Dockerrun.aws.json << EOF
+          {
+            "AWSEBDockerrunVersion": "1",
+            "Image": {
+              "Name": "${{ env.DOCKER_IMAGE }}:${{ github.sha }}",
+              "Update": "true"
+            },
+            "Ports": [
+              {
+                "ContainerPort": "8080",
+                "HostPort": "80"
+              }
+            ],
+            "Environment": [
+              {
+                "Name": "SPRING_PROFILES_ACTIVE",
+                "Value": "prod"
+              }
+            ]
+          }
+          EOF
+
+      # 5. 배포 패키지 생성
+      - name: Create deployment package
+        run: |
+          zip -r deploy-${{ github.sha }}.zip Dockerrun.aws.json
+
+      # 6. S3에 업로드
+      - name: Upload to S3
+        run: |
+          aws s3 cp deploy-${{ github.sha }}.zip \
+            s3://elasticbeanstalk-${{ env.AWS_REGION }}-${{ secrets.AWS_ACCOUNT_ID }}/utong-backend-${{ github.sha }}.zip
+
+      # 7. EB 애플리케이션 버전 생성
+      - name: Create application version
+        run: |
+          aws elasticbeanstalk create-application-version \
+            --application-name ${{ env.EB_APPLICATION_NAME }} \
+            --version-label v${{ github.sha }} \
+            --source-bundle S3Bucket=elasticbeanstalk-${{ env.AWS_REGION }}-${{ secrets.AWS_ACCOUNT_ID }},S3Key=utong-backend-${{ github.sha }}.zip \
+            --description "Deployed from GitHub Actions - ${{ github.sha }}"
+
+      # 8. 타겟 환경에 배포
+      - name: Deploy to target environment
+        run: |
+          echo "Deploying to ${{ steps.target-env.outputs.target }}"
+          
+          aws elasticbeanstalk update-environment \
+            --environment-name ${{ steps.target-env.outputs.target }} \
+            --version-label v${{ github.sha }}
+
+      # 9. 배포 완료 대기 (최대 20분)
+      - name: Wait for deployment
+        run: |
+          echo "Waiting for deployment to complete..."
+          
+          aws elasticbeanstalk wait environment-updated \
+            --environment-name ${{ steps.target-env.outputs.target }} \
+            --cli-read-timeout 1200 \
+            --cli-connect-timeout 60
+
+      # 10. 헬스체크 확인
+      - name: Health check
+        run: |
+          HEALTH=$(aws elasticbeanstalk describe-environment-health \
+            --environment-name ${{ steps.target-env.outputs.target }} \
+            --attribute-names Status \
+            --query 'Status' --output text)
+          
+          if [ "$HEALTH" = "Ok" ]; then
+            echo "✅ Deployment successful! Environment is healthy."
+          else
+            echo "❌ Deployment failed! Environment health: $HEALTH"
+            exit 1
+          fi
+
+      # 11. 배포 완료 알림
+      - name: Deployment summary
+        run: |
+          TARGET_URL=$(aws elasticbeanstalk describe-environments \
+            --environment-names ${{ steps.target-env.outputs.target }} \
+            --query 'Environments[0].CNAME' --output text)
+          
+          echo "🎉 Deployment completed!"
+          echo "📍 Target Environment: ${{ steps.target-env.outputs.target }}"
+          echo "🌐 Environment URL: https://$TARGET_URL"
+          echo "📋 Version: v${{ github.sha }}"
+          echo ""
+          echo "⚠️  Next step: Swap environment URLs to switch traffic"
+          echo "   Blue: ${{ env.EB_BLUE_ENVIRONMENT }}"
+          echo "   Green: ${{ env.EB_GREEN_ENVIRONMENT }}"
+
+      # 12. (선택사항) 자동 트래픽 전환 - 주석 해제하면 자동으로 URL 스왑
+      - name: Auto swap environment URLs
+        run: |
+           echo "Auto swapping environment URLs..."
+           aws elasticbeanstalk swap-environment-cnames \
+             --source-environment-name ${{ steps.target-env.outputs.target }} \
+             --destination-environment-name ${{ steps.target-env.outputs.standby }}
+
+           echo "✅ Traffic switched successfully!"
