@@ -1,6 +1,8 @@
 package com.ureka.team3.utong_backend.datatrade.utils;
 
+import com.ureka.team3.utong_backend.datatrade.dto.ContractDto;
 import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
+import com.ureka.team3.utong_backend.datatrade.repository.ContractQueueRepository;
 import com.ureka.team3.utong_backend.price.entity.Price;
 import com.ureka.team3.utong_backend.price.repository.PriceRepository;
 import jakarta.annotation.PostConstruct;
@@ -14,6 +16,7 @@ import java.util.List;
 public class TradeCalculator {
 
     private final PriceRepository priceRepository;
+    private final ContractQueueRepository contractQueueRepository;
 
     private double tax;               // Float → double
     private Long minimumPrice;
@@ -38,9 +41,8 @@ public class TradeCalculator {
      * 판매자가 얻는 실제 수익 계산
      */
     public Long calculateTotalIncomeForSeller(Long pricePerUnit, Long amount) {
-        long gross = pricePerUnit * amount;
-        double taxAmount = gross * tax;
-        return Math.round(gross - taxAmount);
+        double netPerUnit = pricePerUnit * (1 - tax); // 단가에서 세금 차감
+        return Math.round(netPerUnit * amount);       // 총 금액 계산 후 반올림
     }
 
     /**
@@ -57,6 +59,18 @@ public class TradeCalculator {
 
     public boolean isHundredUnit(Long price){
         return price%100==0;
+    }
+
+    public boolean isAvailableInputPrice(Long inputPrice, String dataCode){
+        ContractDto recentContract = contractQueueRepository.getRecentContract(dataCode);
+        Long recentPrice = 5000L;
+        if(recentContract!=null && recentContract.getPrice()!=0){
+            recentPrice = recentContract.getPrice();
+        }
+        double availableMaxInputPrice = recentPrice + recentPrice * minimumRate;
+        double availableMinInputPrice = recentPrice - recentPrice * minimumRate;
+
+        return inputPrice<=availableMaxInputPrice&&inputPrice>=availableMinInputPrice;
     }
 
     /**

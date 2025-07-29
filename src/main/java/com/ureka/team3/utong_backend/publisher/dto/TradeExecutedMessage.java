@@ -14,9 +14,8 @@ public class TradeExecutedMessage {
     private String dataCode;
     private String requestOrderId;
     private RequestType requestType;
-    private Long purchaseDataChange;
-    private Long saleDataChange;
-    private Long price;
+    private Long remain;
+    private Long requestPrice;
     private List<TradeMatch> matchedList;
     private List<ContractDto> newContracts;
 }

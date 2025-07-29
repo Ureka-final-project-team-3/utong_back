@@ -9,6 +9,7 @@ import com.ureka.team3.utong_backend.common.exception.business.CannotCancelCompl
 import com.ureka.team3.utong_backend.common.exception.business.NotMyOrderException;
 import com.ureka.team3.utong_backend.datatrade.config.DataTradePolicy;
 import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
+import com.ureka.team3.utong_backend.datatrade.dto.TradeCancelMessage;
 import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
 import com.ureka.team3.utong_backend.datatrade.enums.BuyOrderResult;
@@ -20,6 +21,8 @@ import com.ureka.team3.utong_backend.datatrade.utils.TradeCalculator;
 import com.ureka.team3.utong_backend.line.entity.Line;
 import com.ureka.team3.utong_backend.line.entity.LineData;
 import com.ureka.team3.utong_backend.line.service.LineService;
+import com.ureka.team3.utong_backend.publisher.TradeCancelPublisher;
+import com.ureka.team3.utong_backend.publisher.dto.TradeExecutedMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +42,7 @@ public class DataTradeCancelFacadeImpl implements DataTradeCancelFacade{
     private final DataTradePolicy dataTradePolicy;
     private final SaleDataRequestService saleDataRequestService;
     private final LineService lineService;
+    private final TradeCancelPublisher tradeCancelPublisher;
 
 
     @Transactional
@@ -54,6 +58,8 @@ public class DataTradeCancelFacadeImpl implements DataTradeCancelFacade{
         account.increasePoint(tradeCalculator.calculatePayPoint(buyOrderById.getRemaining(), buyOrderById.getPrice()));
         // 5. 레디스에서 제거
         tradeOrderQueueService.removeFromBuyQueue(buyOrderById);
+        TradeCancelMessage message = TradeCancelMessage.purchaseCancelMessage(buyOrderById.getDataCode(),buyOrderById.getPrice(),buyOrderById.getQuantity());
+        tradeCancelPublisher.publish(message);
         return ApiResponse.success("구매 대기 취소 완료",null);
     }
 
@@ -84,6 +90,8 @@ public class DataTradeCancelFacadeImpl implements DataTradeCancelFacade{
         recoverData(saleOrderById);
         // 5. 레디스에서 제거
         tradeOrderQueueService.removeFromSaleQueue(saleOrderById);
+        TradeCancelMessage message = TradeCancelMessage.saleCancelMessage(saleOrderById.getDataCode(),saleOrderById.getPrice(),saleOrderById.getQuantity());
+        tradeCancelPublisher.publish(message);
         return ApiResponse.success("판매 대기 취소 완료",null);
     }
 

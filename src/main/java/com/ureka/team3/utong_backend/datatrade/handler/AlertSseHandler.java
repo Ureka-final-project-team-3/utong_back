@@ -27,13 +27,6 @@ public class AlertSseHandler {
         emitter.onCompletion(() -> emitters.remove(userId));
         emitter.onTimeout(() -> emitters.remove(userId));
         emitter.onError(e -> emitters.remove(userId));
-
-        try {
-            emitter.send(SseEmitter.event().name(TOPIC).data("알림 채널이 연결되었습니다."));
-        } catch (IOException e) {
-            emitters.remove(userId);
-        }
-
         return emitter;
     }
 
