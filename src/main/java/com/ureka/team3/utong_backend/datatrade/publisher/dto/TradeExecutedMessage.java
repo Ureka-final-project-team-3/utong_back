@@ -1,4 +1,4 @@
-package com.ureka.team3.utong_backend.publisher.dto;
+package com.ureka.team3.utong_backend.datatrade.publisher.dto;
 
 import com.ureka.team3.utong_backend.datatrade.dto.ContractDto;
 import com.ureka.team3.utong_backend.datatrade.dto.TradeMatch;

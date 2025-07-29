@@ -1,8 +1,8 @@
 package com.ureka.team3.utong_backend.config;
 
-import com.ureka.team3.utong_backend.subscriber.AlertSubscriber;
-import com.ureka.team3.utong_backend.subscriber.ChartStatusSubscriber;
-import com.ureka.team3.utong_backend.subscriber.OrderQueueStatusSubscriber;
+import com.ureka.team3.utong_backend.datatrade.subscriber.AlertSubscriber;
+import com.ureka.team3.utong_backend.datatrade.subscriber.ChartStatusSubscriber;
+import com.ureka.team3.utong_backend.datatrade.subscriber.OrderQueueStatusSubscriber;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
