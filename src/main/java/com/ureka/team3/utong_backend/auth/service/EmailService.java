@@ -20,7 +20,7 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
     
-    @Value("${app.frontend.url:https://d2rykyv7hqvhku.cloudfront.net}")
+    @Value("${app.frontend.url:https://utong.site}")
     private String frontendUrl;
 //    @Value("${app.frontend.url:http://localhost:5173}")
 //    private String frontendUrl;

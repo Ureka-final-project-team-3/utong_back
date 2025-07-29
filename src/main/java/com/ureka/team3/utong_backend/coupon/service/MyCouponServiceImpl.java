@@ -3,6 +3,7 @@ package com.ureka.team3.utong_backend.coupon.service;
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.common.exception.business.*;
+import com.ureka.team3.utong_backend.coupon.config.CouponPolicy;
 import com.ureka.team3.utong_backend.coupon.dto.CouponUseResponseDto;
 import com.ureka.team3.utong_backend.coupon.dto.MyCouponResponseDto;
 import com.ureka.team3.utong_backend.coupon.entity.Coupon;
@@ -27,6 +28,7 @@ public class MyCouponServiceImpl implements MyCouponService {
 
     private final MyCouponRepository myCouponRepository;
     private final UserService userService;
+    private final CouponPolicy couponPolicy;
 
     @Override
     public List<MyCouponResponseDto> getMyCoupons(String userId) {
@@ -44,19 +46,7 @@ public class MyCouponServiceImpl implements MyCouponService {
             Gifticon gifticon = coupon.getGifticon();
 
             String statusCode = userCoupon.getStatus(); // ex: "001"
-            String statusName = getStatusName(statusCode);
-
-
-
-//            String status;
-//            if (Boolean.TRUE.equals(coupon.getIsActive())) {
-//                status = "사용 완료";
-//            } else if (userCoupon.getExpiredAt() != null && userCoupon.getExpiredAt().isBefore(now)) {
-//                status = "유효기간 만료";
-//            } else {
-//                status = "사용 가능";
-//            }
-
+            String statusName = couponPolicy.getCodeNameBriefByCode(statusCode);;
 
             return MyCouponResponseDto.builder()
                     .userCouponId(userCoupon.getId())
@@ -71,15 +61,6 @@ public class MyCouponServiceImpl implements MyCouponService {
                     .statusName(statusName)
                     .build();
         }).collect(Collectors.toList());
-    }
-
-    private String getStatusName(String statusCode) {
-        return switch (statusCode) {
-            case "001" -> "유효기간 만료";
-            case "002" -> "사용 가능";
-            case "003" -> "사용 완료";
-            default -> "알 수 없음";
-        };
     }
 
     @Override
