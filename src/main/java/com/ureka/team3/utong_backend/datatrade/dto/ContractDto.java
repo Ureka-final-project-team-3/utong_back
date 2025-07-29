@@ -52,6 +52,7 @@ public class ContractDto {
         contractDto.saleAccountId = contract.getSaleDataRequest().getAccount().getId();
         contractDto.price = contract.getPrice();
         contractDto.quantity = contract.getAmount();
+        contractDto.dataCode = contract.getBuyDataRequest().getDataCode();
         contractDto.contractedAt = contract.getCreatedAt();
 
         return contractDto;

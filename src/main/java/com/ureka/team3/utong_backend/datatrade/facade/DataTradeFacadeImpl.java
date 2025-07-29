@@ -3,11 +3,9 @@ package com.ureka.team3.utong_backend.datatrade.facade;
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.auth.service.AccountService;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
-import com.ureka.team3.utong_backend.common.exception.business.InsufficientPointException;
 import com.ureka.team3.utong_backend.datatrade.dto.*;
 import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
-import com.ureka.team3.utong_backend.datatrade.enums.BuyMatchingStatus;
 import com.ureka.team3.utong_backend.datatrade.enums.RequestType;
 import com.ureka.team3.utong_backend.datatrade.handler.BuyMatchingResultHandler;
 import com.ureka.team3.utong_backend.datatrade.handler.SaleMatchingResultHandler;
@@ -22,7 +20,6 @@ import com.ureka.team3.utong_backend.datatrade.utils.TradeCalculator;
 import com.ureka.team3.utong_backend.datatrade.utils.TradeResponseFactory;
 import com.ureka.team3.utong_backend.datatrade.validator.TradeValidator;
 import com.ureka.team3.utong_backend.line.service.LineService;
-import com.ureka.team3.utong_backend.point.service.PointService;
 //import com.ureka.team3.utong_backend.publisher.TradeExecutePublisher;
 import com.ureka.team3.utong_backend.publisher.TradeExecutePublisher;
 import com.ureka.team3.utong_backend.publisher.dto.TradeExecutedMessage;
@@ -30,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,27 +58,23 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
         List<ContractDto> contractDtoList = new ArrayList<>();
         try {
             account = accountService.findById(account.getId());
-            String defaultLineId = account.getDefaultLine();
 
             // 1. 검증
-            tradeValidator.validatePurchase(defaultLineId, dto);
+            tradeValidator.validatePurchase(account, dto);
 
-            // 2. 포인트 결제
-            Long purchaseCost = tradeCalculator.calculateTotalCoastForConsumer(dto);
-            account.decreasePoint(purchaseCost);
-
-            // 3. 저장
+            // 2. 저장
             BuyDataRequest saved = buyDataRequestService.save(account, dto);
 
-            // 4. 매칭
+            // 3. 매칭
             buyMatchingResult = buyMatchingProcessor.handle(dto);
             if(!buyMatchingResult.getBuyMatchingStatus().isWaitingOnly()){
                 for (TradeMatch tradeMatch : buyMatchingResult.getMatchList()) {
                     ContractDto contractDto = tradeProcessor.processBuyMatches(saved, tradeMatch);
                     contractDtoList.add(contractDto);
+                    account.decreasePoint(contractDto.getPrice()*contractDto.getQuantity());
                 }
             }
-
+            account.decreasePoint(buyMatchingResult.getRemain()*dto.getPrice());
             if(!buyMatchingResult.getBuyMatchingStatus().isAllMatched()){
                 tradeOrderQueueService.addToBuyOrderQueue(saved,buyMatchingResult.getRemain());
             }
@@ -122,9 +114,8 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
                 .dataCode(buyMatchingResult.getDataCode()) // 반드시 null 아님 확인
                 .requestType(RequestType.PURCHASE)
                 .matchedList(buyMatchingResult.getMatchList())
-                .purchaseDataChange(remain)
-                .saleDataChange(Math.negateExact(used))
-                .price(buyMatchingResult.getPrice())
+                .remain(remain)
+                .requestPrice(buyMatchingResult.getPrice())
                 .newContracts(contractDtoList)
                 .requestOrderId(requestOrderId)
                 .build();
@@ -187,9 +178,8 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
                 .dataCode(saleMatchingResult.getDataCode())
                 .requestType(RequestType.SALE)
                 .matchedList(saleMatchingResult.getMatchList())
-                .purchaseDataChange(Math.negateExact(used))
-                .saleDataChange(remain)
-                .price(saleMatchingResult.getPrice())
+                .remain(remain)
+                .requestPrice(saleMatchingResult.getPrice())
                 .requestOrderId(requestOrderId)
                 .newContracts(contractDtoList)
                 .build();

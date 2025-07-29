@@ -109,4 +109,8 @@ public class Account implements UserDetails {
     public boolean isMyId(String id){
         return this.id.equals(id);
     }
+
+    public boolean isPayAble(Long amount){
+        return this.mileage >= amount;
+    }
 }

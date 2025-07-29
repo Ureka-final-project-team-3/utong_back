@@ -33,7 +33,7 @@ public class SaleMatchingProcessorImpl implements SaleMatchingProcessor {
 
         while (remaining > 0) {
             // 구매자 대기 주문 중 가장 높은 가격을 가진 유효한 주문을 꺼낸다
-            OrderDto buyOrder = tradeOrderQueueService.popValidBuyOrder(saleRequest.getDataCode(), priceLimit);
+            OrderDto buyOrder = tradeOrderQueueService.popValidBuyOrder(saleRequest.getDataCode(), saleRequest.getPrice());
             if (buyOrder == null) break;
 
             long available = buyOrder.getQuantity();

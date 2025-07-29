@@ -1,11 +1,11 @@
 package com.ureka.team3.utong_backend.datatrade.validator;
 
-import com.ureka.team3.utong_backend.common.exception.business.ExceedSaleLimitException;
-import com.ureka.team3.utong_backend.common.exception.business.NotExistDefaultLineException;
-import com.ureka.team3.utong_backend.common.exception.business.PriceUnitException;
-import com.ureka.team3.utong_backend.common.exception.business.UnlimitedPlanForbiddenTradeException;
+import com.ureka.team3.utong_backend.auth.entity.Account;
+import com.ureka.team3.utong_backend.common.exception.business.*;
+import com.ureka.team3.utong_backend.datatrade.dto.ContractDto;
 import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
 import com.ureka.team3.utong_backend.datatrade.repository.BuyDataRequestRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.ContractQueueRepository;
 import com.ureka.team3.utong_backend.datatrade.repository.SaleDataRequestRepository;
 import com.ureka.team3.utong_backend.datatrade.utils.TradeCalculator;
 import com.ureka.team3.utong_backend.line.entity.Line;
@@ -24,8 +24,10 @@ public class TradeValidator {
     private final SaleDataRequestRepository saleDataRequestRepository;
     private final TradeCalculator tradeCalculator;
     private final BuyDataRequestRepository buyDataRequestRepository;
+    private final ContractQueueRepository contractQueueRepository;
 
-    public void validatePurchase(String defaultLineId, DataTradeDto.DataTradeRequestDto dto) {
+    public void validatePurchase(Account account, DataTradeDto.DataTradeRequestDto dto) {
+        String defaultLineId = account.getDefaultLine();
         if (defaultLineId == null)
             throw new NotExistDefaultLineException();
 
@@ -35,6 +37,16 @@ public class TradeValidator {
 
         if (!tradeCalculator.isHundredUnit(dto.getPrice()))
             throw new PriceUnitException();
+
+        if(!account.isPayAble(tradeCalculator.calculateTotalCoastForConsumer(dto)))
+            throw new InsufficientDataException();
+
+
+        if(!tradeCalculator.isAvailableInputPrice(dto.getPrice(),dto.getDataCode())){
+            throw new IllegalInputPriceException();
+        }
+
+
 
 //        if (saleDataRequestRepository.existsWaitingRequestByLineId(defaultLine.getId()))
 //            throw new ExistWaitingSaleRequestException();
@@ -61,6 +73,11 @@ public class TradeValidator {
 
         if (!tradeCalculator.isHundredUnit(dto.getPrice()))
             throw new PriceUnitException();
+
+        if(!tradeCalculator.isAvailableInputPrice(dto.getPrice(),dto.getDataCode())){
+            throw new IllegalInputPriceException();
+        }
+
 //        if (buyDataRequestRepository.existsWaitingRequestByLineId(defaultLine.getId())) {
 //            throw new ExistWaitingPurchaseRequestException();
 //        }
