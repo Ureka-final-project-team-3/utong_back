@@ -1,4 +1,4 @@
-name: Deploy to Production (Blue-Green)
+name: Deploy to Production (Single Environment)
 
 on:
   push:
@@ -7,8 +7,7 @@ on:
 env:
   DOCKER_IMAGE: wkdtmf357/utong-backend-prod
   EB_APPLICATION_NAME: utong-backend-prod
-  EB_BLUE_ENVIRONMENT: utong-backend-prod-blue
-  EB_GREEN_ENVIRONMENT: utong-backend-prod-green
+  EB_ENVIRONMENT_NAME: utong-backend-prod-blue
   AWS_REGION: ap-northeast-2
 
 jobs:
@@ -52,35 +51,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # 3. 현재 활성 환경 확인 (Blue가 활성이면 Green에 배포, 반대도 마찬가지)
-      - name: Determine target environment
-        id: target-env
+      # 3. 환경 상태 확인
+      - name: Check environment status
         run: |
-          # Blue 환경 상태 확인
-          BLUE_STATUS=$(aws elasticbeanstalk describe-environments \
+          ENV_STATUS=$(aws elasticbeanstalk describe-environments \
             --application-name ${{ env.EB_APPLICATION_NAME }} \
-            --environment-names ${{ env.EB_BLUE_ENVIRONMENT }} \
+            --environment-names ${{ env.EB_ENVIRONMENT_NAME }} \
             --query 'Environments[0].Health' --output text)
           
-          # Green 환경 상태 확인  
-          GREEN_STATUS=$(aws elasticbeanstalk describe-environments \
-            --application-name ${{ env.EB_APPLICATION_NAME }} \
-            --environment-names ${{ env.EB_GREEN_ENVIRONMENT }} \
-            --query 'Environments[0].Health' --output text)
-          
-          echo "Blue Status: $BLUE_STATUS"
-          echo "Green Status: $GREEN_STATUS"
-          
-          # Blue가 Ok/Ready면 Green에 배포, 아니면 Blue에 배포
-          if [ "$BLUE_STATUS" = "Ok" ] || [ "$BLUE_STATUS" = "Ready" ]; then
-            echo "target=${{ env.EB_GREEN_ENVIRONMENT }}" >> $GITHUB_OUTPUT
-            echo "standby=${{ env.EB_BLUE_ENVIRONMENT }}" >> $GITHUB_OUTPUT
-            echo "Deploying to GREEN environment"
-          else
-            echo "target=${{ env.EB_BLUE_ENVIRONMENT }}" >> $GITHUB_OUTPUT  
-            echo "standby=${{ env.EB_GREEN_ENVIRONMENT }}" >> $GITHUB_OUTPUT
-            echo "Deploying to BLUE environment"
-          fi
+          echo "Environment Status: $ENV_STATUS"
+          echo "Deploying to: ${{ env.EB_ENVIRONMENT_NAME }}"
 
       # 4. Dockerrun.aws.json 생성
       - name: Create Dockerrun.aws.json
@@ -127,62 +107,89 @@ jobs:
             --source-bundle S3Bucket=elasticbeanstalk-${{ env.AWS_REGION }}-${{ secrets.AWS_ACCOUNT_ID }},S3Key=utong-backend-${{ github.sha }}.zip \
             --description "Deployed from GitHub Actions - ${{ github.sha }}"
 
-      # 8. 타겟 환경에 배포
-      - name: Deploy to target environment
+      # 8. 환경에 배포 (Rolling Deployment)
+      - name: Deploy to environment
         run: |
-          echo "Deploying to ${{ steps.target-env.outputs.target }}"
+          echo "🚀 Starting deployment to ${{ env.EB_ENVIRONMENT_NAME }}"
           
           aws elasticbeanstalk update-environment \
-            --environment-name ${{ steps.target-env.outputs.target }} \
+            --environment-name ${{ env.EB_ENVIRONMENT_NAME }} \
             --version-label v${{ github.sha }}
+          
+          echo "📦 Deployment initiated with version: v${{ github.sha }}"
 
       # 9. 배포 완료 대기 (최대 20분)
-      - name: Wait for deployment
+      - name: Wait for deployment completion
         run: |
-          echo "Waiting for deployment to complete..."
+          echo "⏳ Waiting for deployment to complete..."
+          echo "This may take 5-15 minutes for rolling deployment..."
           
           aws elasticbeanstalk wait environment-updated \
-            --environment-name ${{ steps.target-env.outputs.target }} \
+            --environment-name ${{ env.EB_ENVIRONMENT_NAME }} \
             --cli-read-timeout 1200 \
             --cli-connect-timeout 60
+          
+          echo "✅ Deployment wait completed!"
 
-      # 10. 헬스체크 확인 (수정된 버전)
+      # 10. 헬스체크 확인
       - name: Health check
         run: |
+          echo "🏥 Checking environment health..."
+          
           HEALTH=$(aws elasticbeanstalk describe-environment-health \
-            --environment-name ${{ steps.target-env.outputs.target }} \
+            --environment-name ${{ env.EB_ENVIRONMENT_NAME }} \
             --attribute-names Status \
             --query 'Status' --output text)
           
-          if [ "$HEALTH" = "Ok" ] || [ "$HEALTH" = "Ready" ]; then
+          echo "Environment Health: $HEALTH"
+          
+          if [ "$HEALTH" = "Ok" ]; then
             echo "✅ Deployment successful! Environment is healthy."
+          elif [ "$HEALTH" = "Warning" ]; then
+            echo "⚠️ Deployment completed with warnings. Check logs if needed."
           else
             echo "❌ Deployment failed! Environment health: $HEALTH"
             exit 1
           fi
 
-      # 11. 배포 완료 알림
-      - name: Deployment summary
+      # 11. API 헬스체크 (선택사항)
+      - name: API Health check
         run: |
-          TARGET_URL=$(aws elasticbeanstalk describe-environments \
-            --environment-names ${{ steps.target-env.outputs.target }} \
+          ENV_URL=$(aws elasticbeanstalk describe-environments \
+            --environment-names ${{ env.EB_ENVIRONMENT_NAME }} \
             --query 'Environments[0].CNAME' --output text)
           
-          echo "🎉 Deployment completed!"
-          echo "📍 Target Environment: ${{ steps.target-env.outputs.target }}"
-          echo "🌐 Environment URL: https://$TARGET_URL"
-          echo "📋 Version: v${{ github.sha }}"
-          echo ""
-          echo "⚠️  Next step: Swap environment URLs to switch traffic"
-          echo "   Blue: ${{ env.EB_BLUE_ENVIRONMENT }}"
-          echo "   Green: ${{ env.EB_GREEN_ENVIRONMENT }}"
+          echo "🧪 Testing API endpoint: https://$ENV_URL/actuator/health"
+          
+          # API 헬스체크 (최대 3분 대기)
+          for i in {1..18}; do
+            if curl -f -s "https://$ENV_URL/actuator/health" > /dev/null; then
+              echo "✅ API health check passed!"
+              break
+            else
+              echo "⏳ API not ready yet, retrying... ($i/18)"
+              sleep 10
+            fi
+          
+            if [ $i -eq 18 ]; then
+              echo "⚠️ API health check timeout, but deployment may still be successful"
+            fi
+          done
 
-      # 12. (선택사항) 자동 트래픽 전환 - 주석 해제하면 자동으로 URL 스왑
-      - name: Auto swap environment URLs
+      # 12. 배포 완료 알림
+      - name: Deployment summary
         run: |
-           echo "Auto swapping environment URLs..."
-           aws elasticbeanstalk swap-environment-cnames \
-             --source-environment-name ${{ steps.target-env.outputs.target }} \
-             --destination-environment-name ${{ steps.target-env.outputs.standby }}
-
-           echo "✅ Traffic switched successfully!"
+          ENV_URL=$(aws elasticbeanstalk describe-environments \
+            --environment-names ${{ env.EB_ENVIRONMENT_NAME }} \
+            --query 'Environments[0].CNAME' --output text)
+          
+          echo "🎉 Deployment Summary"
+          echo "=================================="
+          echo "📍 Environment: ${{ env.EB_ENVIRONMENT_NAME }}"
+          echo "🌐 Environment URL: https://$ENV_URL"
+          echo "🐳 Docker Image: ${{ env.DOCKER_IMAGE }}:${{ github.sha }}"
+          echo "📋 Version Label: v${{ github.sha }}"
+          echo "🔄 Deployment Type: Rolling Deployment"
+          echo "⏰ Completed at: $(date)"
+          echo "=================================="
+          echo "✅ Production deployment completed successfully!"
