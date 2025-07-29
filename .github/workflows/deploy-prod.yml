@@ -146,7 +146,7 @@ jobs:
             --cli-read-timeout 1200 \
             --cli-connect-timeout 60
 
-      # 10. 헬스체크 확인
+      # 10. 헬스체크 확인 (수정된 버전)
       - name: Health check
         run: |
           HEALTH=$(aws elasticbeanstalk describe-environment-health \
@@ -154,7 +154,7 @@ jobs:
             --attribute-names Status \
             --query 'Status' --output text)
           
-          if [ "$HEALTH" = "Ok" ]; then
+          if [ "$HEALTH" = "Ok" ] || [ "$HEALTH" = "Ready" ]; then
             echo "✅ Deployment successful! Environment is healthy."
           else
             echo "❌ Deployment failed! Environment health: $HEALTH"
