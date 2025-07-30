@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 @Tag(name = "데이터 주문 대기열 API", description = "데이터 거래의 주문 대기열 상태를 실시간 또는 요청 시 조회하는 API입니다.")
 @RestController
-@RequestMapping("/api/data")
+//@RequestMapping("/api/data")
 @RequiredArgsConstructor
 public class DataTradeQueueStatusController {
 
@@ -36,7 +36,7 @@ public class DataTradeQueueStatusController {
             summary = "실시간 주문 대기열 스트리밍",
             description = "SSE(Server-Sent Events)를 통해 모든 데이터 코드의 주문 대기열 상태를 실시간으로 스트리밍합니다."
     )
-    @GetMapping(value = "/order-queue/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)    // todo : /orders/live로 변경
+    @GetMapping(value = "/sse/data/order-queue/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)    // todo : /orders/live로 변경
     public SseEmitter streamAllOrderQueue() {
         return sseHandler.connect("ALL_DATA");
     }
@@ -45,7 +45,7 @@ public class DataTradeQueueStatusController {
             summary = "현재 전체 주문 대기열 상태 조회",
             description = "현재 등록된 모든 데이터 코드에 대한 주문 대기열 상태를 조회합니다."
     )
-    @GetMapping("/order-queue")
+    @GetMapping("/api/data/order-queue")
     public ResponseEntity<ApiResponse> getAllOrderQueue() {
         return ResponseEntity.ok(orderQueueStatusService.getCurrentAllQueue());
     }
