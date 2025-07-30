@@ -135,15 +135,14 @@ public class ContractNotificationService {
                                 <li><strong>구매 주문 ID:</strong> %s</li>
                                 <li><strong>판매 주문 ID:</strong> %s</li>
                                 <li><strong>데이터 코드:</strong> %s</li>
-                                <li><strong>구매 수량:</strong> %,d개</li>
-                                <li><strong>단가:</strong> %,d포인트</li>
-                                <li><strong>총 결제 금액:</strong> %,d포인트</li>
+                                <li><strong>구매 수량:</strong> %,dGB</li>
+                                <li><strong>단가:</strong> %,dp</li>
+                                <li><strong>총 결제 금액:</strong> %,dp</li>
                                 <li><strong>계약 일시:</strong> %s</li>
                             </ul>
                         </div>
                         
                         <p>구매하신 데이터는 즉시 사용 가능합니다.</p>
-                        <a href="%s/contracts" class="button">계약 내역 확인하기</a>
                     </div>
                     <div class="footer">
                         <p>문의사항이 있으시면 언제든 연락해 주세요.</p>
@@ -156,12 +155,11 @@ public class ContractNotificationService {
             dto.getBuyerNickname(),
             dto.getPurchaseOrderId(),
             dto.getSaleOrderId(),
-            dto.getDataCode(),
+            convertDataCode(dto.getDataCode()),
             dto.getQuantity(),
             dto.getPrice(),
             dto.getTotalAmount(),
-            dto.getContractedAt().toString(),
-            frontendUrl
+            dto.getContractedAt().toString()
         );
     }
 
@@ -198,19 +196,18 @@ public class ContractNotificationService {
                                 <li><strong>판매 주문 ID:</strong> %s</li>
                                 <li><strong>구매 주문 ID:</strong> %s</li>
                                 <li><strong>데이터 코드:</strong> %s</li>
-                                <li><strong>판매 수량:</strong> %,d개</li>
-                                <li><strong>단가:</strong> %,d포인트</li>
-                                <li><strong>총 판매 금액:</strong> <span class="highlight">%,d포인트</span></li>
+                                <li><strong>판매 수량:</strong> %,dGB</li>
+                                <li><strong>단가:</strong> %,dp</li>
+                                <li><strong>총 판매 금액:</strong> <span class="highlight">%,dp</span></li>
                                 <li><strong>계약 일시:</strong> %s</li>
                             </ul>
                         </div>
                         
                         <p>판매 수익이 즉시 계정에 적립되었습니다.</p>
-                        <a href="%s/contracts" class="button">계약 내역 확인하기</a>
                     </div>
                     <div class="footer">
                         <p>지속적인 데이터 판매를 통해 더 많은 수익을 얻어보세요!</p>
-                        <p>우통(UTONG) 팀 드림</p>
+                        <p>유통(UTONG) 팀 드림</p>
                     </div>
                 </div>
             </body>
@@ -219,12 +216,16 @@ public class ContractNotificationService {
             dto.getSellerNickname(),
             dto.getSaleOrderId(),
             dto.getPurchaseOrderId(),
-            dto.getDataCode(),
+            convertDataCode(dto.getDataCode()),
             dto.getQuantity(),
             dto.getPrice(),
             dto.getTotalAmount(),
-            dto.getContractedAt().toString(),
-            frontendUrl
+            dto.getContractedAt().toString()
         );
+    }
+    public String convertDataCode(String s)
+    {
+    	if(s.equals("001")) return "LTE";
+    	else return "5G";
     }
 }
