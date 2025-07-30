@@ -117,10 +117,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 return emailAccount;
             }
         }
-        
-        // 3. 새 OAuth 계정 생성
-        logger.info("새 OAuth 계정 생성 - Email: {}", userInfo.getEmail());
-        return createNewOAuthAccount(userInfo);
+        throw new OAuth2AuthenticationException(
+                "OAuth 로그인을 위해서는 먼저 일반 회원가입을 해주세요. 가입 후 해당 이메일로 OAuth 로그인이 가능합니다."
+            );
     }
     
     private Account updateExistingAccount(Account account, OAuth2UserInfoDto userInfo) {
