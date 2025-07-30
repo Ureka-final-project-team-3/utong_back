@@ -37,10 +37,7 @@ public class DataTradeQueueStatusController {
             description = "SSE(Server-Sent Events)를 통해 모든 데이터 코드의 주문 대기열 상태를 실시간으로 스트리밍합니다."
     )
     @GetMapping(value = "/order-queue/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)    // todo : /orders/live로 변경
-    public SseEmitter streamAllOrderQueue(HttpServletResponse response) {
-    	response.setHeader("Cache-Control", "no-cache");
-        response.setHeader("Connection", "keep-alive");
-        response.setHeader("X-Accel-Buffering", "no");
+    public SseEmitter streamAllOrderQueue() {
         return sseHandler.connect("ALL_DATA");
     }
 
