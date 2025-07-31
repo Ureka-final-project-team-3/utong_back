@@ -31,17 +31,19 @@ public class TradeProcessorImpl implements TradeProcessor {
     @Transactional
     public ContractDto processBuyMatches(BuyDataRequest buyDataRequest, TradeMatch matchOrder) {
         SaleDataRequest saleDataRequest = saleDataRequestService.findSaleOrderById(matchOrder.getMatchedOrder().getOrderId());
-        saleDataRequestService.subtractSell(saleDataRequest, matchOrder.getAmount());
+        saleDataRequest.subtractRemain(matchOrder.getAmount());
+        buyDataRequest.subtractRemain(matchOrder.getAmount());
         TradeExecutionDto tradeExecutionDto = new TradeExecutionDto(buyDataRequest, saleDataRequest, matchOrder.getAmount(), matchOrder.getPricePerUnit());
         return processTrade(tradeExecutionDto);
     }
 
     @Override
     @Transactional
-    public ContractDto processSaleMatches(SaleDataRequest request, TradeMatch match) {
-        BuyDataRequest buyOrderRequest = buyDataRequestService.findBuyOrderById(match.getMatchedOrder().getOrderId());
-        buyDataRequestService.subtractPurchased(buyOrderRequest, match.getAmount());
-        TradeExecutionDto tradeExecutionDto = new TradeExecutionDto(buyOrderRequest, request, match.getAmount(), match.getPricePerUnit());
+    public ContractDto processSaleMatches(SaleDataRequest saleDataRequest, TradeMatch matchOrder) {
+        BuyDataRequest buyDataRequest = buyDataRequestService.findBuyOrderById(matchOrder.getMatchedOrder().getOrderId());
+        saleDataRequest.subtractRemain(matchOrder.getAmount());
+        buyDataRequest.subtractRemain(matchOrder.getAmount());
+        TradeExecutionDto tradeExecutionDto = new TradeExecutionDto(buyDataRequest, saleDataRequest, matchOrder.getAmount(), matchOrder.getPricePerUnit());
         return processTrade(tradeExecutionDto);
     }
 
