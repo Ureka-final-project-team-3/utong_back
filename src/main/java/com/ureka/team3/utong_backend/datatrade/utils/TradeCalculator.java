@@ -21,6 +21,7 @@ public class TradeCalculator {
     private double tax;               // Float → double
     private Long minimumPrice;
     private double minimumRate;       // Float → double
+    private double availableTradeRate;
 
     /**
      * 소비자 기준 총 비용 (단가 * 수량)
@@ -48,9 +49,10 @@ public class TradeCalculator {
     /**
      * 판매 가능한 데이터 양 계산
      */
-    public Long calculateCanSellAmount(Long remaining, Long canSale, Long alreadySold) {
-
-        return Math.min(remaining, canSale - alreadySold);
+    public Long calculateCanSellAmount(Long remaining, Long planData, Long alreadySold) {
+        long tradable = Math.round(planData * availableTradeRate) - alreadySold;
+        tradable = Math.max(tradable, 0); // 음수 방지
+        return Math.min(remaining, tradable);
     }
 
     public Long calculatePayPoint(Long remaining, Long price) {
@@ -87,6 +89,7 @@ public class TradeCalculator {
         this.tax = price.getTax();                   // float → double 자동 변환
         this.minimumPrice = price.getMinimumPrice();
         this.minimumRate = price.getMinimumRate();   // float → double 자동 변환
+        this.availableTradeRate = price.getAvailableTradeRate();
     }
 
 
