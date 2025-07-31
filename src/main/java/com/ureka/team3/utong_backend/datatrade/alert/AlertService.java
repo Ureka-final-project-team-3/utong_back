@@ -27,9 +27,9 @@ public class AlertService {
             String json = objectMapper.writeValueAsString(alertDto);
             boolean sent = alertSseHandler.sendIfConnected(userId, json);
             log.info("[알림 전송] : {}",json);
-//            if (!sent) {
-//                alertRepository.save(userId, json);
-//            }
+            if (!sent) {
+                alertRepository.save(userId, json);
+            }
         } catch (JsonProcessingException e) {
             log.error("알림 직렬화 실패: {}", e.getMessage());
         }
