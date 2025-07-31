@@ -30,6 +30,9 @@ public class Plan {
     @Column(name = "available_trade_rate")
     private float availableTradeRate;
 
+    @Column(name = "data_code", length = 3)
+    private String dataCode;
+
     public Long canSell() {
         if (data == null || data == -1L) {
             return 0L; // 무제한 요금제 혹은 데이터 없음 → 판매 불가

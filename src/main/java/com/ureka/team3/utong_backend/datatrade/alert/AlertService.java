@@ -26,6 +26,7 @@ public class AlertService {
         try {
             String json = objectMapper.writeValueAsString(alertDto);
             boolean sent = alertSseHandler.sendIfConnected(userId, json);
+            log.info("[알림 전송] : {}",json);
             if (!sent) {
                 alertRepository.save(userId, json);
             }

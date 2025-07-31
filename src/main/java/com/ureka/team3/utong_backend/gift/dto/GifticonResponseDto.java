@@ -11,7 +11,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Getter
-@Setter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -42,6 +41,7 @@ public class GifticonResponseDto {
         gifticonResponseDto.imageUrl = gifticon.getImageUrl();
         gifticonResponseDto.imageKey = gifticon.getImageKey();
         gifticonResponseDto.category = gifticon.getCategory();
+
         return gifticonResponseDto;
     }
 }

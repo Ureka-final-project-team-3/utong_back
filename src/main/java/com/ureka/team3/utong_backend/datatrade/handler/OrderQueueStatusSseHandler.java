@@ -81,6 +81,7 @@ public class OrderQueueStatusSseHandler implements SseHandler<OrdersQueueDto> {
             } catch (IOException e) {
                 log.warn("SSE 전송 실패 [dataCode: {}] → 제거 예정: {}", dataCode, e.getMessage());
                 deadEmitters.add(emitter);
+                emitter.completeWithError(e);
             }
         }
 

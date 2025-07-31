@@ -36,25 +36,21 @@ public class GifticonServiceImpl implements GifticonService {
 
     private final GifticonRepository gifticonRepository;
 
-    private final UserGifticonRepository myGifticonRepository;
+    private final UserGifticonRepository userGifticonRepository;
 
     private final AccountRepository accountRepository;
 
     private final UserRepository userRepository;
     
-    private final CodeRepository codeRepository;
     @Override
     public ApiResponse<List<GifticonResponseDto>> getGifticonList() {
         try {
-        	List<Code> codeList = codeRepository.findByGroupCode("080");
-        	for (Code code : codeList) {
-				System.out.println(code.getCode());
-			}
+
             List<GifticonResponseDto> list = gifticonRepository.findAll()
                     .stream()
                     .map(GifticonResponseDto::from)
                     .toList();
-            for (GifticonResponseDto gifticonResponseDto : list) for (Code code : codeList) if(gifticonResponseDto.getCategory().equals(code.getCode()))gifticonResponseDto.setCategory(code.getCodeName());
+
             return ApiResponse.success(list);
         } catch (Exception e) {
             log.error("기프티콘 목록 조회 중 오류가 발생하였습니다. {}", e.getMessage());
@@ -103,28 +99,30 @@ public class GifticonServiceImpl implements GifticonService {
 
             account.decreasePoint(gifticon.getPrice());
 
-            UserGifticon userGifticon = UserGifticon.builder()
-                    .user(user)
-                    .gifticon(gifticon)
-                    .isActive(true)
-                    .createdAt(LocalDateTime.now())
-                    .expiredAt(LocalDateTime.now().plusDays(30).toLocalDate().atTime(23, 59, 59))
-                    .build();
-
-            myGifticonRepository.save(userGifticon);
-
-            log.info("기프티콘 교환 성공: gifticonId = {}, accountId = {}, price = {}", gifticonId, accountId, gifticon.getPrice());
+            saveUserGifticon(user, gifticon);
 
             return ApiResponse.success(null);
         } catch (PessimisticLockException e) {
-            log.warn("동시 접근으로 인한 락 타임아웃: accountId = {}", accountId, e);
+            log.error("동시 접근으로 인한 락 타임아웃: error = {}", e.getMessage(), e);
             throw new ConcurrentAccessException();
         } catch (AccountNotFoundException | GifticonNotFoundException | UserNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            log.error("기프티콘 교환 중 오류가 발생하였습니다. gifticonId = {}, accountId = {}, error = {}", gifticonId, accountId, e.getMessage());
+            log.error("기프티콘 교환 중 오류가 발생하였습니다. error = {}", e.getMessage());
             throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private void saveUserGifticon(User user, Gifticon gifticon) {
+        UserGifticon userGifticon = UserGifticon.builder()
+                .user(user)
+                .gifticon(gifticon)
+                .isActive(true)
+                .createdAt(LocalDateTime.now())
+                .expiredAt(LocalDateTime.now().plusDays(30).toLocalDate().atTime(23, 59, 59))
+                .build();
+
+        userGifticonRepository.save(userGifticon);
     }
 
 }

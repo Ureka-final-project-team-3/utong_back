@@ -46,20 +46,31 @@ public class WeeklyPriceServiceImpl implements WeeklyPriceService {
     private List<DailyChartDto> buildDailyCharts(LocalDateTime today, List<Object[]> results, String dataCode) {
         List<DailyChartDto> dailyCharts = new ArrayList<>();
 
+        Long initialPreviousPrice = getPreviousPrice(today.minusDays(7).toLocalDate(), dataCode, results);
+        Long currentPreviousPrice = initialPreviousPrice;
+
         for (int i = 7; i >= 1; i--) {
             LocalDate targetDate = today.minusDays(i).toLocalDate();
             Optional<Object[]> dayData = findDataForDate(targetDate, results);
 
             if (dayData.isPresent()) {
                 Object[] result = dayData.get();
-                dailyCharts.add(createDailyChart(targetDate, ((Number) result[1]).longValue()));
+                Long actualPrice = ((Number) result[1]).longValue();
+                dailyCharts.add(createDailyChart(targetDate, actualPrice));
+                currentPreviousPrice = actualPrice;
             } else {
-                Long previousPrice = getPreviousPrice(targetDate, dataCode, results);
-                dailyCharts.add(createDailyChart(targetDate, previousPrice != null ? previousPrice : 0L));
+                buildChartByDataCode(dataCode, dailyCharts, targetDate, currentPreviousPrice);
             }
         }
 
         return dailyCharts;
+    }
+
+    private void buildChartByDataCode(String dataCode, List<DailyChartDto> dailyCharts, LocalDate targetDate, Long previousPrice) {
+        switch (dataCode) {
+            case "001" : dailyCharts.add(createDailyChart(targetDate, previousPrice == 0L ? 4000L : previousPrice)); break;
+            case "002" : dailyCharts.add(createDailyChart(targetDate, previousPrice == 0L ? 5000L : previousPrice)); break;
+        }
     }
 
     private Optional<Object[]> findDataForDate(LocalDate targetDate, List<Object[]> results) {
@@ -81,10 +92,7 @@ public class WeeklyPriceServiceImpl implements WeeklyPriceService {
                 .map(result -> ((Number) result[1]).longValue())
                 .findFirst();
 
-        if (recentPrice.isPresent()) {
-            return recentPrice.get();
-        }
+        return recentPrice.orElseGet(() -> contractRepository.findLatestAvgPriceBeforeDate(targetDate.atStartOfDay(), dataCode));
 
-        return contractRepository.findLatestAvgPriceBeforeDate(targetDate.atStartOfDay(), dataCode);
     }
 }
