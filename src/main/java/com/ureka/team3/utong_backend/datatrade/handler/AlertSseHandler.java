@@ -32,6 +32,7 @@ public class AlertSseHandler {
 
     public boolean sendIfConnected(String userId, String alertJson) {
         SseEmitter emitter = emitters.get(userId);
+        log.info("[알림 전송] : {}",alertJson);
         if (emitter != null) {
             try {
                 emitter.send(SseEmitter.event().name(TOPIC).data(alertJson));
