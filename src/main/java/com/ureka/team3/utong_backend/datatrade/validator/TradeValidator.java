@@ -48,8 +48,8 @@ public class TradeValidator {
 
 
 
-        if (saleDataRequestRepository.existsWaitingRequestByLineId(defaultLine.getId()))
-            throw new ExistWaitingSaleRequestException();
+//        if (saleDataRequestRepository.existsWaitingRequestByLineId(defaultLine.getId()))
+//            throw new ExistWaitingSaleRequestException();
 
     }
 
@@ -66,7 +66,7 @@ public class TradeValidator {
             throw new UnlimitedPlanForbiddenTradeException();
 
         LineData lineData = lineService.getLineDataByLineAndDate(defaultLine, LocalDate.now());
-        Long canSell = tradeCalculator.calculateCanSellAmount(lineData.getRemaining(), plan.canSell(), lineData.getSell());
+        Long canSell = tradeCalculator.calculateCanSellAmount(lineData.getRemaining(), plan.getData(), lineData.getSell());
         if (dto.getDataAmount() > canSell) {
             throw new ExceedSaleLimitException();
         }
@@ -78,8 +78,8 @@ public class TradeValidator {
             throw new IllegalInputPriceException();
         }
 
-        if (buyDataRequestRepository.existsWaitingRequestByLineId(defaultLine.getId()))
-            throw new ExistWaitingPurchaseRequestException();
+//        if (buyDataRequestRepository.existsWaitingRequestByLineId(defaultLine.getId()))
+//            throw new ExistWaitingPurchaseRequestException();
     }
 }
 
