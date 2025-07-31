@@ -38,7 +38,7 @@ public class AlertSseHandler {
                 emitter.send(SseEmitter.event().name(TOPIC).data(alertJson));
                 return true;
             } catch (IOException e) {
-                emitters.remove(userId);
+                emitter.completeWithError(e);
             }
         }
         return false;
