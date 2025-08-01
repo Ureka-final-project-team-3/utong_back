@@ -1,8 +1,8 @@
 package com.ureka.team3.utong_backend.datatrade.service.trade.purchase;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
-import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
-import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.DataTradeDto;
+import com.ureka.team3.utong_backend.datatrade.domain.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.enums.BuyOrderResult;
 
 public interface BuyDataRequestService {

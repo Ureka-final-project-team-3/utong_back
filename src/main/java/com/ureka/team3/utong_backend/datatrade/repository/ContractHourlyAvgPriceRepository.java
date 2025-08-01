@@ -1,11 +1,8 @@
 package com.ureka.team3.utong_backend.datatrade.repository;
 
-import com.ureka.team3.utong_backend.datatrade.entity.ContractHourlyAvgPrice;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ureka.team3.utong_backend.datatrade.domain.entity.ContractHourlyAvgPrice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 

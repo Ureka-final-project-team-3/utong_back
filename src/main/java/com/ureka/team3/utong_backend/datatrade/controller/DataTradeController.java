@@ -2,9 +2,9 @@ package com.ureka.team3.utong_backend.datatrade.controller;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
-import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
-import com.ureka.team3.utong_backend.datatrade.dto.TradeHistoryRequestDto;
-import com.ureka.team3.utong_backend.datatrade.dto.WeeklyChartDto;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.DataTradeDto;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.TradeHistoryRequestDto;
+import com.ureka.team3.utong_backend.datatrade.dto.chart.WeeklyChartDto;
 import com.ureka.team3.utong_backend.datatrade.facade.DataTradeCancelFacade;
 import com.ureka.team3.utong_backend.datatrade.facade.DataTradeFacade;
 import com.ureka.team3.utong_backend.datatrade.service.chart.weekly.WeeklyPriceService;

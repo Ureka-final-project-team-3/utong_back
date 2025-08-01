@@ -1,6 +1,6 @@
 package com.ureka.team3.utong_backend.datatrade.repository;
 
-import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
+import com.ureka.team3.utong_backend.datatrade.domain.entity.SaleDataRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

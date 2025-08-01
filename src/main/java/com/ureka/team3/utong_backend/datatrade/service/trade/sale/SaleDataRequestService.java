@@ -1,8 +1,8 @@
 package com.ureka.team3.utong_backend.datatrade.service.trade.sale;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
-import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
-import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.DataTradeDto;
+import com.ureka.team3.utong_backend.datatrade.domain.entity.SaleDataRequest;
 import com.ureka.team3.utong_backend.datatrade.enums.SaleOrderResult;
 
 public interface SaleDataRequestService {

@@ -1,6 +1,6 @@
 package com.ureka.team3.utong_backend.datatrade.repository;
 
-import com.ureka.team3.utong_backend.datatrade.dto.ContractDto;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.ContractDto;
 
 import java.util.List;
 

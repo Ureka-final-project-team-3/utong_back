@@ -1,7 +1,7 @@
 package com.ureka.team3.utong_backend.datatrade.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ureka.team3.utong_backend.datatrade.dto.AvgPerHour;
+import com.ureka.team3.utong_backend.datatrade.dto.chart.AvgPerHour;
 import com.ureka.team3.utong_backend.datatrade.utils.RedisKeyUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

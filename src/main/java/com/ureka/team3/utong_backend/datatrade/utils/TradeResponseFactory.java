@@ -1,9 +1,9 @@
 package com.ureka.team3.utong_backend.datatrade.utils;
 
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
-import com.ureka.team3.utong_backend.datatrade.dto.BuyMatchingResult;
-import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
-import com.ureka.team3.utong_backend.datatrade.dto.SaleMatchingResult;
+import com.ureka.team3.utong_backend.datatrade.domain.result.BuyMatchingResult;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.DataTradeDto;
+import com.ureka.team3.utong_backend.datatrade.domain.result.SaleMatchingResult;
 import com.ureka.team3.utong_backend.datatrade.enums.BuyOrderResult;
 import com.ureka.team3.utong_backend.datatrade.enums.SaleOrderResult;
 

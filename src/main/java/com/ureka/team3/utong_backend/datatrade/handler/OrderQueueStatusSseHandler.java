@@ -1,6 +1,6 @@
 package com.ureka.team3.utong_backend.datatrade.handler;
 
-import com.ureka.team3.utong_backend.datatrade.dto.OrdersQueueDto;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.OrdersQueueDto;
 import com.ureka.team3.utong_backend.datatrade.service.queue.OrderQueueStatusService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

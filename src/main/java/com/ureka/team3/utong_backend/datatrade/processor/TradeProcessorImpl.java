@@ -1,12 +1,12 @@
 package com.ureka.team3.utong_backend.datatrade.processor;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
-import com.ureka.team3.utong_backend.datatrade.dto.ContractDto;
-import com.ureka.team3.utong_backend.datatrade.dto.TradeExecutionDto;
-import com.ureka.team3.utong_backend.datatrade.dto.TradeMatch;
-import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
-import com.ureka.team3.utong_backend.datatrade.entity.Contract;
-import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.ContractDto;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.TradeExecutionDto;
+import com.ureka.team3.utong_backend.datatrade.domain.result.TradeMatch;
+import com.ureka.team3.utong_backend.datatrade.domain.entity.BuyDataRequest;
+import com.ureka.team3.utong_backend.datatrade.domain.entity.Contract;
+import com.ureka.team3.utong_backend.datatrade.domain.entity.SaleDataRequest;
 import com.ureka.team3.utong_backend.datatrade.service.trade.contract.ContractService;
 import com.ureka.team3.utong_backend.datatrade.service.trade.purchase.BuyDataRequestServiceImpl;
 import com.ureka.team3.utong_backend.datatrade.service.trade.sale.SaleDataRequestService;
