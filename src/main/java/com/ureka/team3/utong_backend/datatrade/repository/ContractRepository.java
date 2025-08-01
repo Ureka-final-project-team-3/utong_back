@@ -1,6 +1,5 @@
 package com.ureka.team3.utong_backend.datatrade.repository;
 
-import com.ureka.team3.utong_backend.datatrade.dto.DailyChartDto;
 import com.ureka.team3.utong_backend.datatrade.entity.Contract;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -77,4 +76,18 @@ public interface ContractRepository extends JpaRepository<Contract, String> {
             @Param("beforeDate") LocalDateTime beforeDate,
             @Param("dataCode") String dataCode
     );
+
+//    @Query("SELECT c FROM Contract c WHERE c.buyDataRequest.id = :buyRequestId")
+//    List<Contract> findByBuyRequestId(@Param("buyRequestId") String buyRequestId);
+//
+//    @Query("SELECT c FROM Contract c WHERE c.saleDataRequest.id = :saleRequestId")
+//    List<Contract> findBySaleRequestId(@Param("saleRequestId") String saleRequestId);
+
+    @Query("SELECT c FROM Contract c WHERE c.saleDataRequest.id = :saleRequestId ORDER BY c.createdAt DESC")
+    List<Contract> findBySaleRequestIdOrderByCreatedAtDesc(@Param("saleRequestId") String saleRequestId);
+
+    @Query("SELECT c FROM Contract c WHERE c.buyDataRequest.id = :buyRequestId ORDER BY c.createdAt DESC")
+    List<Contract> findByBuyRequestIdOrderByCreatedAtDesc(@Param("buyRequestId") String buyRequestId);
+
+
 }

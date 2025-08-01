@@ -1,10 +1,7 @@
 package com.ureka.team3.utong_backend.datatrade.dto;
 
 import com.ureka.team3.utong_backend.datatrade.entity.Contract;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -57,4 +54,17 @@ public class ContractDto {
 
         return contractDto;
     }
+
+    public static ContractDto ofWithoutAccount(Contract contract) {
+        ContractDto contractDto = new ContractDto();
+        contractDto.purchaseOrderId = contract.getBuyDataRequest().getId();
+        contractDto.saleOrderId = contract.getSaleDataRequest().getId();
+        contractDto.price = contract.getPrice();
+        contractDto.quantity = contract.getAmount();
+        contractDto.dataCode = contract.getBuyDataRequest().getDataCode();
+        contractDto.contractedAt = contract.getCreatedAt();
+
+        return contractDto;
+    }
+
 }
