@@ -3,6 +3,7 @@ package com.ureka.team3.utong_backend.datatrade.controller;
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.datatrade.alert.AlertService;
 import com.ureka.team3.utong_backend.datatrade.dto.ChartDataDto;
+import com.ureka.team3.utong_backend.datatrade.dto.OrdersQueueDto;
 import com.ureka.team3.utong_backend.datatrade.handler.SseHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,8 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequestMapping("/sse")
 public class SseController {
     private final AlertService alertService;
-    private final @Qualifier("chartSseHandler") SseHandler<ChartDataDto> sseHandler;
+    private final @Qualifier("chartSseHandler") SseHandler<ChartDataDto> chartSseHandler;
+        private final @Qualifier("orderQueueStatusSseHandler") SseHandler<OrdersQueueDto> queueSseHandler;
     @Operation(
             summary = "알림 전송 SSE 연결",
             description = "해당 사용자의 거래 체결 정보 알림을 전송하기 위한 SSE 연결"
@@ -35,7 +37,7 @@ public class SseController {
     )
     @GetMapping(value = "/chart", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamAllCurrentPrices() {
-        return sseHandler.connect("ALL_DATA");
+        return chartSseHandler.connect("ALL_DATA");
     }
 
     @Operation(
@@ -44,7 +46,7 @@ public class SseController {
     )
     @GetMapping(value = "/queue", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamAllOrderQueue() {
-        return sseHandler.connect("ALL_DATA");
+        return queueSseHandler.connect("ALL_DATA");
     }
 
 }
