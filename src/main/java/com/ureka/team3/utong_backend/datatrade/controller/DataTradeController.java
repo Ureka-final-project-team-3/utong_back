@@ -1,11 +1,15 @@
 package com.ureka.team3.utong_backend.datatrade.controller;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
+import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
 import com.ureka.team3.utong_backend.datatrade.dto.TradeHistoryRequestDto;
+import com.ureka.team3.utong_backend.datatrade.dto.WeeklyChartDto;
 import com.ureka.team3.utong_backend.datatrade.facade.DataTradeCancelFacade;
 import com.ureka.team3.utong_backend.datatrade.facade.DataTradeFacade;
+import com.ureka.team3.utong_backend.datatrade.service.chart.weekly.WeeklyPriceService;
 import com.ureka.team3.utong_backend.datatrade.service.query.TradeQueryService;
+import com.ureka.team3.utong_backend.datatrade.service.queue.OrderQueueStatusService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,8 @@ public class DataTradeController {
     private final DataTradeFacade dataTradeFacade;
     private final DataTradeCancelFacade dataTradeCancelFacade;
     private final TradeQueryService tradeQueryService;
+    private final WeeklyPriceService weeklyPriceService;
+    private final OrderQueueStatusService orderQueueStatusService;
 
     @Operation(summary = "내 구매내역 조회", description = "로그인한 사용자의 데이터 구매 내역을 조건에 따라 조회합니다.")
     @GetMapping("/purchase")
@@ -63,5 +69,19 @@ public class DataTradeController {
     public ResponseEntity cancelSaleWaiting(@AuthenticationPrincipal Account account, @RequestBody DataTradeDto.CancelWaitingTradeRequestDto requestDto) {
         log.info("로그인한 id : {}", account.getId());
         return ResponseEntity.ok(dataTradeCancelFacade.cancelSaleWaiting(account, requestDto));
+    }
+
+    @GetMapping("/weekly-prices/{dataCode}")
+    public ResponseEntity<ApiResponse<WeeklyChartDto>> getWeeklyPrices(@PathVariable("dataCode") String dataCode) {
+        return ResponseEntity.ok(weeklyPriceService.getWeeklyPrice(dataCode));
+    }
+
+    @Operation(
+            summary = "현재 전체 주문 대기열 상태 조회",
+            description = "현재 등록된 모든 데이터 코드에 대한 주문 대기열 상태를 조회합니다."
+    )
+    @GetMapping("/api/data/order-queue")
+    public ResponseEntity<ApiResponse> getAllOrderQueue() {
+        return ResponseEntity.ok(orderQueueStatusService.getCurrentAllQueue());
     }
 }
