@@ -33,7 +33,7 @@ public class SseController {
             summary = "전체 데이터 실시간 가격 스트리밍",
             description = "SSE(Server-Sent Events)를 통해 전체 데이터 코드의 실시간 가격 정보를 스트리밍합니다."
     )
-    @GetMapping(value = "/current-prices/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/chart", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamAllCurrentPrices() {
         return sseHandler.connect("ALL_DATA");
     }
@@ -42,7 +42,7 @@ public class SseController {
             summary = "실시간 주문 대기열 스트리밍",
             description = "SSE(Server-Sent Events)를 통해 모든 데이터 코드의 주문 대기열 상태를 실시간으로 스트리밍합니다."
     )
-    @GetMapping(value = "/order-queue/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/queue", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamAllOrderQueue() {
         return sseHandler.connect("ALL_DATA");
     }
