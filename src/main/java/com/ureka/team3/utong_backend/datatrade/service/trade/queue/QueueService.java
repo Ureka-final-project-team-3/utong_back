@@ -4,7 +4,7 @@ import com.ureka.team3.utong_backend.datatrade.dto.trade.OrderDto;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.SaleDataRequest;
 
-public interface TradeOrderQueueService {
+public interface QueueService {
     Long getLoweSellPriceByDataCode(String dataCode);
 
     OrderDto popValidSellOrder(String dataCode, Long targetPrice);
@@ -14,8 +14,6 @@ public interface TradeOrderQueueService {
     void addToBuyOrderQueue(BuyDataRequest order, long remain);
 
     void addToSaleOrderQueue(SaleDataRequest order, long remain);
-
-    OrderDto peekValidSellOrder(String dataCode, Long targetPrice);
 
     Long getHighestBuyPrice(String dataCode);
 

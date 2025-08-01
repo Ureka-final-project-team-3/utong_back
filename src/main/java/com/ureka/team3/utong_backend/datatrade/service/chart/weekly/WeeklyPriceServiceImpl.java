@@ -5,7 +5,7 @@ import com.ureka.team3.utong_backend.common.exception.BusinessException;
 import com.ureka.team3.utong_backend.common.exception.ErrorCode;
 import com.ureka.team3.utong_backend.datatrade.dto.chart.DailyChartDto;
 import com.ureka.team3.utong_backend.datatrade.dto.chart.WeeklyChartDto;
-import com.ureka.team3.utong_backend.datatrade.repository.ContractRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.perman.ContractRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

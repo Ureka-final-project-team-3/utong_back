@@ -1,7 +1,7 @@
 package com.ureka.team3.utong_backend.datatrade.domain.result;
 
 import com.ureka.team3.utong_backend.datatrade.dto.trade.DataTradeDto;
-import com.ureka.team3.utong_backend.datatrade.enums.BuyMatchingStatus;
+import com.ureka.team3.utong_backend.datatrade.enums.PurchaseMatchingStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -9,8 +9,8 @@ import java.util.List;
 
 @Getter
 @Builder
-public class BuyMatchingResult implements MatchingResult {
-    private BuyMatchingStatus buyMatchingStatus;
+public class PurchaseMatchingResult implements MatchingResult {
+    private PurchaseMatchingStatus purchaseMatchingStatus;
     private List<TradeMatch> matchList;
     private Long request = 0L;
     private Long used;
@@ -18,19 +18,19 @@ public class BuyMatchingResult implements MatchingResult {
     private String dataCode;
     private Long price;
 
-    public static BuyMatchingResult of(List<TradeMatch> matches, DataTradeDto.DataTradeRequestDto requestDto) {
+    public static PurchaseMatchingResult of(List<TradeMatch> matches, DataTradeDto.DataTradeRequestDto requestDto) {
         long request = requestDto.getDataAmount();
         long used = matches.stream()
                 .mapToLong(TradeMatch::getAmount)
                 .sum();
         long remain = request-used;
 
-        BuyMatchingStatus status = (remain == 0)
-                ? BuyMatchingStatus.ALL_MATCHED
-                : BuyMatchingStatus.PART_MATCHED;
+        PurchaseMatchingStatus status = (remain == 0)
+                ? PurchaseMatchingStatus.ALL_MATCHED
+                : PurchaseMatchingStatus.PART_MATCHED;
 
-        return BuyMatchingResult.builder()
-                .buyMatchingStatus(status)
+        return PurchaseMatchingResult.builder()
+                .purchaseMatchingStatus(status)
                 .matchList(matches)
                 .request(request)
                 .used(used)
@@ -40,9 +40,9 @@ public class BuyMatchingResult implements MatchingResult {
                 .build();
     }
 
-    public static BuyMatchingResult underMinimumPrice(DataTradeDto.DataTradeRequestDto requestDto) {
-        return BuyMatchingResult.builder()
-                .buyMatchingStatus(BuyMatchingStatus.UNDER_MINIMUM_SALE_PRICE)
+    public static PurchaseMatchingResult underMinimumPrice(DataTradeDto.DataTradeRequestDto requestDto) {
+        return PurchaseMatchingResult.builder()
+                .purchaseMatchingStatus(PurchaseMatchingStatus.UNDER_MINIMUM_SALE_PRICE)
                 .price(requestDto.getPrice())
                 .used(0L)
                 .dataCode(requestDto.getDataCode())

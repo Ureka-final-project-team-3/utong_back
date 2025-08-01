@@ -2,6 +2,7 @@ package com.ureka.team3.utong_backend.datatrade.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ureka.team3.utong_backend.datatrade.dto.trade.OrderDto;
+import com.ureka.team3.utong_backend.datatrade.repository.cache.OrderRepositoryImpl;
 import com.ureka.team3.utong_backend.datatrade.utils.RedisKeyUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

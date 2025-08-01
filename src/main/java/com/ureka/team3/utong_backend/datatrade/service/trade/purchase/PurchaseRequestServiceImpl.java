@@ -6,19 +6,19 @@ import com.ureka.team3.utong_backend.datatrade.config.DataTradePolicy;
 import com.ureka.team3.utong_backend.datatrade.dto.trade.DataTradeDto;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.enums.BuyOrderResult;
-import com.ureka.team3.utong_backend.datatrade.repository.BuyDataRequestRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.perman.PurchaseRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class BuyDataRequestServiceImpl implements BuyDataRequestService {
-    private final BuyDataRequestRepository buyDataRequestRepository;
+public class PurchaseRequestServiceImpl implements PurchaseRequestService {
+    private final PurchaseRequestRepository purchaseRequestRepository;
     private final DataTradePolicy dataTradePolicy;
 
     @Override
     public BuyDataRequest save(Account account, DataTradeDto.DataTradeRequestDto dto) {
-        return buyDataRequestRepository.save(BuyDataRequest.builder()
+        return purchaseRequestRepository.save(BuyDataRequest.builder()
                 .price(dto.getPrice())
                 .account(account)
                 .quantity(dto.getDataAmount())
@@ -31,7 +31,7 @@ public class BuyDataRequestServiceImpl implements BuyDataRequestService {
 
     @Override
     public BuyDataRequest findBuyOrderById(String buyOrderId) {
-        return buyDataRequestRepository.findById(buyOrderId).orElseThrow(OrderNotFoundException::new);
+        return purchaseRequestRepository.findById(buyOrderId).orElseThrow(OrderNotFoundException::new);
     }
 
     @Override

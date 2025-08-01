@@ -5,7 +5,7 @@ import com.ureka.team3.utong_backend.datatrade.dto.trade.DataTradeDto;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.enums.BuyOrderResult;
 
-public interface BuyDataRequestService {
+public interface PurchaseRequestService {
     BuyDataRequest save(Account account, DataTradeDto.DataTradeRequestDto dto);
 
     BuyDataRequest findBuyOrderById(String buyOrderId);

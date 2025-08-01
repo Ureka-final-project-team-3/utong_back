@@ -8,22 +8,22 @@ import com.ureka.team3.utong_backend.datatrade.dto.trade.DataTradeDto;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.SaleDataRequest;
 import com.ureka.team3.utong_backend.datatrade.enums.RequestType;
-import com.ureka.team3.utong_backend.datatrade.processor.BuyMatchingProcessor;
+import com.ureka.team3.utong_backend.datatrade.processor.PurchaseMatchingProcessor;
 import com.ureka.team3.utong_backend.datatrade.processor.SaleMatchingProcessor;
 import com.ureka.team3.utong_backend.datatrade.processor.TradeProcessor;
-import com.ureka.team3.utong_backend.datatrade.domain.result.BuyMatchingResult;
+import com.ureka.team3.utong_backend.datatrade.domain.result.PurchaseMatchingResult;
 import com.ureka.team3.utong_backend.datatrade.domain.result.SaleMatchingResult;
 import com.ureka.team3.utong_backend.datatrade.domain.result.TradeMatch;
-import com.ureka.team3.utong_backend.datatrade.service.trade.purchase.BuyDataRequestService;
-import com.ureka.team3.utong_backend.datatrade.service.trade.queue.OrderRecoveryService;
-import com.ureka.team3.utong_backend.datatrade.service.trade.queue.TradeOrderQueueService;
-import com.ureka.team3.utong_backend.datatrade.service.trade.sale.SaleDataRequestService;
+import com.ureka.team3.utong_backend.datatrade.service.trade.purchase.PurchaseRequestService;
+import com.ureka.team3.utong_backend.datatrade.processor.OrderRecoveryProcessorImpl;
+import com.ureka.team3.utong_backend.datatrade.service.trade.queue.QueueService;
+import com.ureka.team3.utong_backend.datatrade.service.trade.sale.SaleRequestService;
 import com.ureka.team3.utong_backend.datatrade.utils.TradeResponseFactory;
 import com.ureka.team3.utong_backend.datatrade.utils.TradeValidator;
 import com.ureka.team3.utong_backend.line.service.LineService;
 //import com.ureka.team3.utong_backend.publisher.TradeExecutePublisher;
 import com.ureka.team3.utong_backend.datatrade.messaging.publisher.TradeExecutePublisher;
-import com.ureka.team3.utong_backend.datatrade.messaging.publisher.dto.TradeExecutedMessage;
+import com.ureka.team3.utong_backend.datatrade.messaging.message.TradeExecutedMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,64 +38,64 @@ import java.util.List;
 public class DataTradeFacadeImpl implements DataTradeFacade {
 
     private final TradeValidator tradeValidator;
-    private final BuyDataRequestService buyDataRequestService;
-    private final BuyMatchingProcessor buyMatchingProcessor;
-    private final SaleDataRequestService saleDataRequestService;
+    private final PurchaseRequestService purchaseRequestService;
+    private final PurchaseMatchingProcessor purchaseMatchingProcessor;
+    private final SaleRequestService saleRequestService;
     private final LineService lineService;
     private final SaleMatchingProcessor saleMatchingProcessor;
     private final AccountService accountService;
     private final TradeExecutePublisher tradeExecutePublisher;
-    private final OrderRecoveryService orderRecoveryService;
+    private final OrderRecoveryProcessorImpl orderRecoveryProcessorImpl;
     private final TradeProcessor tradeProcessor;
-    private final TradeOrderQueueService tradeOrderQueueService;
+    private final QueueService queueService;
 
     @Override
     @Transactional
     public ApiResponse requestBuy(Account account, DataTradeDto.DataTradeRequestDto dto) {
-        BuyMatchingResult buyMatchingResult = null;
+        PurchaseMatchingResult purchaseMatchingResult = null;
         List<ContractDto> contractDtoList = new ArrayList<>();
         try {
             account = accountService.findById(account.getId());
             // 1. 검증
             tradeValidator.validatePurchase(account, dto);
             // 2. 저장
-            BuyDataRequest saved = buyDataRequestService.save(account, dto);
+            BuyDataRequest saved = purchaseRequestService.save(account, dto);
             // 3. 매칭
-            buyMatchingResult = buyMatchingProcessor.handle(dto);
-            if(!buyMatchingResult.getBuyMatchingStatus().isWaitingOnly()){
-                for (TradeMatch tradeMatch : buyMatchingResult.getMatchList()) {
+            purchaseMatchingResult = purchaseMatchingProcessor.handle(dto);
+            if(!purchaseMatchingResult.getPurchaseMatchingStatus().isWaitingOnly()){
+                for (TradeMatch tradeMatch : purchaseMatchingResult.getMatchList()) {
                     ContractDto contractDto = tradeProcessor.processBuyMatches(saved, tradeMatch);
                     contractDtoList.add(contractDto);
                     account.decreasePoint(contractDto.getPrice()*contractDto.getQuantity());
                 }
             }
-            account.decreasePoint(buyMatchingResult.getRemain()*dto.getPrice());
-            if(!buyMatchingResult.getBuyMatchingStatus().isAllMatched()){
-                tradeOrderQueueService.addToBuyOrderQueue(saved,buyMatchingResult.getRemain());
+            account.decreasePoint(purchaseMatchingResult.getRemain()*dto.getPrice());
+            if(!purchaseMatchingResult.getPurchaseMatchingStatus().isAllMatched()){
+                queueService.addToBuyOrderQueue(saved, purchaseMatchingResult.getRemain());
             }
             // 5. 결과 처리
-            ApiResponse response = buildPurchaseResponse(buyMatchingResult);
+            ApiResponse response = buildPurchaseResponse(purchaseMatchingResult);
 
             // 6. 메시지 발행
-            TradeExecutedMessage message = buildPurchaseExecutedMessage(buyMatchingResult,contractDtoList);
+            TradeExecutedMessage message = buildPurchaseExecutedMessage(purchaseMatchingResult,contractDtoList);
             tradeExecutePublisher.publish(message);
 
             return response;
         } catch (Exception e) {
-            if(buyMatchingResult!=null)
-                orderRecoveryService.restoreSellOrdersOnFailure(buyMatchingResult);
+            if(purchaseMatchingResult !=null)
+                orderRecoveryProcessorImpl.restoreSellOrdersOnFailure(purchaseMatchingResult);
             throw e;
         }
     }
 
-    private static ApiResponse buildPurchaseResponse(BuyMatchingResult buyMatchingResult) {
+    private static ApiResponse buildPurchaseResponse(PurchaseMatchingResult purchaseMatchingResult) {
         ApiResponse response;
-        switch (buyMatchingResult.getBuyMatchingStatus()) {
+        switch (purchaseMatchingResult.getPurchaseMatchingStatus()) {
             case ALL_MATCHED -> {
                 response = TradeResponseFactory.successPurchaseComplete();
             }
             case PART_MATCHED -> {
-                response = TradeResponseFactory.successPurchasePartComplete(buyMatchingResult);
+                response = TradeResponseFactory.successPurchasePartComplete(purchaseMatchingResult);
             }
             case UNDER_MINIMUM_SALE_PRICE -> {
                 response = TradeResponseFactory.waitingPurchase();
@@ -106,15 +106,15 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
     }
 
 
-    private TradeExecutedMessage buildPurchaseExecutedMessage(BuyMatchingResult buyMatchingResult, List<ContractDto> contractDtoList) {
-        long remain = buyMatchingResult.getRemain() != null ? buyMatchingResult.getRemain() : 0L;
+    private TradeExecutedMessage buildPurchaseExecutedMessage(PurchaseMatchingResult purchaseMatchingResult, List<ContractDto> contractDtoList) {
+        long remain = purchaseMatchingResult.getRemain() != null ? purchaseMatchingResult.getRemain() : 0L;
         String requestOrderId = contractDtoList.isEmpty()? null: contractDtoList.get(0).getPurchaseOrderId();
         return TradeExecutedMessage.builder()
-                .dataCode(buyMatchingResult.getDataCode()) // 반드시 null 아님 확인
+                .dataCode(purchaseMatchingResult.getDataCode()) // 반드시 null 아님 확인
                 .requestType(RequestType.PURCHASE)
-                .matchedList(buyMatchingResult.getMatchList())
+                .matchedList(purchaseMatchingResult.getMatchList())
                 .remain(remain)
-                .requestPrice(buyMatchingResult.getPrice())
+                .requestPrice(purchaseMatchingResult.getPrice())
                 .newContracts(contractDtoList)
                 .requestOrderId(requestOrderId)
                 .build();
@@ -131,7 +131,7 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
             String defaultLineId = account.getDefaultLine();
             tradeValidator.validateSale(defaultLineId, dto);
 
-            SaleDataRequest saved = saleDataRequestService.save(account, dto);
+            SaleDataRequest saved = saleRequestService.save(account, dto);
             lineService.saleData(saved.getLineId(), dto.getDataAmount());  // 데이터 차감
             saleMatchingResult = saleMatchingProcessor.handle(dto);
             if(!saleMatchingResult.getSaleMatchingStatus().isWaitingOnly()){
@@ -142,7 +142,7 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
             }
 
             if(!saleMatchingResult.getSaleMatchingStatus().isAllMatched()){
-                tradeOrderQueueService.addToSaleOrderQueue(saved,saleMatchingResult.getRemain());
+                queueService.addToSaleOrderQueue(saved,saleMatchingResult.getRemain());
             }
             ApiResponse response;
             response = buildSaleApiResponse(saleMatchingResult);
@@ -151,7 +151,7 @@ public class DataTradeFacadeImpl implements DataTradeFacade {
             return response;
         }catch (Exception e){
             if(saleMatchingResult!=null)
-                orderRecoveryService.restoreBuyOrdersOnFailure(saleMatchingResult);
+                orderRecoveryProcessorImpl.restoreBuyOrdersOnFailure(saleMatchingResult);
             throw e;
         }
 

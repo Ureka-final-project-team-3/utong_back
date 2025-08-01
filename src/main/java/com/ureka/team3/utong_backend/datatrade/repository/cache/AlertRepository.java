@@ -1,4 +1,4 @@
-package com.ureka.team3.utong_backend.datatrade.repository;
+package com.ureka.team3.utong_backend.datatrade.repository.cache;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;

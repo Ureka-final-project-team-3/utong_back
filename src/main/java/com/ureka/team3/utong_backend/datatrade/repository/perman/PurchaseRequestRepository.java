@@ -1,4 +1,4 @@
-package com.ureka.team3.utong_backend.datatrade.repository;
+package com.ureka.team3.utong_backend.datatrade.repository.perman;
 
 import com.ureka.team3.utong_backend.datatrade.domain.entity.BuyDataRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,10 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface BuyDataRequestRepository extends JpaRepository<BuyDataRequest, String> {
-    @Query("SELECT COUNT(bdr) > 0 FROM BuyDataRequest bdr WHERE bdr.lineId = :lineId AND (bdr.status = '002' or bdr.status='003')")
-    boolean existsWaitingRequestByLineId(@Param("lineId") String id);
-
+public interface PurchaseRequestRepository extends JpaRepository<BuyDataRequest, String> {
     // 본인 구매 대기 내역 조회
     @Query("""
         SELECT b FROM BuyDataRequest b

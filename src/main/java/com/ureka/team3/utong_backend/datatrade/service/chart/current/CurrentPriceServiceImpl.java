@@ -4,7 +4,7 @@ import com.ureka.team3.utong_backend.common.entity.Code;
 import com.ureka.team3.utong_backend.datatrade.config.DataTradePolicy;
 import com.ureka.team3.utong_backend.datatrade.dto.chart.AvgPerHour;
 import com.ureka.team3.utong_backend.datatrade.dto.chart.ChartDataDto;
-import com.ureka.team3.utong_backend.datatrade.repository.ContractHourlyAvgPriceRedisRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.cache.ContractHourlyAvgPriceRedisRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

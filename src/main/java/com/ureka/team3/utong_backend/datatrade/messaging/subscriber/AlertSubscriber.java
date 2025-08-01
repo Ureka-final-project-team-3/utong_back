@@ -2,7 +2,7 @@ package com.ureka.team3.utong_backend.datatrade.messaging.subscriber;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ureka.team3.utong_backend.datatrade.service.AlertServiceImpl;
+import com.ureka.team3.utong_backend.datatrade.service.alert.AlertServiceImpl;
 import com.ureka.team3.utong_backend.datatrade.dto.alert.ContractAlertDto;
 import com.ureka.team3.utong_backend.datatrade.messaging.message.AlertMessage;
 import lombok.RequiredArgsConstructor;

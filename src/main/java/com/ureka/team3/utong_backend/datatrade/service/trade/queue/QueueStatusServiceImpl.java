@@ -1,4 +1,4 @@
-package com.ureka.team3.utong_backend.datatrade.service.queue;
+package com.ureka.team3.utong_backend.datatrade.service.trade.queue;
 
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.common.entity.Code;
@@ -10,8 +10,8 @@ import com.ureka.team3.utong_backend.datatrade.dto.query.OrderExceptTimeDto;
 import com.ureka.team3.utong_backend.datatrade.dto.trade.ContractDto;
 import com.ureka.team3.utong_backend.datatrade.dto.trade.OrderDto;
 import com.ureka.team3.utong_backend.datatrade.dto.trade.OrdersQueueDto;
-import com.ureka.team3.utong_backend.datatrade.repository.ContractQueueRepository;
-import com.ureka.team3.utong_backend.datatrade.repository.OrderRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.cache.ContractQueueRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.perman.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class OrderQueueStatusServiceImpl implements OrderQueueStatusService {
+public class QueueStatusServiceImpl implements QueueStatusService {
 
     private final OrderRepository orderRepository;
     private final ContractQueueRepository contractQueueRepository;

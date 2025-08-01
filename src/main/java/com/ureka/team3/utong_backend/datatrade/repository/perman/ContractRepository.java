@@ -1,4 +1,4 @@
-package com.ureka.team3.utong_backend.datatrade.repository;
+package com.ureka.team3.utong_backend.datatrade.repository.perman;
 
 import com.ureka.team3.utong_backend.datatrade.domain.entity.Contract;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,7 +11,6 @@ import java.util.List;
 
 @Repository
 public interface ContractRepository extends JpaRepository<Contract, String> {
-
     // 구매 완료
     @Query("""
         SELECT c FROM Contract c
@@ -35,7 +34,6 @@ public interface ContractRepository extends JpaRepository<Contract, String> {
             @Param("accountId") String accountId,
             @Param("fromDate") LocalDateTime fromDate
     );
-
 
     // 최근 N 일간의 일별 평균 가격을 조회하는 메서드
     @Query(value = """

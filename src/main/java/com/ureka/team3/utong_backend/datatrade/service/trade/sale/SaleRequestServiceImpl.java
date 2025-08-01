@@ -6,19 +6,19 @@ import com.ureka.team3.utong_backend.datatrade.config.DataTradePolicy;
 import com.ureka.team3.utong_backend.datatrade.dto.trade.DataTradeDto;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.SaleDataRequest;
 import com.ureka.team3.utong_backend.datatrade.enums.SaleOrderResult;
-import com.ureka.team3.utong_backend.datatrade.repository.SaleDataRequestRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.perman.SaleRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class SaleDataRequestServiceImpl implements SaleDataRequestService {
-    private final SaleDataRequestRepository saleDataRequestRepository;
+public class SaleRequestServiceImpl implements SaleRequestService {
+    private final SaleRequestRepository saleRequestRepository;
     private final DataTradePolicy dataTradePolicy;
 
     @Override
     public SaleDataRequest save(Account account, DataTradeDto.DataTradeRequestDto dto) {
-        return saleDataRequestRepository.save(SaleDataRequest.builder()
+        return saleRequestRepository.save(SaleDataRequest.builder()
                 .price(dto.getPrice())
                 .account(account)
                 .quantity(dto.getDataAmount())
@@ -31,7 +31,7 @@ public class SaleDataRequestServiceImpl implements SaleDataRequestService {
 
     @Override
     public SaleDataRequest findSaleOrderById(String saleOrderId) {
-        return saleDataRequestRepository.findById(saleOrderId).orElseThrow(OrderNotFoundException::new);
+        return saleRequestRepository.findById(saleOrderId).orElseThrow(OrderNotFoundException::new);
     }
 
     @Override

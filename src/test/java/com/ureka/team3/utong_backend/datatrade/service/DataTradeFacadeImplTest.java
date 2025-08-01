@@ -8,9 +8,9 @@ import com.ureka.team3.utong_backend.datatrade.dto.trade.OrderDto;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.SaleDataRequest;
 import com.ureka.team3.utong_backend.datatrade.facade.DataTradeFacadeImpl;
-import com.ureka.team3.utong_backend.datatrade.repository.BuyDataRequestRepository;
-import com.ureka.team3.utong_backend.datatrade.repository.OrderRepositoryImpl;
-import com.ureka.team3.utong_backend.datatrade.repository.SaleDataRequestRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.perman.PurchaseRequestRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.cache.OrderRepositoryImpl;
+import com.ureka.team3.utong_backend.datatrade.repository.perman.SaleRequestRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,10 +34,10 @@ class DataTradeFacadeImplTest {
     private DataTradeFacadeImpl dataTradeService;
 
     @Mock
-    private SaleDataRequestRepository saleDataRequestRepository;
+    private SaleRequestRepository saleRequestRepository;
 
     @Mock
-    private BuyDataRequestRepository buyDataRequestRepository;
+    private PurchaseRequestRepository purchaseRequestRepository;
 
     @Mock
     private AccountRepository accountRepository;
@@ -69,7 +69,7 @@ class DataTradeFacadeImplTest {
         ReflectionTestUtils.setField(saved, "expiredAt", LocalDateTime.now().plusHours(2));
         ReflectionTestUtils.setField(saved, "id", "123"); // ID도 세팅
 
-        when(buyDataRequestRepository.save(any())).thenReturn(saved);
+        when(purchaseRequestRepository.save(any())).thenReturn(saved);
 
         // when
         ApiResponse response = dataTradeService.requestBuy(account, dto);
@@ -103,7 +103,7 @@ class DataTradeFacadeImplTest {
         ReflectionTestUtils.setField(saved, "createdAt", LocalDateTime.now());
         ReflectionTestUtils.setField(saved, "expiredAt", LocalDateTime.now().plusDays(1));
 
-        when(saleDataRequestRepository.save(any())).thenReturn(saved);
+        when(saleRequestRepository.save(any())).thenReturn(saved);
 
         // when
         ApiResponse response = dataTradeService.requestSale(account, dto);

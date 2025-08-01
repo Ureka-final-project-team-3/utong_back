@@ -3,8 +3,8 @@ package com.ureka.team3.utong_backend.datatrade.utils;
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.common.exception.business.*;
 import com.ureka.team3.utong_backend.datatrade.dto.trade.DataTradeDto;
-import com.ureka.team3.utong_backend.datatrade.repository.BuyDataRequestRepository;
-import com.ureka.team3.utong_backend.datatrade.repository.SaleDataRequestRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.perman.PurchaseRequestRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.perman.SaleRequestRepository;
 import com.ureka.team3.utong_backend.line.entity.Line;
 import com.ureka.team3.utong_backend.line.entity.LineData;
 import com.ureka.team3.utong_backend.line.service.LineService;
@@ -18,9 +18,9 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class TradeValidator {
     private final LineService lineService;
-    private final SaleDataRequestRepository saleDataRequestRepository;
+    private final SaleRequestRepository saleRequestRepository;
     private final TradeCalculator tradeCalculator;
-    private final BuyDataRequestRepository buyDataRequestRepository;
+    private final PurchaseRequestRepository purchaseRequestRepository;
 
     public void validatePurchase(Account account, DataTradeDto.DataTradeRequestDto dto) {
         String defaultLineId = account.getDefaultLine();

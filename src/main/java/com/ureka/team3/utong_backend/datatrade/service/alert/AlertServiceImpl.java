@@ -1,9 +1,9 @@
-package com.ureka.team3.utong_backend.datatrade.service;
+package com.ureka.team3.utong_backend.datatrade.service.alert;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ureka.team3.utong_backend.auth.entity.Account;
-import com.ureka.team3.utong_backend.datatrade.repository.AlertRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.cache.AlertRepository;
 import com.ureka.team3.utong_backend.datatrade.dto.alert.ContractAlertDto;
 import com.ureka.team3.utong_backend.datatrade.handler.AlertSseHandler;
 import lombok.RequiredArgsConstructor;

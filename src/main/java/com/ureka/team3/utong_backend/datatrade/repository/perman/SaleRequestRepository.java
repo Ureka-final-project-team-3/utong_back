@@ -1,4 +1,4 @@
-package com.ureka.team3.utong_backend.datatrade.repository;
+package com.ureka.team3.utong_backend.datatrade.repository.perman;
 
 import com.ureka.team3.utong_backend.datatrade.domain.entity.SaleDataRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,10 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface SaleDataRequestRepository extends JpaRepository<SaleDataRequest, String> {
-    @Query("SELECT COUNT(sdr) > 0 FROM SaleDataRequest sdr WHERE sdr.lineId = :lineId AND (sdr.status = '002' or sdr.status='003')")
-    boolean existsWaitingRequestByLineId(@Param("lineId") String id);
-
+public interface SaleRequestRepository extends JpaRepository<SaleDataRequest, String> {
     // 본인 판매 대기 내역 조회
     @Query("""
         SELECT s FROM SaleDataRequest s

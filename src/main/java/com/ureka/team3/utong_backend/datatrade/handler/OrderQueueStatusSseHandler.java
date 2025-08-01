@@ -1,7 +1,7 @@
 package com.ureka.team3.utong_backend.datatrade.handler;
 
 import com.ureka.team3.utong_backend.datatrade.dto.trade.OrdersQueueDto;
-import com.ureka.team3.utong_backend.datatrade.service.queue.OrderQueueStatusService;
+import com.ureka.team3.utong_backend.datatrade.service.trade.queue.QueueStatusService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,7 +22,7 @@ import static com.ureka.team3.utong_backend.datatrade.config.DataTradePolicy.SSE
 public class OrderQueueStatusSseHandler implements SseHandler<OrdersQueueDto> {
 
     private final ConcurrentHashMap<String, Set<SseEmitter>> emitterMap = new ConcurrentHashMap<>();
-    private final OrderQueueStatusService orderQueueStatusService;
+    private final QueueStatusService queueStatusService;
     private static final String TOPIC ="queue-initial-data";
     private static final String ALL_DATA_TOPIC = "all-queue-initial-data";
     private static final String ALL_DATA_KEY = "ALL_DATA";
@@ -48,13 +48,13 @@ public class OrderQueueStatusSseHandler implements SseHandler<OrdersQueueDto> {
         // 이니셜 데이터 가져오기
         try {
             if(ALL_DATA_KEY.equals(dataCode)) {
-                List<OrdersQueueDto> allInitData = orderQueueStatusService.getAllInitData();
+                List<OrdersQueueDto> allInitData = queueStatusService.getAllInitData();
 
                 emitter.send(SseEmitter.event()
                         .name(ALL_DATA_TOPIC)
                         .data(allInitData));
             } else {
-                OrdersQueueDto initData = orderQueueStatusService.getInitData(dataCode);
+                OrdersQueueDto initData = queueStatusService.getInitData(dataCode);
                 emitter.send(SseEmitter.event()
                         .name(TOPIC)
                         .data(initData));

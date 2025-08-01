@@ -3,7 +3,7 @@ package com.ureka.team3.utong_backend.datatrade.service.trade.queue;
 import com.ureka.team3.utong_backend.datatrade.dto.trade.OrderDto;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.SaleDataRequest;
-import com.ureka.team3.utong_backend.datatrade.repository.OrderRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.perman.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import static com.ureka.team3.utong_backend.datatrade.utils.TimeUtil.toEpochMill
 
 @Service
 @RequiredArgsConstructor
-public class TradeOrderQueueServiceImpl implements TradeOrderQueueService {
+public class QueueServiceImpl implements QueueService {
     private final OrderRepository orderRepository;
 
     @Override
@@ -53,11 +53,6 @@ public class TradeOrderQueueServiceImpl implements TradeOrderQueueService {
                 .price(order.getPrice())
                 .build();
         orderRepository.saveSellOrder(orderDto);
-    }
-
-    @Override
-    public OrderDto peekValidSellOrder(String dataCode, Long targetPrice) {
-        return null;
     }
 
     @Override

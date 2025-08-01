@@ -1,4 +1,4 @@
-package com.ureka.team3.utong_backend.datatrade.messaging.publisher.dto;
+package com.ureka.team3.utong_backend.datatrade.messaging.message;
 
 import com.ureka.team3.utong_backend.datatrade.dto.trade.ContractDto;
 import com.ureka.team3.utong_backend.datatrade.domain.result.TradeMatch;
