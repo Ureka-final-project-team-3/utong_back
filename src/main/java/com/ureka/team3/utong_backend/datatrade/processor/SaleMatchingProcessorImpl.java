@@ -1,7 +1,10 @@
 package com.ureka.team3.utong_backend.datatrade.processor;
 
-import com.ureka.team3.utong_backend.datatrade.dto.*;
-import com.ureka.team3.utong_backend.datatrade.service.trade.queue.TradeOrderQueueService;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.DataTradeDto;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.OrderDto;
+import com.ureka.team3.utong_backend.datatrade.domain.result.SaleMatchingResult;
+import com.ureka.team3.utong_backend.datatrade.domain.result.TradeMatch;
+import com.ureka.team3.utong_backend.datatrade.service.trade.queue.QueueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,11 +14,11 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class SaleMatchingProcessorImpl implements SaleMatchingProcessor {
-    private final TradeOrderQueueService tradeOrderQueueService;
+    private final QueueService queueService;
 
     @Override
     public SaleMatchingResult handle(DataTradeDto.DataTradeRequestDto request) {
-        Long highestBuyPrice = tradeOrderQueueService.getHighestBuyPrice(request.getDataCode());
+        Long highestBuyPrice = queueService.getHighestBuyPrice(request.getDataCode());
         long remaining = request.getDataAmount();
 
         if (highestBuyPrice == null || request.getPrice() > highestBuyPrice) {
@@ -33,7 +36,7 @@ public class SaleMatchingProcessorImpl implements SaleMatchingProcessor {
 
         while (remaining > 0) {
             // 구매자 대기 주문 중 가장 높은 가격을 가진 유효한 주문을 꺼낸다
-            OrderDto buyOrder = tradeOrderQueueService.popValidBuyOrder(saleRequest.getDataCode(), saleRequest.getPrice());
+            OrderDto buyOrder = queueService.popValidBuyOrder(saleRequest.getDataCode(), saleRequest.getPrice());
             if (buyOrder == null) break;
 
             long available = buyOrder.getQuantity();
@@ -45,7 +48,7 @@ public class SaleMatchingProcessorImpl implements SaleMatchingProcessor {
             // 구매자가 원하는 양이 일부 남았다면 재삽입
             if (available > used) {
                 buyOrder.setQuantity(available - used);
-                tradeOrderQueueService.requeuePartialBuyOrder(buyOrder);
+                queueService.requeuePartialBuyOrder(buyOrder);
             }
         }
 

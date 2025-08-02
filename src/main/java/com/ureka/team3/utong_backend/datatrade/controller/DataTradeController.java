@@ -2,14 +2,14 @@ package com.ureka.team3.utong_backend.datatrade.controller;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
-import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
-import com.ureka.team3.utong_backend.datatrade.dto.TradeHistoryRequestDto;
-import com.ureka.team3.utong_backend.datatrade.dto.WeeklyChartDto;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.DataTradeDto;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.TradeHistoryRequestDto;
+import com.ureka.team3.utong_backend.datatrade.dto.chart.WeeklyChartDto;
 import com.ureka.team3.utong_backend.datatrade.facade.DataTradeCancelFacade;
 import com.ureka.team3.utong_backend.datatrade.facade.DataTradeFacade;
 import com.ureka.team3.utong_backend.datatrade.service.chart.weekly.WeeklyPriceService;
 import com.ureka.team3.utong_backend.datatrade.service.query.TradeQueryService;
-import com.ureka.team3.utong_backend.datatrade.service.queue.OrderQueueStatusService;
+import com.ureka.team3.utong_backend.datatrade.service.trade.queue.QueueStatusService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public class DataTradeController {
     private final DataTradeCancelFacade dataTradeCancelFacade;
     private final TradeQueryService tradeQueryService;
     private final WeeklyPriceService weeklyPriceService;
-    private final OrderQueueStatusService orderQueueStatusService;
+    private final QueueStatusService queueStatusService;
 
     @Operation(summary = "내 구매내역 조회", description = "로그인한 사용자의 데이터 구매 내역을 조건에 따라 조회합니다.")
     @GetMapping("/purchase")
@@ -82,6 +82,6 @@ public class DataTradeController {
     )
     @GetMapping("/api/data/order-queue")
     public ResponseEntity<ApiResponse> getAllOrderQueue() {
-        return ResponseEntity.ok(orderQueueStatusService.getCurrentAllQueue());
+        return ResponseEntity.ok(queueStatusService.getCurrentAllQueue());
     }
 }

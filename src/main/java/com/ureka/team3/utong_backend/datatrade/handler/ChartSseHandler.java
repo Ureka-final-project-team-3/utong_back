@@ -1,6 +1,6 @@
 package com.ureka.team3.utong_backend.datatrade.handler;
 
-import com.ureka.team3.utong_backend.datatrade.dto.ChartDataDto;
+import com.ureka.team3.utong_backend.datatrade.dto.chart.ChartDataDto;
 import com.ureka.team3.utong_backend.datatrade.service.chart.current.CurrentPriceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

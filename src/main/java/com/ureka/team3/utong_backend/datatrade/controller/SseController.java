@@ -1,9 +1,9 @@
 package com.ureka.team3.utong_backend.datatrade.controller;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
-import com.ureka.team3.utong_backend.datatrade.alert.AlertService;
-import com.ureka.team3.utong_backend.datatrade.dto.ChartDataDto;
-import com.ureka.team3.utong_backend.datatrade.dto.OrdersQueueDto;
+import com.ureka.team3.utong_backend.datatrade.service.alert.AlertService;
+import com.ureka.team3.utong_backend.datatrade.dto.chart.ChartDataDto;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.OrdersQueueDto;
 import com.ureka.team3.utong_backend.datatrade.handler.SseHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;

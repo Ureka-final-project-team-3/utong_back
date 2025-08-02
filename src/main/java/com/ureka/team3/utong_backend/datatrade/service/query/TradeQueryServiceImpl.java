@@ -3,14 +3,17 @@ package com.ureka.team3.utong_backend.datatrade.service.query;
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.common.exception.business.LineNotFoundException;
-import com.ureka.team3.utong_backend.datatrade.dto.*;
-import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
-import com.ureka.team3.utong_backend.datatrade.entity.Contract;
-import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
-import com.ureka.team3.utong_backend.datatrade.repository.BuyDataRequestRepository;
-import com.ureka.team3.utong_backend.datatrade.repository.ContractRepository;
-import com.ureka.team3.utong_backend.datatrade.repository.SaleDataRequestRepository;
-import com.ureka.team3.utong_backend.datatrade.utils.RedisKeyUtil;
+import com.ureka.team3.utong_backend.datatrade.dto.query.PurchaseHistoryResponseDto;
+import com.ureka.team3.utong_backend.datatrade.dto.query.PurchaseResponseDto;
+import com.ureka.team3.utong_backend.datatrade.dto.query.SaleHistoryResponseDto;
+import com.ureka.team3.utong_backend.datatrade.dto.query.SaleResponseDto;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.TradeHistoryRequestDto;
+import com.ureka.team3.utong_backend.datatrade.domain.entity.BuyDataRequest;
+import com.ureka.team3.utong_backend.datatrade.domain.entity.Contract;
+import com.ureka.team3.utong_backend.datatrade.domain.entity.SaleDataRequest;
+import com.ureka.team3.utong_backend.datatrade.repository.perman.PurchaseRequestRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.perman.ContractRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.perman.SaleRequestRepository;
 import com.ureka.team3.utong_backend.line.entity.Line;
 import com.ureka.team3.utong_backend.line.repository.LineRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +28,8 @@ import java.util.List;
 public class TradeQueryServiceImpl implements TradeQueryService {
 
     private final ContractRepository contractRepository;
-    private final BuyDataRequestRepository buyDataRequestRepository;
-    private final SaleDataRequestRepository saleDataRequestRepository;
+    private final PurchaseRequestRepository purchaseRequestRepository;
+    private final SaleRequestRepository saleRequestRepository;
     private final LineRepository lineRepository;
 
     private static final String STATUS_COMPLETED = "001";
@@ -89,7 +92,7 @@ public class TradeQueryServiceImpl implements TradeQueryService {
         List<Contract> completedContracts = contractRepository.findCompletedPurchasesByAccountId(accountId, fromDate);
         List<PurchaseResponseDto> result = new ArrayList<>();
 
-        for (Contract contract : completedContracts) {
+        for (Contract contract : completedContracts) {  // todo : 병목 해결
             BuyDataRequest buyRequest = contract.getBuyDataRequest();
             Line line = findLineById(buyRequest.getLineId());
 
@@ -108,7 +111,7 @@ public class TradeQueryServiceImpl implements TradeQueryService {
     }
 
     private List<PurchaseResponseDto> buildWaitingPurchases(String accountId, LocalDateTime fromDate) {
-        List<BuyDataRequest> waitingRequests = buyDataRequestRepository.findWaitingPurchasesByAccountId(accountId, fromDate);
+        List<BuyDataRequest> waitingRequests = purchaseRequestRepository.findWaitingPurchasesByAccountId(accountId, fromDate);
         List<PurchaseResponseDto> result = new ArrayList<>();
 
         for (BuyDataRequest buyRequest : waitingRequests) {
@@ -152,7 +155,7 @@ public class TradeQueryServiceImpl implements TradeQueryService {
     }
 
     private List<SaleResponseDto> buildWaitingSales(String accountId, LocalDateTime fromDate) {
-        List<SaleDataRequest> waitingRequests = saleDataRequestRepository.findWaitingSalesByAccountId(accountId, fromDate);
+        List<SaleDataRequest> waitingRequests = saleRequestRepository.findWaitingSalesByAccountId(accountId, fromDate);
         List<SaleResponseDto> result = new ArrayList<>();
 
         for (SaleDataRequest saleRequest : waitingRequests) {

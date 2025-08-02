@@ -1,8 +1,8 @@
 package com.ureka.team3.utong_backend.datatrade.utils;
 
-import com.ureka.team3.utong_backend.datatrade.dto.ContractDto;
-import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
-import com.ureka.team3.utong_backend.datatrade.repository.ContractQueueRepository;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.ContractDto;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.DataTradeDto;
+import com.ureka.team3.utong_backend.datatrade.repository.cache.ContractQueueRepository;
 import com.ureka.team3.utong_backend.price.entity.Price;
 import com.ureka.team3.utong_backend.price.repository.PriceRepository;
 import jakarta.annotation.PostConstruct;
