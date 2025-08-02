@@ -13,15 +13,29 @@ import java.util.List;
 public interface SaleRequestRepository extends JpaRepository<SaleDataRequest, String> {
     // 본인 판매 대기 내역 조회
     @Query("""
-        SELECT s FROM SaleDataRequest s
-        WHERE s.account.id = :accountId
-         AND (s.status = '002' OR s.status = '003')
-        AND s.createdAt >= :fromDate
-        ORDER BY s.createdAt DESC
-    """)
+                SELECT s FROM SaleDataRequest s
+                WHERE s.account.id = :accountId
+                 AND (s.status = '002' OR s.status = '003')
+                AND s.createdAt >= :fromDate
+                ORDER BY s.createdAt DESC
+            """)
     List<SaleDataRequest> findWaitingSalesByAccountId(
             @Param("accountId") String accountId,
             @Param("fromDate") LocalDateTime fromDate
     );
+
+    // 본인 판매 대기 내역 조회
+    @Query("""
+                SELECT s FROM SaleDataRequest s
+                WHERE s.account.id = :accountId
+                AND s.createdAt >= :fromDate
+                ORDER BY s.createdAt DESC
+            """)
+    List<SaleDataRequest> findSaleRequestsByAccountId(
+            @Param("accountId") String accountId,
+            @Param("fromDate") LocalDateTime fromDate
+    );
+
+
 }
 

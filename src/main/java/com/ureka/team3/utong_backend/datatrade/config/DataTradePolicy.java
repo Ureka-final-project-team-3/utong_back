@@ -21,11 +21,13 @@ public class DataTradePolicy {
     public static final int CONTRACT_LIST_SIZE = 20;
     public static final Long SSE_TIMEOUT = 60 * 60 * 1000L;
 
-    public Code getStatusCode(String status){
+    public Code getStatusCode(String status) {
         return tradeStatusCodeList.stream()
-                .filter(code->code.getCodeName().equals(status))
+                .filter(code -> code.getCodeName().equals(status))
                 .findFirst().orElseThrow();
     }
+
+    // 6600 - 1, 6500 -1 ,6400 -1
 
 
     @PostConstruct

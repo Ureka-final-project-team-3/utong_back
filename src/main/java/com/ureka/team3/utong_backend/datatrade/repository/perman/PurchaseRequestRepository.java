@@ -13,13 +13,24 @@ import java.util.List;
 public interface PurchaseRequestRepository extends JpaRepository<BuyDataRequest, String> {
     // 본인 구매 대기 내역 조회
     @Query("""
-        SELECT b FROM BuyDataRequest b
-        WHERE b.account.id = :accountId
-        AND (b.status = '002' OR b.status = '003')
-        AND b.createdAt >= :fromDate
-        ORDER BY b.createdAt DESC
-    """)
+                SELECT b FROM BuyDataRequest b
+                WHERE b.account.id = :accountId
+                AND (b.status = '002' OR b.status = '003')
+                AND b.createdAt >= :fromDate
+                ORDER BY b.createdAt DESC
+            """)
     List<BuyDataRequest> findWaitingPurchasesByAccountId(
+            @Param("accountId") String accountId,
+            @Param("fromDate") LocalDateTime fromDate
+    );
+
+    @Query("""
+                SELECT b FROM BuyDataRequest b
+                WHERE b.account.id = :accountId
+                AND b.createdAt >= :fromDate
+                ORDER BY b.createdAt DESC
+            """)
+    List<BuyDataRequest> findPurchaseRequestsByAccountId(
             @Param("accountId") String accountId,
             @Param("fromDate") LocalDateTime fromDate
     );
