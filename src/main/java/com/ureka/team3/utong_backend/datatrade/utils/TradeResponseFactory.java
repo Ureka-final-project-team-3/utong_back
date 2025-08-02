@@ -1,9 +1,9 @@
 package com.ureka.team3.utong_backend.datatrade.utils;
 
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
-import com.ureka.team3.utong_backend.datatrade.dto.BuyMatchingResult;
-import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
-import com.ureka.team3.utong_backend.datatrade.dto.SaleMatchingResult;
+import com.ureka.team3.utong_backend.datatrade.domain.result.PurchaseMatchingResult;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.DataTradeDto;
+import com.ureka.team3.utong_backend.datatrade.domain.result.SaleMatchingResult;
 import com.ureka.team3.utong_backend.datatrade.enums.BuyOrderResult;
 import com.ureka.team3.utong_backend.datatrade.enums.SaleOrderResult;
 
@@ -42,11 +42,11 @@ public class TradeResponseFactory {
                         .build());
     }
 
-    public static ApiResponse successPurchasePartComplete(BuyMatchingResult buyMatchingResult) {
+    public static ApiResponse successPurchasePartComplete(PurchaseMatchingResult purchaseMatchingResult) {
         return ApiResponse.success("일부 데이터만 구매 완료",
                 DataTradeDto.BuyDataResponseDto.builder()
                         .result(BuyOrderResult.PART_COMPLETE)
-                        .remainData(buyMatchingResult.getRemain())
+                        .remainData(purchaseMatchingResult.getRemain())
                         .build());
     }
 

@@ -1,9 +1,9 @@
 package com.ureka.team3.utong_backend.datatrade.processor;
 
-import com.ureka.team3.utong_backend.datatrade.dto.ContractDto;
-import com.ureka.team3.utong_backend.datatrade.dto.TradeMatch;
-import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
-import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.ContractDto;
+import com.ureka.team3.utong_backend.datatrade.domain.result.TradeMatch;
+import com.ureka.team3.utong_backend.datatrade.domain.entity.BuyDataRequest;
+import com.ureka.team3.utong_backend.datatrade.domain.entity.SaleDataRequest;
 
 public interface TradeProcessor {
     ContractDto processBuyMatches(BuyDataRequest request, TradeMatch match);

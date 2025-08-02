@@ -8,20 +8,20 @@ import com.ureka.team3.utong_backend.common.exception.business.AlreadyCancelOrde
 import com.ureka.team3.utong_backend.common.exception.business.CannotCancelCompletedOrderException;
 import com.ureka.team3.utong_backend.common.exception.business.NotMyOrderException;
 import com.ureka.team3.utong_backend.datatrade.config.DataTradePolicy;
-import com.ureka.team3.utong_backend.datatrade.dto.DataTradeDto;
-import com.ureka.team3.utong_backend.datatrade.dto.TradeCancelMessage;
-import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
-import com.ureka.team3.utong_backend.datatrade.entity.SaleDataRequest;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.DataTradeDto;
+import com.ureka.team3.utong_backend.datatrade.messaging.message.TradeCancelMessage;
+import com.ureka.team3.utong_backend.datatrade.domain.entity.BuyDataRequest;
+import com.ureka.team3.utong_backend.datatrade.domain.entity.SaleDataRequest;
 import com.ureka.team3.utong_backend.datatrade.enums.BuyOrderResult;
 import com.ureka.team3.utong_backend.datatrade.enums.SaleOrderResult;
-import com.ureka.team3.utong_backend.datatrade.service.trade.purchase.BuyDataRequestService;
-import com.ureka.team3.utong_backend.datatrade.service.trade.queue.TradeOrderQueueService;
-import com.ureka.team3.utong_backend.datatrade.service.trade.sale.SaleDataRequestService;
+import com.ureka.team3.utong_backend.datatrade.service.trade.purchase.PurchaseRequestService;
+import com.ureka.team3.utong_backend.datatrade.service.trade.queue.QueueService;
+import com.ureka.team3.utong_backend.datatrade.service.trade.sale.SaleRequestService;
 import com.ureka.team3.utong_backend.datatrade.utils.TradeCalculator;
 import com.ureka.team3.utong_backend.line.entity.Line;
 import com.ureka.team3.utong_backend.line.entity.LineData;
 import com.ureka.team3.utong_backend.line.service.LineService;
-import com.ureka.team3.utong_backend.datatrade.publisher.TradeCancelPublisher;
+import com.ureka.team3.utong_backend.datatrade.messaging.publisher.TradeCancelPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,11 +35,11 @@ import static com.ureka.team3.utong_backend.datatrade.enums.SaleOrderResult.CANC
 @RequiredArgsConstructor
 public class DataTradeCancelFacadeImpl implements DataTradeCancelFacade{
     private final AccountService accountService;
-    private final BuyDataRequestService buyDataRequestService;
+    private final PurchaseRequestService purchaseRequestService;
     private final TradeCalculator tradeCalculator;
-    private final TradeOrderQueueService tradeOrderQueueService;
+    private final QueueService queueService;
     private final DataTradePolicy dataTradePolicy;
-    private final SaleDataRequestService saleDataRequestService;
+    private final SaleRequestService saleRequestService;
     private final LineService lineService;
     private final TradeCancelPublisher tradeCancelPublisher;
 
@@ -49,14 +49,14 @@ public class DataTradeCancelFacadeImpl implements DataTradeCancelFacade{
     public ApiResponse cancelBuyWaiting(Account account, DataTradeDto.CancelWaitingTradeRequestDto requestDto) {
         // 1. 본인의 orderId가 맞는지 확인
         account = accountService.findById(account.getId());
-        BuyDataRequest buyOrderById = buyDataRequestService.findBuyOrderById(requestDto.getOrderId());
+        BuyDataRequest buyOrderById = purchaseRequestService.findBuyOrderById(requestDto.getOrderId());
         validateCancelBuyWaiting(account, buyOrderById);
         // 3. mysql에서 004로 변경
-        buyDataRequestService.changeStatus(buyOrderById, BuyOrderResult.CANCEL);
+        purchaseRequestService.changeStatus(buyOrderById, BuyOrderResult.CANCEL);
         // 4. 포인트 반환
         account.increasePoint(tradeCalculator.calculatePayPoint(buyOrderById.getRemaining(), buyOrderById.getPrice()));
         // 5. 레디스에서 제거
-        tradeOrderQueueService.removeFromBuyQueue(buyOrderById);
+        queueService.removeFromBuyQueue(buyOrderById);
         TradeCancelMessage message = TradeCancelMessage.purchaseCancelMessage(buyOrderById.getDataCode(),buyOrderById.getPrice(),buyOrderById.getQuantity());
         tradeCancelPublisher.publish(message);
         return ApiResponse.success("구매 대기 취소 완료",null);
@@ -81,14 +81,14 @@ public class DataTradeCancelFacadeImpl implements DataTradeCancelFacade{
     @Override
     public ApiResponse cancelSaleWaiting(Account account, DataTradeDto.CancelWaitingTradeRequestDto requestDto) {
         // 1. 본인의 orderId가 맞는지 확인
-        SaleDataRequest saleOrderById = saleDataRequestService.findSaleOrderById(requestDto.getOrderId());
+        SaleDataRequest saleOrderById = saleRequestService.findSaleOrderById(requestDto.getOrderId());
         validateSaleWaitingCancel(account, saleOrderById);
         // 3. mysql에서 004로 변경
-        saleDataRequestService.changeStatus(saleOrderById, SaleOrderResult.CANCEL);
+        saleRequestService.changeStatus(saleOrderById, SaleOrderResult.CANCEL);
         // 4. 데이터 복구
         recoverData(saleOrderById);
         // 5. 레디스에서 제거
-        tradeOrderQueueService.removeFromSaleQueue(saleOrderById);
+        queueService.removeFromSaleQueue(saleOrderById);
         TradeCancelMessage message = TradeCancelMessage.saleCancelMessage(saleOrderById.getDataCode(),saleOrderById.getPrice(),saleOrderById.getQuantity());
         tradeCancelPublisher.publish(message);
         return ApiResponse.success("판매 대기 취소 완료",null);
