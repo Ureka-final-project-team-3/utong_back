@@ -22,8 +22,6 @@ public class EmailService {
     
     @Value("${app.frontend.url:https://utong.site}")
     private String frontendUrl;
-//    @Value("${app.frontend.url:http://localhost:5173}")
-//    private String frontendUrl;
     @Value("${mail.enabled:true}")
     private boolean mailEnabled;
     
