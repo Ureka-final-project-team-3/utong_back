@@ -1,7 +1,7 @@
 package com.ureka.team3.utong_backend.datatrade.processor;
 
 import com.ureka.team3.utong_backend.datatrade.dto.trade.OrderDto;
-import com.ureka.team3.utong_backend.datatrade.repository.perman.OrderRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.cache.OrderRepository;
 import com.ureka.team3.utong_backend.datatrade.domain.result.PurchaseMatchingResult;
 import com.ureka.team3.utong_backend.datatrade.domain.result.SaleMatchingResult;
 import com.ureka.team3.utong_backend.datatrade.domain.result.TradeMatch;

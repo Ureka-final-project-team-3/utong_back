@@ -3,7 +3,7 @@ package com.ureka.team3.utong_backend.datatrade.service.trade.queue;
 import com.ureka.team3.utong_backend.datatrade.dto.trade.OrderDto;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.SaleDataRequest;
-import com.ureka.team3.utong_backend.datatrade.repository.perman.OrderRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.cache.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

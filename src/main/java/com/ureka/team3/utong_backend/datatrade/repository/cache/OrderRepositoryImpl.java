@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ureka.team3.utong_backend.datatrade.dto.trade.OrderDto;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.SaleDataRequest;
-import com.ureka.team3.utong_backend.datatrade.repository.perman.OrderRepository;
 import com.ureka.team3.utong_backend.datatrade.utils.RedisKeyUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

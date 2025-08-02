@@ -92,7 +92,7 @@ public class TradeQueryServiceImpl implements TradeQueryService {
         List<Contract> completedContracts = contractRepository.findCompletedPurchasesByAccountId(accountId, fromDate);
         List<PurchaseResponseDto> result = new ArrayList<>();
 
-        for (Contract contract : completedContracts) {
+        for (Contract contract : completedContracts) {  // todo : 병목 해결
             BuyDataRequest buyRequest = contract.getBuyDataRequest();
             Line line = findLineById(buyRequest.getLineId());
 

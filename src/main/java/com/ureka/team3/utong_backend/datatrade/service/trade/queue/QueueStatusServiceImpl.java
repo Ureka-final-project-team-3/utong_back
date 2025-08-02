@@ -11,7 +11,7 @@ import com.ureka.team3.utong_backend.datatrade.dto.trade.ContractDto;
 import com.ureka.team3.utong_backend.datatrade.dto.trade.OrderDto;
 import com.ureka.team3.utong_backend.datatrade.dto.trade.OrdersQueueDto;
 import com.ureka.team3.utong_backend.datatrade.repository.cache.ContractQueueRepository;
-import com.ureka.team3.utong_backend.datatrade.repository.perman.OrderRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.cache.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
