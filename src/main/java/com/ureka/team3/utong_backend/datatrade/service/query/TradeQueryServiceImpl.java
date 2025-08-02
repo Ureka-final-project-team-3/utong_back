@@ -14,6 +14,7 @@ import com.ureka.team3.utong_backend.datatrade.repository.perman.ContractReposit
 import com.ureka.team3.utong_backend.datatrade.repository.perman.PurchaseRequestRepository;
 import com.ureka.team3.utong_backend.datatrade.repository.perman.SaleRequestRepository;
 import com.ureka.team3.utong_backend.datatrade.utils.TradeCalculator;
+import com.ureka.team3.utong_backend.line.entity.Line;
 import com.ureka.team3.utong_backend.line.repository.LineRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TradeQueryServiceImpl implements TradeQueryService {
 
-    private final ContractRepository contractRepository;
     private final PurchaseRequestRepository purchaseRequestRepository;
     private final SaleRequestRepository saleRequestRepository;
     private final LineRepository lineRepository;
@@ -94,14 +94,8 @@ public class TradeQueryServiceImpl implements TradeQueryService {
      * 라인 번호 미리 로딩
      */
     private Map<String, String> preloadLineNumbers(Set<String> lineIds) {
-        Map<String, String> lineMap = new HashMap<>();
-        for (String lineId : lineIds) {
-            String phoneNumber = lineRepository.findById(lineId)
-                    .orElseThrow(LineNotFoundException::new)
-                    .getPhoneNumber();
-            lineMap.put(lineId, phoneNumber);
-        }
-        return lineMap;
+        return lineRepository.findAllById(lineIds).stream()
+                .collect(Collectors.toMap(Line::getId, Line::getPhoneNumber));
     }
 
     private PurchaseResponseDto buildPurchaseResponse(BuyDataRequest request, String phoneNumber) {

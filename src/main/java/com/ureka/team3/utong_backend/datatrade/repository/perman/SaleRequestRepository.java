@@ -27,6 +27,7 @@ public interface SaleRequestRepository extends JpaRepository<SaleDataRequest, St
     // 본인 판매 대기 내역 조회
     @Query("""
                 SELECT s FROM SaleDataRequest s
+                LEFT JOIN FETCH s.contracts c
                 WHERE s.account.id = :accountId
                 AND s.createdAt >= :fromDate
                 ORDER BY s.createdAt DESC

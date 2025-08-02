@@ -26,6 +26,7 @@ public interface PurchaseRequestRepository extends JpaRepository<BuyDataRequest,
 
     @Query("""
                 SELECT b FROM BuyDataRequest b
+                LEFT JOIN FETCH b.contracts c
                 WHERE b.account.id = :accountId
                 AND b.createdAt >= :fromDate
                 ORDER BY b.createdAt DESC
