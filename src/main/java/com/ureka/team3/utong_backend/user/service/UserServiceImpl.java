@@ -129,7 +129,7 @@ public class UserServiceImpl implements UserService {
     private Long calculateCanSellAmount(LineData data, Line line, Long remaining) {
         Long canSell = tradeCalculator.calculateCanSellAmount(
                 data.getRemaining(),
-                line.getPlan().canSell(),
+                line.getPlan().getData(),
                 data.getSell()
         );
 

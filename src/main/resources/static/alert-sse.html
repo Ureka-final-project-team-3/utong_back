@@ -1,93 +1,93 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8" />
-    <title>SSE JWT 테스트</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 2rem; background: #f5f5f5; }
-        input, button { padding: 0.5rem; margin: 0.5rem 0; width: 100%; }
-        li {
-            background: #fff;
-            margin-bottom: 10px;
-            padding: 1rem;
-            border-radius: 5px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-    </style>
-</head>
-<body>
+<!--<!DOCTYPE html>-->
+<!--<html lang="ko">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8" />-->
+<!--    <title>SSE JWT 테스트</title>-->
+<!--    <style>-->
+<!--        body { font-family: Arial, sans-serif; padding: 2rem; background: #f5f5f5; }-->
+<!--        input, button { padding: 0.5rem; margin: 0.5rem 0; width: 100%; }-->
+<!--        li {-->
+<!--            background: #fff;-->
+<!--            margin-bottom: 10px;-->
+<!--            padding: 1rem;-->
+<!--            border-radius: 5px;-->
+<!--            box-shadow: 0 1px 3px rgba(0,0,0,0.1);-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
 
-<h1>📡 SSE JWT 인증 테스트</h1>
+<!--<h1>📡 SSE JWT 인증 테스트</h1>-->
 
-<label>
-    Access Token:
-    <input type="text" id="tokenInput" placeholder="Bearer 토큰 입력" />
-</label>
-<button onclick="connectSSE()">SSE 연결</button>
+<!--<label>-->
+<!--    Access Token:-->
+<!--    <input type="text" id="tokenInput" placeholder="Bearer 토큰 입력" />-->
+<!--</label>-->
+<!--<button onclick="connectSSE()">SSE 연결</button>-->
 
-<h2>💬 수신된 알림</h2>
-<ul id="alertList"></ul>
+<!--<h2>💬 수신된 알림</h2>-->
+<!--<ul id="alertList"></ul>-->
 
-<script>
-    function connectSSE() {
-        const token = document.getElementById('tokenInput').value;
-        if (!token) {
-            alert('accessToken을 입력하세요.');
-            return;
-        }
+<!--<script>-->
+<!--    function connectSSE() {-->
+<!--        const token = document.getElementById('tokenInput').value;-->
+<!--        if (!token) {-->
+<!--            alert('accessToken을 입력하세요.');-->
+<!--            return;-->
+<!--        }-->
 
-        fetch("http://localhost:8080/api/data/alert", {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Accept": "text/event-stream"
-            }
-        }).then(response => {
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder('utf-8');
+<!--        fetch("http://localhost:8080/api/data/alert", {-->
+<!--            method: "GET",-->
+<!--            headers: {-->
+<!--                "Authorization": `Bearer ${token}`,-->
+<!--                "Accept": "text/event-stream"-->
+<!--            }-->
+<!--        }).then(response => {-->
+<!--            const reader = response.body.getReader();-->
+<!--            const decoder = new TextDecoder('utf-8');-->
 
-            function readStream() {
-                reader.read().then(({ done, value }) => {
-                    if (done) return;
+<!--            function readStream() {-->
+<!--                reader.read().then(({ done, value }) => {-->
+<!--                    if (done) return;-->
 
-                    const chunk = decoder.decode(value, { stream: true });
-                    handleEventStreamChunk(chunk);
-                    readStream(); // 계속 읽기
-                });
-            }
+<!--                    const chunk = decoder.decode(value, { stream: true });-->
+<!--                    handleEventStreamChunk(chunk);-->
+<!--                    readStream(); // 계속 읽기-->
+<!--                });-->
+<!--            }-->
 
-            readStream();
-        }).catch(error => {
-            console.error("❌ SSE 연결 실패:", error);
-        });
-    }
+<!--            readStream();-->
+<!--        }).catch(error => {-->
+<!--            console.error("❌ SSE 연결 실패:", error);-->
+<!--        });-->
+<!--    }-->
 
-    function handleEventStreamChunk(chunk) {
-        const lines = chunk.split("\n");
-        for (const line of lines) {
-            if (line.startsWith("data:")) {
-                const raw = line.replace("data:", "").trim();
-                try {
-                    const alert = JSON.parse(raw);
-                    const li = document.createElement("li");
-                    li.innerHTML = `
-              <strong>[${alert.requestType}]</strong><br>
-              데이터 코드: ${alert.dataCode}<br>
-              수량: ${alert.quantity}<br>
-              가격: ${alert.price}<br>
-              주문 ID: ${alert.orderId}<br>
-              체결 시각: ${alert.contractedAt}
-            `;
-                    document.getElementById("alertList").prepend(li);
-                } catch (e) {
-                    // 일반 텍스트 메시지 처리
-                    const li = document.createElement("li");
-                    li.textContent = `📎 일반 메시지: ${raw}`;
-                    document.getElementById("alertList").prepend(li);
-                }
-            }
-        }
-    }
-</script>
-</body>
-</html>
+<!--    function handleEventStreamChunk(chunk) {-->
+<!--        const lines = chunk.split("\n");-->
+<!--        for (const line of lines) {-->
+<!--            if (line.startsWith("data:")) {-->
+<!--                const raw = line.replace("data:", "").trim();-->
+<!--                try {-->
+<!--                    const alert = JSON.parse(raw);-->
+<!--                    const li = document.createElement("li");-->
+<!--                    li.innerHTML = `-->
+<!--              <strong>[${alert.requestType}]</strong><br>-->
+<!--              데이터 코드: ${alert.dataCode}<br>-->
+<!--              수량: ${alert.quantity}<br>-->
+<!--              가격: ${alert.price}<br>-->
+<!--              주문 ID: ${alert.orderId}<br>-->
+<!--              체결 시각: ${alert.contractedAt}-->
+<!--            `;-->
+<!--                    document.getElementById("alertList").prepend(li);-->
+<!--                } catch (e) {-->
+<!--                    // 일반 텍스트 메시지 처리-->
+<!--                    const li = document.createElement("li");-->
+<!--                    li.textContent = `📎 일반 메시지: ${raw}`;-->
+<!--                    document.getElementById("alertList").prepend(li);-->
+<!--                }-->
+<!--            }-->
+<!--        }-->
+<!--    }-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->

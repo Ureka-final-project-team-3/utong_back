@@ -8,7 +8,8 @@ public enum GroupCode {
     REWARD_TYPE("030", "쿠폰 타입"),
     AVAILABILITY("040", "사용 가능 상태"),
     PROCESS_STATUS("060", "진행 상태"),
-    TRADE_DIRECTION("070", "거래 방향");
+    TRADE_DIRECTION("070", "거래 방향"),
+    GIFTICON_CATEGORY("080", "기프티콘 카테고리");
 
     private final String code;
     private final String description;

@@ -2,8 +2,7 @@ package com.ureka.team3.utong_backend.datatrade.service.query;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
-import com.ureka.team3.utong_backend.datatrade.dto.TradeHistoryRequestDto;
-import com.ureka.team3.utong_backend.datatrade.entity.BuyDataRequest;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.TradeHistoryRequestDto;
 
 public interface TradeQueryService {
 
