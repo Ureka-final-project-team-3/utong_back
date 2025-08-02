@@ -74,4 +74,18 @@ public interface ContractRepository extends JpaRepository<Contract, String> {
             @Param("beforeDate") LocalDateTime beforeDate,
             @Param("dataCode") String dataCode
     );
+
+//    @Query("SELECT c FROM Contract c WHERE c.buyDataRequest.id = :buyRequestId")
+//    List<Contract> findByBuyRequestId(@Param("buyRequestId") String buyRequestId);
+//
+//    @Query("SELECT c FROM Contract c WHERE c.saleDataRequest.id = :saleRequestId")
+//    List<Contract> findBySaleRequestId(@Param("saleRequestId") String saleRequestId);
+
+    @Query("SELECT c FROM Contract c WHERE c.saleDataRequest.id = :saleRequestId ORDER BY c.createdAt DESC")
+    List<Contract> findBySaleRequestIdOrderByCreatedAtDesc(@Param("saleRequestId") String saleRequestId);
+
+    @Query("SELECT c FROM Contract c WHERE c.buyDataRequest.id = :buyRequestId ORDER BY c.createdAt DESC")
+    List<Contract> findByBuyRequestIdOrderByCreatedAtDesc(@Param("buyRequestId") String buyRequestId);
+
+
 }

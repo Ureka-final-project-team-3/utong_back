@@ -57,4 +57,17 @@ public class ContractDto {
 
         return contractDto;
     }
+
+    public static ContractDto ofWithoutAccount(Contract contract) {
+        ContractDto contractDto = new ContractDto();
+        contractDto.purchaseOrderId = contract.getBuyDataRequest().getId();
+        contractDto.saleOrderId = contract.getSaleDataRequest().getId();
+        contractDto.price = contract.getPrice();
+        contractDto.quantity = contract.getAmount();
+        contractDto.dataCode = contract.getBuyDataRequest().getDataCode();
+        contractDto.contractedAt = contract.getCreatedAt();
+
+        return contractDto;
+    }
+
 }

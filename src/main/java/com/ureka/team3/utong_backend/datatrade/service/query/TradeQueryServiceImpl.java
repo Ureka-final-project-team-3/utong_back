@@ -3,16 +3,17 @@ package com.ureka.team3.utong_backend.datatrade.service.query;
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
 import com.ureka.team3.utong_backend.common.exception.business.LineNotFoundException;
+import com.ureka.team3.utong_backend.datatrade.domain.entity.BuyDataRequest;
+import com.ureka.team3.utong_backend.datatrade.domain.entity.Contract;
+import com.ureka.team3.utong_backend.datatrade.domain.entity.SaleDataRequest;
 import com.ureka.team3.utong_backend.datatrade.dto.query.PurchaseHistoryResponseDto;
 import com.ureka.team3.utong_backend.datatrade.dto.query.PurchaseResponseDto;
 import com.ureka.team3.utong_backend.datatrade.dto.query.SaleHistoryResponseDto;
 import com.ureka.team3.utong_backend.datatrade.dto.query.SaleResponseDto;
+import com.ureka.team3.utong_backend.datatrade.dto.trade.ContractDto;
 import com.ureka.team3.utong_backend.datatrade.dto.trade.TradeHistoryRequestDto;
-import com.ureka.team3.utong_backend.datatrade.domain.entity.BuyDataRequest;
-import com.ureka.team3.utong_backend.datatrade.domain.entity.Contract;
-import com.ureka.team3.utong_backend.datatrade.domain.entity.SaleDataRequest;
-import com.ureka.team3.utong_backend.datatrade.repository.perman.PurchaseRequestRepository;
 import com.ureka.team3.utong_backend.datatrade.repository.perman.ContractRepository;
+import com.ureka.team3.utong_backend.datatrade.repository.perman.PurchaseRequestRepository;
 import com.ureka.team3.utong_backend.datatrade.repository.perman.SaleRequestRepository;
 import com.ureka.team3.utong_backend.line.entity.Line;
 import com.ureka.team3.utong_backend.line.repository.LineRepository;
@@ -20,8 +21,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -89,23 +91,43 @@ public class TradeQueryServiceImpl implements TradeQueryService {
     }
 
     private List<PurchaseResponseDto> buildCompletePurchases(String accountId, LocalDateTime fromDate) {
-        List<Contract> completedContracts = contractRepository.findCompletedPurchasesByAccountId(accountId, fromDate);
+        List<Contract> contracts = contractRepository.findCompletedPurchasesByAccountId(accountId, fromDate);
+
+        // 1. purchaseId 기준으로 그룹핑
+        Map<String, List<Contract>> groupedContracts = contracts.stream()
+                .collect(Collectors.groupingBy(c -> c.getBuyDataRequest().getId(),
+                        LinkedHashMap::new, Collectors.toList()));
+
         List<PurchaseResponseDto> result = new ArrayList<>();
 
-        for (Contract contract : completedContracts) {  // todo : 병목 해결
-            BuyDataRequest buyRequest = contract.getBuyDataRequest();
+        for (Map.Entry<String, List<Contract>> entry : groupedContracts.entrySet()) {
+            String purchaseId = entry.getKey();
+            List<Contract> contractList = entry.getValue();
+
+            BuyDataRequest buyRequest = contractList.get(0).getBuyDataRequest();
+
+            if (buyRequest.getRemaining() != null && buyRequest.getRemaining() > 0) {
+                continue;
+            }
+
             Line line = findLineById(buyRequest.getLineId());
 
-            PurchaseResponseDto dto = createPurchaseResponseDto(
-                    buyRequest.getId(),
-                    STATUS_COMPLETED,
-                    buyRequest.getDataCode(),
-                    contract.getAmount(),
-                    contract.getCreatedAt(),
-                    contract.getPrice(),
-                    line.getPhoneNumber()
-            );
+            PurchaseResponseDto dto = PurchaseResponseDto.builder()
+                    .purchaseId(purchaseId)
+                    .status(STATUS_COMPLETED)
+                    .dataCode(buyRequest.getDataCode())
+                    .quantity(contractList.stream().mapToLong(Contract::getAmount).sum()) // 합산
+                    .remaining(buyRequest.getRemaining())
+                    .tradeDate(contractList.stream()
+                            .map(Contract::getCreatedAt)
+                            .max(LocalDateTime::compareTo).orElse(null)) // 최신 체결시간
+                    .pricePerGb(contractList.get(0).getPrice()) // 동일 단가라면 아무거나
+                    .phoneNumber(line.getPhoneNumber())
+                    .contractDto(buildContractDtosForBuy(purchaseId))
+                    .build();
+
             result.add(dto);
+            result.sort(Comparator.comparing(PurchaseResponseDto::getTradeDate).reversed());
         }
         return result;
     }
@@ -115,43 +137,69 @@ public class TradeQueryServiceImpl implements TradeQueryService {
         List<PurchaseResponseDto> result = new ArrayList<>();
 
         for (BuyDataRequest buyRequest : waitingRequests) {
-            Long quantity = calculateRemainingQuantity(buyRequest);
+            Long requestedQuantity = buyRequest.getQuantity();
+            Long remainingQuantity = calculateRemainingQuantity(buyRequest);
+
             Line line = findLineById(buyRequest.getLineId());
 
-            PurchaseResponseDto dto = createPurchaseResponseDto(
-                    buyRequest.getId(),
-                    STATUS_WAITING,
-                    buyRequest.getDataCode(),
-                    quantity,
-                    buyRequest.getCreatedAt(),
-                    buyRequest.getPrice(),
-                    line.getPhoneNumber()
-            );
+            PurchaseResponseDto dto = PurchaseResponseDto.builder()
+                    .purchaseId(buyRequest.getId())
+                    .status(STATUS_WAITING)
+                    .dataCode(buyRequest.getDataCode())
+                    .quantity(requestedQuantity)
+                    .remaining(remainingQuantity)
+                    .tradeDate(buyRequest.getCreatedAt())
+                    .pricePerGb(buyRequest.getPrice())
+                    .phoneNumber(line.getPhoneNumber())
+                    .contractDto(buildContractDtosForBuy(buyRequest.getId()))
+                    .build();
+
             result.add(dto);
         }
         return result;
     }
 
     private List<SaleResponseDto> buildCompleteSales(String accountId, LocalDateTime fromDate) {
-        List<Contract> completedContracts = contractRepository.findCompletedSalesByAccountId(accountId, fromDate);
+        List<Contract> contracts = contractRepository.findCompletedSalesByAccountId(accountId, fromDate);
+
+        // 1. purchaseId 기준으로 그룹핑
+        Map<String, List<Contract>> groupedContracts = contracts.stream()
+                .collect(Collectors.groupingBy(c -> c.getSaleDataRequest().getId(),
+                        LinkedHashMap::new, Collectors.toList()));
+
         List<SaleResponseDto> result = new ArrayList<>();
 
-        for (Contract contract : completedContracts) {
-            SaleDataRequest saleRequest = contract.getSaleDataRequest();
+            for (Map.Entry<String, List<Contract>> entry : groupedContracts.entrySet()) {
+            String saleId = entry.getKey();
+            List<Contract> contractList = entry.getValue();
+
+            SaleDataRequest saleRequest = contractList.get(0).getSaleDataRequest();
+
+                if (saleRequest.getRemaining() != null && saleRequest.getRemaining() > 0) {
+                    continue;
+                }
+
             Line line = findLineById(saleRequest.getLineId());
 
-            SaleResponseDto dto = createSaleResponseDto(
-                    saleRequest.getId(),
-                    STATUS_COMPLETED,
-                    saleRequest.getDataCode(),
-                    contract.getAmount(),
-                    contract.getCreatedAt(),
-                    contract.getPrice(),
-                    line.getPhoneNumber()
-            );
-            result.add(dto);
-        }
-        return result;
+                SaleResponseDto dto = SaleResponseDto.builder()
+                    .saleId(saleId)
+                    .status(STATUS_COMPLETED)
+                    .dataCode(saleRequest.getDataCode())
+                    .quantity(contractList.stream().mapToLong(Contract::getAmount).sum()) // 합산
+                    .remaining(saleRequest.getRemaining())
+                    .tradeDate(contractList.stream()
+                            .map(Contract::getCreatedAt)
+                            .max(LocalDateTime::compareTo).orElse(null)) // 최신 체결시간
+                    .pricePerGb(contractList.get(0).getPrice()) // 동일 단가라면 아무거나
+                    .phoneNumber(line.getPhoneNumber())
+                    .contractDto(buildContractDtosForSale(saleId))
+                    .build();
+
+                result.add(dto);
+                result.sort(Comparator.comparing(SaleResponseDto::getTradeDate).reversed());
+
+            }
+            return result;
     }
 
     private List<SaleResponseDto> buildWaitingSales(String accountId, LocalDateTime fromDate) {
@@ -159,18 +207,23 @@ public class TradeQueryServiceImpl implements TradeQueryService {
         List<SaleResponseDto> result = new ArrayList<>();
 
         for (SaleDataRequest saleRequest : waitingRequests) {
-            Long quantity = calculateRemainingQuantity(saleRequest);
+            Long requestedQuantity = saleRequest.getQuantity();
+            Long remainingQuantity = calculateRemainingQuantity(saleRequest);
+
             Line line = findLineById(saleRequest.getLineId());
 
-            SaleResponseDto dto = createSaleResponseDto(
-                    saleRequest.getId(),
-                    STATUS_WAITING,
-                    saleRequest.getDataCode(),
-                    quantity,
-                    saleRequest.getCreatedAt(),
-                    saleRequest.getPrice(),
-                    line.getPhoneNumber()
-            );
+            SaleResponseDto dto = SaleResponseDto.builder()
+                    .saleId(saleRequest.getId())
+                    .status(STATUS_WAITING)
+                    .dataCode(saleRequest.getDataCode())
+                    .quantity(requestedQuantity)
+                    .remaining(remainingQuantity)
+                    .tradeDate(saleRequest.getCreatedAt())
+                    .pricePerGb(saleRequest.getPrice())
+                    .phoneNumber(line.getPhoneNumber())
+                    .contractDto(buildContractDtosForSale(saleRequest.getId()))
+                    .build();
+
             result.add(dto);
         }
         return result;
@@ -192,13 +245,14 @@ public class TradeQueryServiceImpl implements TradeQueryService {
     }
 
     private PurchaseResponseDto createPurchaseResponseDto(String purchaseId, String status, String dataCode,
-                                                          Long quantity, LocalDateTime tradeDate,
+                                                          Long requestedQuantity, Long remainingQuantity, LocalDateTime tradeDate,
                                                           Long pricePerGb, String phoneNumber) {
         return PurchaseResponseDto.builder()
                 .purchaseId(purchaseId)
                 .status(status)
                 .dataCode(dataCode)
-                .quantity(quantity)
+                .quantity(requestedQuantity)
+                .remaining(remainingQuantity)
                 .tradeDate(tradeDate)
                 .pricePerGb(pricePerGb)
                 .phoneNumber(phoneNumber)
@@ -218,4 +272,20 @@ public class TradeQueryServiceImpl implements TradeQueryService {
                 .phoneNumber(phoneNumber)
                 .build();
     }
+
+    private List<ContractDto> buildContractDtosForBuy(String buyRequestId) {
+        return contractRepository.findByBuyRequestIdOrderByCreatedAtDesc(buyRequestId)
+                .stream()
+                .map(ContractDto::ofWithoutAccount)
+                .toList();
+    }
+
+    private List<ContractDto> buildContractDtosForSale(String saleRequestId) {
+        return contractRepository.findBySaleRequestIdOrderByCreatedAtDesc(saleRequestId)
+                .stream()
+                .map(ContractDto::ofWithoutAccount)
+                .toList();
+    }
+
+
 }
