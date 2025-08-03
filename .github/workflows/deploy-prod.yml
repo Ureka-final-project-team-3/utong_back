@@ -1,0 +1,171 @@
+name: Deploy to Production (Single Environment)
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  DOCKER_IMAGE: wkdtmf357/utong-backend-prod
+  EB_APPLICATION_NAME: utong-backend-prod
+  EB_ENVIRONMENT_NAME: utong-backend-prod-blue
+  AWS_REGION: ap-northeast-2
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 1. Docker 이미지 빌드 및 푸시
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:latest
+            ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
+
+      # 2. AWS 자격 증명 설정
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # 3. 환경 상태 확인
+      - name: Check environment status
+        run: |
+          ENV_STATUS=$(aws elasticbeanstalk describe-environments \
+            --application-name ${{ env.EB_APPLICATION_NAME }} \
+            --environment-names ${{ env.EB_ENVIRONMENT_NAME }} \
+            --query 'Environments[0].Health' --output text)
+          
+          echo "Environment Status: $ENV_STATUS"
+          echo "Deploying to: ${{ env.EB_ENVIRONMENT_NAME }}"
+
+      # 4. Dockerrun.aws.json 생성
+      - name: Create Dockerrun.aws.json
+        run: |
+          cat > Dockerrun.aws.json << EOF
+          {
+            "AWSEBDockerrunVersion": "1",
+            "Image": {
+              "Name": "${{ env.DOCKER_IMAGE }}:${{ github.sha }}",
+              "Update": "true"
+            },
+            "Ports": [
+              {
+                "ContainerPort": "8080",
+                "HostPort": "80"
+              }
+            ],
+            "Environment": [
+              {
+                "Name": "SPRING_PROFILES_ACTIVE",
+                "Value": "prod"
+              }
+            ]
+          }
+          EOF
+
+      # 5. 배포 패키지 생성
+      - name: Create deployment package
+        run: |
+          zip -r deploy-${{ github.sha }}.zip Dockerrun.aws.json
+
+      # 6. S3에 업로드
+      - name: Upload to S3
+        run: |
+          aws s3 cp deploy-${{ github.sha }}.zip \
+            s3://elasticbeanstalk-${{ env.AWS_REGION }}-${{ secrets.AWS_ACCOUNT_ID }}/utong-backend-${{ github.sha }}.zip
+
+      # 7. EB 애플리케이션 버전 생성
+      - name: Create application version
+        run: |
+          aws elasticbeanstalk create-application-version \
+            --application-name ${{ env.EB_APPLICATION_NAME }} \
+            --version-label v${{ github.sha }} \
+            --source-bundle S3Bucket=elasticbeanstalk-${{ env.AWS_REGION }}-${{ secrets.AWS_ACCOUNT_ID }},S3Key=utong-backend-${{ github.sha }}.zip \
+            --description "Deployed from GitHub Actions - ${{ github.sha }}"
+
+      # 8. 환경에 배포 (Rolling Deployment)
+      - name: Deploy to environment
+        run: |
+          echo "🚀 Starting deployment to ${{ env.EB_ENVIRONMENT_NAME }}"
+          
+          aws elasticbeanstalk update-environment \
+            --environment-name ${{ env.EB_ENVIRONMENT_NAME }} \
+            --version-label v${{ github.sha }}
+          
+          echo "📦 Deployment initiated with version: v${{ github.sha }}"
+
+      # 9. 배포 완료 대기 (최대 20분)
+      - name: Wait for deployment completion
+        run: |
+          echo "⏳ Waiting for deployment to complete..."
+          echo "This may take 5-15 minutes for rolling deployment..."
+          
+          aws elasticbeanstalk wait environment-updated \
+            --environment-name ${{ env.EB_ENVIRONMENT_NAME }} \
+            --cli-read-timeout 1200 \
+            --cli-connect-timeout 60
+          
+          echo "✅ Deployment wait completed!"
+
+      # 10. 헬스체크 확인
+      - name: Health check
+        run: |
+          echo "🏥 Checking environment health..."
+          
+          HEALTH=$(aws elasticbeanstalk describe-environment-health \
+            --environment-name ${{ env.EB_ENVIRONMENT_NAME }} \
+            --attribute-names Status \
+            --query 'Status' --output text)
+          
+          echo "Environment Health: $HEALTH"
+          
+          if [ "$HEALTH" = "Ok" ] || [ "$HEALTH" = "Ready" ]; then
+            echo "✅ Deployment successful! Environment is healthy."
+          elif [ "$HEALTH" = "Warning" ]; then
+            echo "⚠️ Deployment completed with warnings. Check logs if needed."
+          else
+            echo "❌ Deployment failed! Environment health: $HEALTH"
+            exit 1
+          fi
+
+      # 11. 배포 완료 알림
+      - name: Deployment summary
+        run: |
+          ENV_URL=$(aws elasticbeanstalk describe-environments \
+            --environment-names ${{ env.EB_ENVIRONMENT_NAME }} \
+            --query 'Environments[0].CNAME' --output text)
+          
+          echo "🎉 Deployment Summary"
+          echo "=================================="
+          echo "📍 Environment: ${{ env.EB_ENVIRONMENT_NAME }}"
+          echo "🌐 Environment URL: https://$ENV_URL"
+          echo "🐳 Docker Image: ${{ env.DOCKER_IMAGE }}:${{ github.sha }}"
+          echo "📋 Version Label: v${{ github.sha }}"
+          echo "🔄 Deployment Type: Rolling Deployment"
+          echo "⏰ Completed at: $(date)"
+          echo "=================================="
+          echo "✅ Production deployment completed successfully!"

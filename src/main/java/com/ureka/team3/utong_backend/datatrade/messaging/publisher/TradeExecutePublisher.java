@@ -15,11 +15,13 @@ public class TradeExecutePublisher{
     private static final String TRADE_EXECUTED_CHANNEL = "trade:executed";
     private final StringRedisTemplate stringRedisTemplate;
     private final ObjectMapper objectMapper;
+    private final EmailRabbitPublisher emailRabbitPublisher;
 
     public void publish(TradeExecutedMessage message) {
         try {
             String jsonMessage = objectMapper.writeValueAsString(message);
-            stringRedisTemplate.convertAndSend(TRADE_EXECUTED_CHANNEL, jsonMessage);
+            stringRedisTemplate.convertAndSend(TRADE_EXECUTED_CHANNEL, jsonMessage); // Redis Pub/Sub
+            emailRabbitPublisher.publishEmailNotification(message); // RabbitMQ
             log.info("거래 요청 완료 메세지 전송");
         } catch (JsonProcessingException e) {
             log.error("거래 요청 완료 메세지 전송 실패");

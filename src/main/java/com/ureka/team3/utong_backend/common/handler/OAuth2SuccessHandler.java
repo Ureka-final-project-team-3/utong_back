@@ -131,30 +131,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             return saved;
         }
         
-        String accountId = UUID.randomUUID().toString();
-        String userId = UUID.randomUUID().toString();
-        
-        Account account = Account.builder()
-                .id(accountId)
-                .email(email)
-                .nickname(name != null ? name : email.split("@")[0])
-                .provider("google")
-                .providerId(providerId)
-                .mileage(0L)
-                .build();
-        
-        Account savedAccount = accountRepository.save(account);
-        
-        User user = User.builder()
-                .id(userId)
-                .name(name)
-                .birthDate(null) 
-                .account(savedAccount)
-                .build();
-        
-        userRepository.save(user);
-        
-        return savedAccount;
+        throw new RuntimeException("OAuth 로그인을 위해서는 먼저 해당 이메일로 일반 회원가입을 해주세요.");
+
     }
     
     private Account createOrUpdateAccountFromOAuth2User(org.springframework.security.oauth2.core.user.OAuth2User oAuth2User) {
@@ -187,30 +165,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             Account saved = accountRepository.save(linkedAccount);
             return saved;
         }
-        
-        String accountId = UUID.randomUUID().toString();
-        String userId = UUID.randomUUID().toString();
-        
-        Account account = Account.builder()
-                .id(accountId)
-                .email(userInfo.getEmail())
-                .nickname(userInfo.getName())
-                .provider(userInfo.getProvider())
-                .providerId(userInfo.getProviderId())
-                .mileage(0L)
-                .build();
-        
-        Account savedAccount = accountRepository.save(account);
-        
-        User user = User.builder()
-                .id(userId)
-                .name(userInfo.getName())
-                .birthDate(null) 
-                .account(savedAccount)
-                .build();
-        
-        userRepository.save(user);
-        
-        return savedAccount;
+        throw new RuntimeException("OAuth 로그인을 위해서는 먼저 해당 이메일로 일반 회원가입을 해주세요.");
+
     }
 }
