@@ -12,6 +12,5 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PurchaseHistoryResponseDto {
-    private List<PurchaseResponseDto> completePurchases;
-    private List<PurchaseResponseDto> waitingPurchases;
+    private List<PurchaseResponseDto> purchases;
 }

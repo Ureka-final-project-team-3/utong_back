@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -47,6 +49,10 @@ public class SaleDataRequest {
 
     @Column
     private Long remaining;
+
+    @OneToMany(mappedBy = "saleDataRequest", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contract> contracts = new ArrayList<>();
+
 
     @PrePersist
     public void initId() {
