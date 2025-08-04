@@ -10,9 +10,23 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class EmailRabbitPublisher {
+public class TradeExecutedRabbitPublisher {
 
     private final RabbitTemplate rabbitTemplate;
+
+    public void publishTradeExecuted(TradeExecutedMessage message) {
+        try {
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.TRADE_EXCHANGE,
+                    RabbitMQConfig.TRADE_EXECUTED_ROUTING_KEY,
+                    message
+            );
+
+            log.info("거래 요청 완료 메시지 전송");
+        } catch (Exception e) {
+            log.error("거래 요청 완료 메시지 전송 실패", e);
+        }
+    }
 
     public void publishEmailNotification(TradeExecutedMessage message) {
         try {
