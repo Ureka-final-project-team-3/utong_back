@@ -2,7 +2,6 @@ package com.ureka.team3.utong_backend.datatrade.service.query;
 
 import com.ureka.team3.utong_backend.auth.entity.Account;
 import com.ureka.team3.utong_backend.common.dto.ApiResponse;
-import com.ureka.team3.utong_backend.common.exception.business.LineNotFoundException;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.BuyDataRequest;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.Contract;
 import com.ureka.team3.utong_backend.datatrade.domain.entity.SaleDataRequest;
@@ -10,7 +9,6 @@ import com.ureka.team3.utong_backend.datatrade.dto.query.ContractResponseDto;
 import com.ureka.team3.utong_backend.datatrade.dto.query.PurchaseResponseDto;
 import com.ureka.team3.utong_backend.datatrade.dto.query.SaleResponseDto;
 import com.ureka.team3.utong_backend.datatrade.dto.trade.TradeHistoryRequestDto;
-import com.ureka.team3.utong_backend.datatrade.repository.perman.ContractRepository;
 import com.ureka.team3.utong_backend.datatrade.repository.perman.PurchaseRequestRepository;
 import com.ureka.team3.utong_backend.datatrade.repository.perman.SaleRequestRepository;
 import com.ureka.team3.utong_backend.datatrade.utils.TradeCalculator;
@@ -137,7 +135,7 @@ public class TradeQueryServiceImpl implements TradeQueryService {
                 .dataCode(request.getDataCode())
                 .contractDto(grouped)
                 .remaining(request.getRemaining())
-                .tradeDate(request.getCreatedAt())
+                .requestDate(request.getCreatedAt())
                 .totalPay(totalPay)
                 .build();
     }
