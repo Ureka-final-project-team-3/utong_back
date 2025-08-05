@@ -12,8 +12,10 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfig {
 
     public static final String EMAIL_EXCHANGE = "email.exchange";
-    public static final String EMAIL_QUEUE = "email.notification.queue";
+    public static final String TRADE_EXCHANGE = "trade.exchange";
+
     public static final String EMAIL_ROUTING_KEY = "email.notification";
+    public static final String TRADE_EXECUTED_ROUTING_KEY = "trade.executed";
 
     @Bean
     public MessageConverter messageConverter() {

@@ -80,7 +80,7 @@ public class DataTradeController {
             summary = "현재 전체 주문 대기열 상태 조회",
             description = "현재 등록된 모든 데이터 코드에 대한 주문 대기열 상태를 조회합니다."
     )
-    @GetMapping("/api/data/order-queue")
+    @GetMapping("/order-queue")
     public ResponseEntity<ApiResponse> getAllOrderQueue() {
         return ResponseEntity.ok(queueStatusService.getCurrentAllQueue());
     }

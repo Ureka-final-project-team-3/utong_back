@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -48,6 +50,9 @@ public class BuyDataRequest {
     @Column
     private Long remaining;
 
+    @OneToMany(mappedBy = "buyDataRequest", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contract> contracts = new ArrayList<>();
+
     @PrePersist
     public void initId() {
         if (this.id == null) this.id = UUID.randomUUID().toString();
@@ -61,17 +66,17 @@ public class BuyDataRequest {
 
     public void subtractRemain(long quantity) {
         this.remaining -= quantity;
-        if(this.remaining == 0 ) {
+        if (this.remaining == 0) {
             this.status = "001";
             return;
         }
 
-        if(!this.remaining.equals(this.quantity) && this.remaining > 0){
+        if (!this.remaining.equals(this.quantity) && this.remaining > 0) {
             this.status = "002";
         }
     }
 
-    public boolean isStatus(String status){
+    public boolean isStatus(String status) {
         return this.status.equals(status);
     }
 

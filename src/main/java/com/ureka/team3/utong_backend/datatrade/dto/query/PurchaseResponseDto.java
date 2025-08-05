@@ -1,6 +1,5 @@
 package com.ureka.team3.utong_backend.datatrade.dto.query;
 
-import com.ureka.team3.utong_backend.datatrade.dto.trade.ContractDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,14 +15,15 @@ import java.util.List;
 @AllArgsConstructor
 public class PurchaseResponseDto {
     private String purchaseId;
-    private String status;      // 거래대기 / 거래완료
+    private String status;      // 거래대기 / 거래완료 / 취소
     private String dataCode;         // LTE / 5G
-    private Long quantity;           // 구매량
+    private Long quantity;           // 구매 요청 량
     private Long remaining;
-    private LocalDateTime tradeDate; // 거래일 (또는 요청일)
-    private Long pricePerGb;         // 1GB당 가격
+    private LocalDateTime requestDate; // 거래일 (또는 요청일)
+    private Long pricePerGb;         // 구매 요청 1GB당 가격
     private String phoneNumber;
+    private Long totalPay;
 
     // 부분 체결된 계약 내역 리스트
-    private List<ContractDto> contractDto;
+    private List<ContractResponseDto> contractDto;
 }
