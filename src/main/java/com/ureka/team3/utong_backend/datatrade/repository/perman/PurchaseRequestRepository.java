@@ -35,4 +35,8 @@ public interface PurchaseRequestRepository extends JpaRepository<BuyDataRequest,
             @Param("accountId") String accountId,
             @Param("fromDate") LocalDateTime fromDate
     );
+
+    @Query("SELECT COUNT(bdr) > 0 FROM BuyDataRequest bdr WHERE bdr.lineId = :lineId AND (bdr.status = '002' or bdr.status='003')")
+    boolean existsWaitingRequestByLineId(@Param("lineId") String id);
+
 }

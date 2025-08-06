@@ -38,5 +38,7 @@ public interface SaleRequestRepository extends JpaRepository<SaleDataRequest, St
     );
 
 
+    @Query("SELECT COUNT(sdr) > 0 FROM SaleDataRequest sdr WHERE sdr.lineId = :lineId AND (sdr.status = '002' or sdr.status='003')")
+    boolean existsWaitingRequestByLineId(@Param("lineId") String id);
 }
 
