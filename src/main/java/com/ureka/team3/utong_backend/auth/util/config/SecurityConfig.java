@@ -112,7 +112,7 @@ public class SecurityConfig {
                         .baseUri("/api/login/oauth2/code/*") 
                     )
                 .successHandler(oAuth2SuccessHandler)
-                .failureUrl("/api/?error=oauth2_failed")
+                .failureUrl("/")
             )
             .exceptionHandling(exceptions -> exceptions
                 .authenticationEntryPoint(new Http403ForbiddenEntryPoint())

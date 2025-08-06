@@ -42,10 +42,8 @@ public class TradeValidator {
             throw new IllegalInputPriceException();
         }
 
-
-
-//        if (saleDataRequestRepository.existsWaitingRequestByLineId(defaultLine.getId()))
-//            throw new ExistWaitingSaleRequestException();
+        if (saleRequestRepository.existsWaitingRequestByLineId(defaultLine.getId()))
+            throw new ExistWaitingSaleRequestException();
 
     }
 
@@ -74,8 +72,8 @@ public class TradeValidator {
             throw new IllegalInputPriceException();
         }
 
-//        if (buyDataRequestRepository.existsWaitingRequestByLineId(defaultLine.getId()))
-//            throw new ExistWaitingPurchaseRequestException();
+        if (purchaseRequestRepository.existsWaitingRequestByLineId(defaultLine.getId()))
+            throw new ExistWaitingPurchaseRequestException();
     }
 }
 
