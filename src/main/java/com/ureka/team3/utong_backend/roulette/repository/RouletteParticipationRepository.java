@@ -16,6 +16,15 @@ public interface RouletteParticipationRepository extends JpaRepository<RouletteP
         @Param("eventId") String eventId, 
         @Param("accountId") String accountId
     );
-    
+
+
+    @Query("""
+    SELECT COUNT(rp) > 0
+    FROM RouletteParticipation rp
+    WHERE rp.event.id = :eventId
+      AND rp.account.id = :accountId
+      AND rp.participatedAt >= CURRENT_DATE
+""")
+
     boolean existsByEventIdAndAccountId(String eventId, String accountId);
 }
