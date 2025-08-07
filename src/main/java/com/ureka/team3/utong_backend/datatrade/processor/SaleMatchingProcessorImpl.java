@@ -6,62 +6,66 @@ import com.ureka.team3.utong_backend.datatrade.domain.result.SaleMatchingResult;
 import com.ureka.team3.utong_backend.datatrade.domain.result.TradeMatch;
 import com.ureka.team3.utong_backend.datatrade.service.trade.queue.QueueService;
 import lombok.RequiredArgsConstructor;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
+import org.springframework.integration.redis.util.RedisLockRegistry;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 @Service
 @RequiredArgsConstructor
-public class SaleMatchingProcessorImpl implements SaleMatchingProcessor {   // 레디슨 락 적용
+public class SaleMatchingProcessorImpl implements SaleMatchingProcessor { // Lettuce 락 적용
 
     private final QueueService queueService;
-    private final RedissonClient redissonClient;
+    private final RedisLockRegistry lockRegistry;
 
-    private static final String LOCK_PREFIX = "order-lock:";
-    private static final long LOCK_WAIT_TIME = 5; // 락 대기 시간 (초)
-    private static final long LOCK_LEASE_TIME = 10; // 락 보유 시간 (초)
+    private static final String LOCK_KEY_FORMAT = "order:{%s}"; // 해시태그로 슬롯 고정
+    private static final long LOCK_WAIT_TIME_SEC = 5;           // 락 대기 시간 (초)
+    // 보유 만료 시간은 RedisLockRegistry 등록 시 expireAfter(ms)로 제어
 
     @Override
     public SaleMatchingResult handle(DataTradeDto.DataTradeRequestDto request) {
         Long highestBuyPrice = queueService.getHighestBuyPrice(request.getDataCode());
-        long remaining = request.getDataAmount();
-
         if (highestBuyPrice == null || request.getPrice() > highestBuyPrice) {
             return SaleMatchingResult.overMaxPurchasePrice(request);
         }
 
-        String lockKey = LOCK_PREFIX + request.getDataCode();
-        RLock lock = redissonClient.getLock(lockKey);
+        String lockKey = String.format(LOCK_KEY_FORMAT, request.getDataCode());
+        Lock lock = lockRegistry.obtain(lockKey);
 
+        boolean acquired = false;
         try {
-            boolean acquired = lock.tryLock(LOCK_WAIT_TIME, LOCK_LEASE_TIME, TimeUnit.SECONDS);
+            acquired = lock.tryLock(LOCK_WAIT_TIME_SEC, TimeUnit.SECONDS);
             if (!acquired) {
-                throw new RuntimeException("현재 다른 거래가 진행 중입니다. 잠시 후 다시 시도해주세요.");
+                throw new IllegalStateException("현재 다른 거래가 진행 중입니다. 잠시 후 다시 시도해주세요.");
             }
 
-            List<TradeMatch> matches = matchOrders(request);
+            List<TradeMatch> matches = matchOrders(request, highestBuyPrice);
             return SaleMatchingResult.of(matches, request);
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("매칭 중단됨", e);
         } finally {
-            if (lock.isHeldByCurrentThread()) {
-                lock.unlock();
+            if (acquired) {
+                try {
+                    lock.unlock();
+                } catch (Exception ignore) {
+                    // 이미 만료/해제된 경우 무시
+                }
             }
         }
     }
 
-    private List<TradeMatch> matchOrders(DataTradeDto.DataTradeRequestDto saleRequest) {
+    private List<TradeMatch> matchOrders(DataTradeDto.DataTradeRequestDto saleRequest, Long priceCeiling) {
         List<TradeMatch> matches = new ArrayList<>();
         long remaining = saleRequest.getDataAmount();
 
         while (remaining > 0) {
-            OrderDto buyOrder = queueService.popValidBuyOrder(saleRequest.getDataCode(), saleRequest.getPrice());
+            // ✅ 최고 매수 호가 한도 내에서 주문 팝
+            OrderDto buyOrder = queueService.popValidBuyOrder(saleRequest.getDataCode(), priceCeiling);
             if (buyOrder == null) break;
 
             long available = buyOrder.getQuantity();
@@ -75,7 +79,6 @@ public class SaleMatchingProcessorImpl implements SaleMatchingProcessor {   // �
                 queueService.requeuePartialBuyOrder(buyOrder);
             }
         }
-
         return matches;
     }
 }

@@ -6,55 +6,58 @@ import com.ureka.team3.utong_backend.datatrade.domain.result.PurchaseMatchingRes
 import com.ureka.team3.utong_backend.datatrade.domain.result.TradeMatch;
 import com.ureka.team3.utong_backend.datatrade.service.trade.queue.QueueService;
 import lombok.RequiredArgsConstructor;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
+import org.springframework.integration.redis.util.RedisLockRegistry;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
+import java.util.concurrent.locks.Lock;
 
 @RequiredArgsConstructor
 @Service
 public class PurchaseMatchingProcessorImpl implements PurchaseMatchingProcessor {
 
     private final QueueService queueService;
-    private final RedissonClient redissonClient;
+    private final RedisLockRegistry lockRegistry;
 
-    private static final String LOCK_PREFIX = "order-lock:";
-    private static final long LOCK_WAIT_TIME = 5; // 락 대기 시간 (초)
-    private static final long LOCK_LEASE_TIME = 10; // 락 보유 시간 (초)
+    // 클러스터 모드 대비 슬롯 고정: {dataCode} 해시태그 사용
+    private static final String LOCK_PREFIX = "order:{%s}";
+    private static final long LOCK_WAIT_TIME_SEC = 5;   // 락 대기 시간
+    // 실제 보유 만료는 RedisLockRegistry 생성 시 expireAfter(위에서 10초)로 관리됨
 
     @Override
     public PurchaseMatchingResult handle(DataTradeDto.DataTradeRequestDto buyRequest) {
         Long lowestPrice = queueService.getLoweSellPriceByDataCode(buyRequest.getDataCode());
-        long remain = buyRequest.getDataAmount();
-
         if (lowestPrice == null || buyRequest.getPrice() < lowestPrice) {
             return PurchaseMatchingResult.underMinimumPrice(buyRequest);
         }
 
-// 락 설정
-        String lockKey = LOCK_PREFIX + buyRequest.getDataCode();
-        RLock lock = redissonClient.getLock(lockKey);
+        String lockKey = String.format(LOCK_PREFIX, buyRequest.getDataCode());
+        Lock lock = lockRegistry.obtain(lockKey);
 
+        boolean acquired = false;
         try {
-            boolean acquired = lock.tryLock(LOCK_WAIT_TIME, LOCK_LEASE_TIME, TimeUnit.SECONDS);
+            acquired = lock.tryLock(LOCK_WAIT_TIME_SEC, TimeUnit.SECONDS);
             if (!acquired) {
-                throw new RuntimeException("현재 다른 거래가 진행 중입니다. 잠시 후 다시 시도해주세요.");
+                throw new IllegalStateException("현재 다른 거래가 진행 중입니다. 잠시 후 다시 시도해주세요.");
             }
 
-// 매칭 로직 실행
+            // ✅ 가격 상한을 올바르게 사용하도록 수정
             List<TradeMatch> matches = matchOrders(buyRequest, lowestPrice);
             return PurchaseMatchingResult.of(matches, buyRequest);
 
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException("매칭 중단됨", e);
+            throw new RuntimeException("매칭 처리 중 인터럽트 발생", ie);
         } finally {
-            if (lock.isHeldByCurrentThread()) {
-                lock.unlock();
+            // 만료되었더라도 unlock 시도 (이미 만료면 내부적으로 무시되거나 예외 없음)
+            if (acquired) {
+                try {
+                    lock.unlock();
+                } catch (Exception ignore) {
+                    // 이미 만료/해제된 경우 무시
+                }
             }
         }
     }
@@ -64,7 +67,8 @@ public class PurchaseMatchingProcessorImpl implements PurchaseMatchingProcessor 
         long remaining = buyRequest.getDataAmount();
 
         while (remaining > 0) {
-            OrderDto sellOrder = queueService.popValidSellOrder(buyRequest.getDataCode(), buyRequest.getPrice());
+            // ✅ priceLimit을 사용하도록 수정 (최저가 이상에서만 매칭)
+            OrderDto sellOrder = queueService.popValidSellOrder(buyRequest.getDataCode(), priceLimit);
             if (sellOrder == null) break;
 
             long available = sellOrder.getQuantity();
