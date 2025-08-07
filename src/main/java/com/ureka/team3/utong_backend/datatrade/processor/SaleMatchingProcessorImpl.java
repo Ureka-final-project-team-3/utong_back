@@ -6,15 +6,24 @@ import com.ureka.team3.utong_backend.datatrade.domain.result.SaleMatchingResult;
 import com.ureka.team3.utong_backend.datatrade.domain.result.TradeMatch;
 import com.ureka.team3.utong_backend.datatrade.service.trade.queue.QueueService;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
-public class SaleMatchingProcessorImpl implements SaleMatchingProcessor {
+public class SaleMatchingProcessorImpl implements SaleMatchingProcessor {   // 레디슨 락 적용
+
     private final QueueService queueService;
+    private final RedissonClient redissonClient;
+
+    private static final String LOCK_PREFIX = "order-lock:";
+    private static final long LOCK_WAIT_TIME = 5; // 락 대기 시간 (초)
+    private static final long LOCK_LEASE_TIME = 10; // 락 보유 시간 (초)
 
     @Override
     public SaleMatchingResult handle(DataTradeDto.DataTradeRequestDto request) {
@@ -25,17 +34,33 @@ public class SaleMatchingProcessorImpl implements SaleMatchingProcessor {
             return SaleMatchingResult.overMaxPurchasePrice(request);
         }
 
-        List<TradeMatch> matches = matchOrders(request, highestBuyPrice);
+        String lockKey = LOCK_PREFIX + request.getDataCode();
+        RLock lock = redissonClient.getLock(lockKey);
 
-        return SaleMatchingResult.of(matches, request);
+        try {
+            boolean acquired = lock.tryLock(LOCK_WAIT_TIME, LOCK_LEASE_TIME, TimeUnit.SECONDS);
+            if (!acquired) {
+                throw new RuntimeException("현재 다른 거래가 진행 중입니다. 잠시 후 다시 시도해주세요.");
+            }
+
+            List<TradeMatch> matches = matchOrders(request);
+            return SaleMatchingResult.of(matches, request);
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("매칭 중단됨", e);
+        } finally {
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
+        }
     }
 
-    private List<TradeMatch> matchOrders(DataTradeDto.DataTradeRequestDto saleRequest, Long priceLimit) {
+    private List<TradeMatch> matchOrders(DataTradeDto.DataTradeRequestDto saleRequest) {
         List<TradeMatch> matches = new ArrayList<>();
         long remaining = saleRequest.getDataAmount();
 
         while (remaining > 0) {
-            // 구매자 대기 주문 중 가장 높은 가격을 가진 유효한 주문을 꺼낸다
             OrderDto buyOrder = queueService.popValidBuyOrder(saleRequest.getDataCode(), saleRequest.getPrice());
             if (buyOrder == null) break;
 
@@ -45,7 +70,6 @@ public class SaleMatchingProcessorImpl implements SaleMatchingProcessor {
             matches.add(TradeMatch.of(buyOrder, used));
             remaining -= used;
 
-            // 구매자가 원하는 양이 일부 남았다면 재삽입
             if (available > used) {
                 buyOrder.setQuantity(available - used);
                 queueService.requeuePartialBuyOrder(buyOrder);
@@ -54,5 +78,4 @@ public class SaleMatchingProcessorImpl implements SaleMatchingProcessor {
 
         return matches;
     }
-
 }
