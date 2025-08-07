@@ -8,7 +8,6 @@ import org.springframework.integration.redis.util.RedisLockRegistry;
 @Configuration
 public class LockConfig {
 
-    // prefix = 키 프리픽스, expireAfter = 락 만료(ms)
     @Bean
     public RedisLockRegistry redisLockRegistry(RedisConnectionFactory connectionFactory) {
         return new RedisLockRegistry(connectionFactory, "utong:lock", 10_000); // 10초 보유
