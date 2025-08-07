@@ -31,10 +31,10 @@ public class RedissonConfig {
         config.useSingleServer()
                 .setAddress(url)
                 .setPassword(redisPassword.isEmpty() ? null : redisPassword)
-                .setConnectTimeout(10000)   // 연결 타임아웃
-                .setTimeout(3000)           // 응답 타임아웃
-                .setRetryAttempts(3)        // 재시도 횟수
-                .setRetryInterval(1500);    // 재시도 간격
+                .setConnectTimeout(10000)
+                .setTimeout(3000)
+                .setRetryAttempts(3)
+                .setRetryInterval(1500);
 
         if (useSsl) {
             config.useSingleServer().setSslEnableEndpointIdentification(false);
