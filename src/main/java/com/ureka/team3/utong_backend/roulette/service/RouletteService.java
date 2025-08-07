@@ -85,11 +85,11 @@ public class RouletteService {
         }
         boolean isWinner = calculateWinProbability(event.getWinProbability());
         if (isWinner) {
-
+            event.incrementWinners();
             rouletteEventRepository.save(event);
             rouletteCouponService.issueWinnerCoupon(account, event);
         }
-
+        saveParticipation(event, account, isWinner);
         String message = isWinner ? "축하합니다! 당첨되셨습니다!" : "아쉽게도 당첨되지 않았습니다";
         RouletteDto.ParticipateResponse response = createParticipateResponse(event, isWinner, message);
         return ApiResponse.success("룰렛 참여가 완료되었습니다", response);
