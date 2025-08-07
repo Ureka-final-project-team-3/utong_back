@@ -21,13 +21,12 @@ public class RedissonConfig { // 레디슨 설정
 
     @Bean
     public RedissonClient redissonClient() {
+        String url = "rediss://" + redisHost + ":" + redisPort; // TLS!
         Config config = new Config();
-
-        String redisUrl = "redis://" + redisHost + ":" + redisPort;
         config.useSingleServer()
-              .setAddress(redisUrl)
-              .setPassword(redisPassword.isBlank() ? null : redisPassword);
-
+                .setAddress(url)
+                .setPassword(redisPassword.isBlank() ? null : redisPassword)
+                .setSslEnableEndpointIdentification(false); // 필요할 때만
         return Redisson.create(config);
     }
 }
