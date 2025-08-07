@@ -32,7 +32,7 @@ public interface SaleRequestRepository extends JpaRepository<SaleDataRequest, St
                 AND s.createdAt >= :fromDate
                 ORDER BY s.createdAt DESC
             """)
-    List<SaleDataRequest> findSaleRequestsByAccountId(
+    List<SaleDataRequest> findSaleRequestsByAccountId(  // 인덱싱 적용
             @Param("accountId") String accountId,
             @Param("fromDate") LocalDateTime fromDate
     );

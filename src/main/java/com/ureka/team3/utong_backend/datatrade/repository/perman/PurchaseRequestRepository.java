@@ -31,7 +31,7 @@ public interface PurchaseRequestRepository extends JpaRepository<BuyDataRequest,
                 AND b.createdAt >= :fromDate
                 ORDER BY b.createdAt DESC
             """)
-    List<BuyDataRequest> findPurchaseRequestsByAccountId(
+    List<BuyDataRequest> findPurchaseRequestsByAccountId(   // 인덱싱 적용
             @Param("accountId") String accountId,
             @Param("fromDate") LocalDateTime fromDate
     );
