@@ -21,7 +21,7 @@ public class RedissonConfig { // 레디슨 설정
 
     @Bean
     public RedissonClient redissonClient() {
-        String url = "rediss://" + redisHost + ":" + redisPort; // TLS!
+        String url = "rediss://" + redisHost + ":" + redisPort;
         Config config = new Config();
         config.useSingleServer()
                 .setAddress(url)
