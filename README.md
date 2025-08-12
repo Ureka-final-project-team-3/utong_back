@@ -277,7 +277,7 @@ src
 - Kafka + WebSocket으로 실시간 시세 스트리밍
 - 실시간 차트(UI: `Recharts` 또는 `Chart.js`)
 - 임계값 이상 변동 시 알림 (Toastify + Jotai)
-- 알림 ON/OFF 설정 가능
+- 이메일 알림 ON/OFF 설정 가능
 
 ### 3 기프티콘 상점
 - 판매후 수익금(포인트)를 현금화하는 방법
